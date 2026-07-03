@@ -38,6 +38,11 @@ document.addEventListener('DOMContentLoaded', () => {
   let isDarkMode = false;
   let currentPrimaryColor = '#1a73e8';
 
+  // State variables for Pairwise School Comparison
+  let comparisonSchoolA = '';
+  let comparisonSchoolB = '';
+  let comparisonBarChart = null;
+
   // Helper to determine school size based on OBEC standards (2569 total)
   function getSchoolSize(school) {
     const totalStudents = school.y69.total.total;
@@ -151,12 +156,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const menuStudents = document.getElementById('menuStudents');
     const menuClassrooms = document.getElementById('menuClassrooms');
     const menuAnalytics = document.getElementById('menuAnalytics');
+    const menuComparison = document.getElementById('menuComparison');
+    const menuInsights = document.getElementById('menuInsights');
     const menuSettings = document.getElementById('menuSettings');
 
     const settingsModal = document.getElementById('settingsModal');
     const closeSettingsBtn = document.getElementById('closeSettingsBtn');
 
-    const menuItems = [menuDashboard, menuStudents, menuClassrooms, menuAnalytics, menuSettings];
+    const menuItems = [menuDashboard, menuStudents, menuClassrooms, menuAnalytics, menuComparison, menuInsights, menuSettings];
 
     function setActiveMenu(activeItem) {
       menuItems.forEach(item => {
@@ -213,6 +220,32 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         setActiveMenu(menuAnalytics);
         const panel = document.getElementById('tableSection');
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        panel.classList.remove('glow-highlight');
+        void panel.offsetWidth;
+        panel.classList.add('glow-highlight');
+        setTimeout(() => panel.classList.remove('glow-highlight'), 1500);
+      });
+    }
+
+    if (menuComparison) {
+      menuComparison.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveMenu(menuComparison);
+        const panel = document.getElementById('comparisonSection');
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        panel.classList.remove('glow-highlight');
+        void panel.offsetWidth;
+        panel.classList.add('glow-highlight');
+        setTimeout(() => panel.classList.remove('glow-highlight'), 1500);
+      });
+    }
+
+    if (menuInsights) {
+      menuInsights.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveMenu(menuInsights);
+        const panel = document.getElementById('insightsSection');
         panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
         panel.classList.remove('glow-highlight');
         void panel.offsetWidth;
@@ -495,6 +528,10 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTopSchools();
     renderAlerts(stats);
     renderTable();
+    
+    // Add call to new views
+    updateComparison();
+    updateInsightsView();
   }
 
   function updateKPIs(stats) {
@@ -1069,5 +1106,352 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   }
+
+  // --- Pairwise School Comparison Functions ---
+
+  function initComparison() {
+    const compareSelectorA = document.getElementById('compareSelectorA');
+    const compareSelectorB = document.getElementById('compareSelectorB');
+    
+    if (!compareSelectorA || !compareSelectorB) return;
+
+    // Populate selectors A and B
+    const sortedSchools = [...DASHBOARD_DATA].sort((a, b) => a.name.localeCompare(b.name, 'th'));
+    sortedSchools.forEach(sch => {
+      const optA = document.createElement('option');
+      optA.value = sch.id;
+      optA.textContent = sch.name;
+      compareSelectorA.appendChild(optA);
+
+      const optB = document.createElement('option');
+      optB.value = sch.id;
+      optB.textContent = sch.name;
+      compareSelectorB.appendChild(optB);
+    });
+
+    // Set defaults
+    if (sortedSchools.length >= 2) {
+      comparisonSchoolA = sortedSchools[0].id;
+      comparisonSchoolB = sortedSchools[1].id;
+      compareSelectorA.value = comparisonSchoolA;
+      compareSelectorB.value = comparisonSchoolB;
+    }
+
+    // Bind listeners
+    compareSelectorA.addEventListener('change', (e) => {
+      comparisonSchoolA = e.target.value;
+      updateComparison();
+    });
+
+    compareSelectorB.addEventListener('change', (e) => {
+      comparisonSchoolB = e.target.value;
+      updateComparison();
+    });
+
+    // Initial comparison render
+    updateComparison();
+  }
+
+  function updateComparison() {
+    const schA = DASHBOARD_DATA.find(s => s.id === comparisonSchoolA);
+    const schB = DASHBOARD_DATA.find(s => s.id === comparisonSchoolB);
+
+    if (!schA || !schB) return;
+
+    // Helper to format values
+    const getSchoolStats = (sch) => {
+      const std68 = sch.y68.total.total;
+      const std69 = sch.y69.total.total;
+      const diff = std69 - std68;
+      const change = std68 > 0 ? (diff / std68) * 100 : 0;
+      const rooms68 = sch.y68.total.rooms;
+      const rooms69 = sch.y69.total.rooms;
+      const ratio68 = rooms68 > 0 ? std68 / rooms68 : 0;
+      const ratio69 = rooms69 > 0 ? std69 / rooms69 : 0;
+      const size = getSchoolSize(sch);
+      
+      let sizeText = 'ขนาดเล็ก (S)';
+      if (size === 'M') sizeText = 'ขนาดกลาง (M)';
+      if (size === 'L') sizeText = 'ขนาดใหญ่ (L)';
+      if (size === 'XL') sizeText = 'ขนาดใหญ่พิเศษ (XL)';
+
+      return { std68, std69, diff, change, rooms68, rooms69, ratio68, ratio69, sizeText };
+    };
+
+    const statsA = getSchoolStats(schA);
+    const statsB = getSchoolStats(schB);
+
+    // Update School A Card
+    document.getElementById('compareNameA').textContent = schA.name;
+    document.getElementById('compareSizeBadgeA').textContent = statsA.sizeText;
+    document.getElementById('compareStd68A').textContent = `${statsA.std68.toLocaleString()} คน`;
+    document.getElementById('compareStd69A').textContent = `${statsA.std69.toLocaleString()} คน`;
+    
+    const badgeA = document.getElementById('compareChangeBadgeA');
+    badgeA.classList.remove('positive', 'negative', 'stable');
+    if (statsA.diff > 0) {
+      badgeA.classList.add('positive');
+      badgeA.textContent = `↗ +${statsA.diff} คน (+${statsA.change.toFixed(1)}%)`;
+    } else if (statsA.diff < 0) {
+      badgeA.classList.add('negative');
+      badgeA.textContent = `▼ ${statsA.diff} คน (${statsA.change.toFixed(1)}%)`;
+    } else {
+      badgeA.classList.add('stable');
+      badgeA.textContent = 'คงที่';
+    }
+
+    document.getElementById('compareRoomsA').textContent = `${statsA.rooms69} ห้อง`;
+    document.getElementById('compareRatioA').textContent = `${statsA.ratio69.toFixed(1)} คน/ห้อง`;
+
+    // Update School B Card
+    document.getElementById('compareNameB').textContent = schB.name;
+    document.getElementById('compareSizeBadgeB').textContent = statsB.sizeText;
+    document.getElementById('compareStd68B').textContent = `${statsB.std68.toLocaleString()} คน`;
+    document.getElementById('compareStd69B').textContent = `${statsB.std69.toLocaleString()} คน`;
+
+    const badgeB = document.getElementById('compareChangeBadgeB');
+    badgeB.classList.remove('positive', 'negative', 'stable');
+    if (statsB.diff > 0) {
+      badgeB.classList.add('positive');
+      badgeB.textContent = `↗ +${statsB.diff} คน (+${statsB.change.toFixed(1)}%)`;
+    } else if (statsB.diff < 0) {
+      badgeB.classList.add('negative');
+      badgeB.textContent = `▼ ${statsB.diff} คน (${statsB.change.toFixed(1)}%)`;
+    } else {
+      badgeB.classList.add('stable');
+      badgeB.textContent = 'คงที่';
+    }
+
+    document.getElementById('compareRoomsB').textContent = `${statsB.rooms69} ห้อง`;
+    document.getElementById('compareRatioB').textContent = `${statsB.ratio69.toFixed(1)} คน/ห้อง`;
+
+    // Render Side-by-Side Grade Chart
+    renderComparisonChart(schA, schB);
+  }
+
+  function renderComparisonChart(schA, schB) {
+    const grades = ['ม1', 'ม2', 'ม3', 'ม4', 'ม5', 'ม6'];
+    const labels = ['ม.1', 'ม.2', 'ม.3', 'ม.4', 'ม.5', 'ม.6'];
+
+    const dataA = grades.map(g => schA.y69.grades[g].total);
+    const dataB = grades.map(g => schB.y69.grades[g].total);
+
+    if (comparisonBarChart) {
+      comparisonBarChart.destroy();
+    }
+
+    const ctx = document.getElementById('comparisonBarChart').getContext('2d');
+    const isDarkTheme = document.body.classList.contains('dark-theme');
+    const gridColor = isDarkTheme ? '#3c4043' : '#eef1f6'; 
+    const textColor = isDarkTheme ? '#9aa0a6' : '#5f6368'; 
+    
+    const colorA = currentPrimaryColor;
+    const colorB = '#b06000'; // Google orange
+
+    comparisonBarChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: schA.name,
+            data: dataA,
+            backgroundColor: colorA,
+            borderRadius: 4,
+            barPercentage: 0.8,
+            categoryPercentage: 0.7
+          },
+          {
+            label: schB.name,
+            data: dataB,
+            backgroundColor: colorB,
+            borderRadius: 4,
+            barPercentage: 0.8,
+            categoryPercentage: 0.7
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top',
+            labels: {
+              color: isDarkTheme ? '#f1f3f4' : '#202124',
+              font: { family: 'Google Sans, Sarabun', size: 11 }
+            }
+          },
+          tooltip: {
+            backgroundColor: isDarkTheme ? '#1e1f22' : '#ffffff',
+            titleColor: isDarkTheme ? '#f1f3f4' : '#202124',
+            bodyColor: isDarkTheme ? '#f1f3f4' : '#202124',
+            borderColor: isDarkTheme ? '#3c4043' : '#dadce0',
+            borderWidth: 1,
+            padding: 10,
+            titleFont: { family: 'Google Sans, Sarabun', size: 12, weight: 'bold' },
+            bodyFont: { family: 'Google Sans, Sarabun', size: 11 }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: {
+              color: textColor,
+              font: { family: 'Google Sans, Sarabun', size: 11 }
+            }
+          },
+          y: {
+            grid: { color: gridColor },
+            ticks: {
+              color: textColor,
+              font: { family: 'Google Sans, Sarabun', size: 10 }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // --- Multi-Dimensional Insights Functions ---
+  function updateInsightsView() {
+    const sizeStats = {
+      S: { count: 0, students: 0, rooms: 0 },
+      M: { count: 0, students: 0, rooms: 0 },
+      L: { count: 0, students: 0, rooms: 0 },
+      XL: { count: 0, students: 0, rooms: 0 }
+    };
+
+    DASHBOARD_DATA.forEach(sch => {
+      const size = getSchoolSize(sch);
+      sizeStats[size].count += 1;
+      sizeStats[size].students += sch.y69.total.total;
+      sizeStats[size].rooms += sch.y69.total.rooms;
+    });
+
+    const sizeLabels = {
+      S: 'ขนาดเล็ก (< 120 คน)',
+      M: 'ขนาดกลาง (120-499 คน)',
+      L: 'ขนาดใหญ่ (500-1499 คน)',
+      XL: 'ขนาดใหญ่พิเศษ (>= 1500)'
+    };
+
+    const sizeStatsTableBody = document.getElementById('sizeStatsTableBody');
+    if (sizeStatsTableBody) {
+      sizeStatsTableBody.innerHTML = '';
+      Object.keys(sizeStats).forEach(key => {
+        const stats = sizeStats[key];
+        const avgRatio = stats.rooms > 0 ? stats.students / stats.rooms : 0;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${sizeLabels[key]}</strong></td>
+          <td style="text-align: center;">${stats.count}</td>
+          <td style="text-align: right;">${stats.students.toLocaleString()}</td>
+          <td style="text-align: center; font-weight: 700;">${avgRatio.toFixed(1)}</td>
+        `;
+        sizeStatsTableBody.appendChild(tr);
+      });
+    }
+
+    const densityStats = {
+      crowded: { count: 0, students: 0 },
+      standard: { count: 0, students: 0 },
+      roomy: { count: 0, students: 0 }
+    };
+
+    DASHBOARD_DATA.forEach(sch => {
+      const ratio = sch.y69.total.rooms > 0 ? sch.y69.total.total / sch.y69.total.rooms : 0;
+      const students = sch.y69.total.total;
+      
+      if (ratio > 35) {
+        densityStats.crowded.count += 1;
+        densityStats.crowded.students += students;
+      } else if (ratio >= 20) {
+        densityStats.standard.count += 1;
+        densityStats.standard.students += students;
+      } else {
+        densityStats.roomy.count += 1;
+        densityStats.roomy.students += students;
+      }
+    });
+
+    const totalStudentsOverall = DASHBOARD_DATA.reduce((sum, s) => sum + s.y69.total.total, 0);
+
+    const densityStatsTableBody = document.getElementById('densityStatsTableBody');
+    if (densityStatsTableBody) {
+      densityStatsTableBody.innerHTML = '';
+      
+      const rows = [
+        { label: 'แออัดหนาแน่นสูง (> 35 คน/ห้อง)', stats: densityStats.crowded, color: 'var(--color-error)' },
+        { label: 'ระดับเกณฑ์ดีมาตรฐาน (20-35 คน/ห้อง)', stats: densityStats.standard, color: 'var(--color-success)' },
+        { label: 'ระดับเบาบางมาก (< 20 คน/ห้อง)', stats: densityStats.roomy, color: 'var(--text-muted)' }
+      ];
+
+      rows.forEach(r => {
+        const pct = totalStudentsOverall > 0 ? (r.stats.students / totalStudentsOverall) * 100 : 0;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span style="color: ${r.color}; font-weight: 600;">■</span> ${r.label}</td>
+          <td style="text-align: center;">${r.stats.count}</td>
+          <td style="text-align: right;">${r.stats.students.toLocaleString()}</td>
+          <td style="text-align: center; font-weight: 700;">${pct.toFixed(1)}%</td>
+        `;
+        densityStatsTableBody.appendChild(tr);
+      });
+    }
+
+    const policyInsightsContent = document.getElementById('policyInsightsContent');
+    if (policyInsightsContent) {
+      let maxGrowthSch = null;
+      let maxDeclineSch = null;
+      let maxGrowthPct = -999;
+      let maxDeclinePct = 999;
+
+      DASHBOARD_DATA.forEach(s => {
+        const std68 = s.y68.total.total;
+        const std69 = s.y69.total.total;
+        if (std68 > 0) {
+          const diff = std69 - std68;
+          const pct = (diff / std68) * 100;
+          if (pct > maxGrowthPct) {
+            maxGrowthPct = pct;
+            maxGrowthSch = s;
+          }
+          if (pct < maxDeclinePct) {
+            maxDeclinePct = pct;
+            maxDeclineSch = s;
+          }
+        }
+      });
+
+      const denseList = DASHBOARD_DATA.map(s => {
+        const ratio = s.y69.total.rooms > 0 ? s.y69.total.total / s.y69.total.rooms : 0;
+        return { name: s.name, ratio };
+      }).filter(s => s.ratio > thresholdDensity);
+
+      let bullet1 = `วิเคราะห์พบว่าโรงเรียนในสังกัด สพม.สกลนคร มีแนวโน้มประชากรนักเรียนรวมหดตัวลงอย่างมีนัยสำคัญตามโครงสร้างประชากรประเทศ โดยมีโรงเรียนที่มีอัตราการถดถอยสูงที่สุดคือ **${maxDeclineSch ? maxDeclineSch.name : 'N/A'}** (${maxDeclinePct.toFixed(1)}%) เฝ้าระวังความเสี่ยงการจัดสรรงบประมาณครู`;
+      let bullet2 = `โรงเรียนที่มีอัตราการขยายตัวสูงสุดของเขตคือ **${maxGrowthSch ? maxGrowthSch.name : 'N/A'}** (+${maxGrowthPct.toFixed(1)}%) สะท้อนความต้องการและการกระจุกตัวของนักเรียนเขตเมือง`;
+      
+      let bullet3 = '';
+      if (denseList.length > 0) {
+        bullet3 = `ปัจจุบันมีโรงเรียนจำนวน **${denseList.length} แห่ง** ที่มีความหนาแน่นของห้องเรียน สูงเกินเกณฑ์กำหนดที่ ${thresholdDensity} คน/ห้อง (เช่น ${denseList.slice(0, 2).map(s => s.name).join(', ')}) ควรพิจารณาสนับสนุนงบจัดหาครูเพิ่มเติมหรือต่อเติมอาคารเรียน`;
+      } else {
+        bullet3 = `โครงสร้างความหนาแน่นห้องเรียนในภาพรวมทุกแห่งอยู่ในเกณฑ์มาตรฐานที่เหมาะสมต่ำกว่าเกณฑ์ควบคุมวิกฤตความแออัด`;
+      }
+
+      let bullet4 = `ข้อเสนอแนะเชิงนโยบาย: จากการแบ่งกลุ่มสัดส่วนพบโรงเรียนขนาดเล็ก (S) มีสัดส่วนนักเรียนต่อน้อยห้องต่ำกว่าเกณฑ์มาตรฐานวิกฤต สมควรจัดสรรให้มีการใช้โครงสร้างพื้นฐานร่วมกันกับโรงเรียนแม่ข่ายเพื่อลดงบรายหัวซ้ำซ้อน`;
+
+      policyInsightsContent.innerHTML = `
+        <div class="insight-bullet">${bullet1}</div>
+        <div class="insight-bullet">${bullet2}</div>
+        <div class="insight-bullet">${bullet3}</div>
+        <div class="insight-bullet">${bullet4}</div>
+      `;
+    }
+  }
+
+  // Hook initComparison inside init()
+  initComparison();
 
 });

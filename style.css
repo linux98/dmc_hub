@@ -1310,6 +1310,48 @@ body.dark-theme footer-row {
   color: var(--text-muted);
 }
 
+/* --- School Comparison & Advanced Insights Layouts --- */
+
+.comparison-grid,
+.insights-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* Strategic Insights list items styling */
+.insight-bullet {
+  padding-left: 20px;
+  position: relative;
+}
+
+.insight-bullet::before {
+  content: "•";
+  position: absolute;
+  left: 6px;
+  color: var(--color-primary);
+  font-weight: bold;
+}
+
+/* Responsive queries for comparison */
+@media (max-width: 992px) {
+  .comparison-grid,
+  .insights-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+/* Dark theme overrides for Comparison specific colors */
+body.dark-theme #schoolCardB {
+  border-left-color: var(--color-warning, #b06000) !important;
+}
+
+body.dark-theme .comparison-grid .kpi-card {
+  background-color: var(--bg-card);
+}
+
+
 
 
 
