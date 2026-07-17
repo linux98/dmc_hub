@@ -522,6 +522,14 @@
           </div>
         </div>
 
+        <!-- Clustering Tabs for Policy Filtering (New feature) -->
+        <div class="cluster-tabs-container">
+          <button class="cluster-tab-btn active" data-filter="all">ทั้งหมด (45 โรงเรียน)</button>
+          <button class="cluster-tab-btn" data-filter="decline">โรงเรียนที่เด็กหดตัวสูง</button>
+          <button class="cluster-tab-btn" data-filter="overcrowded">ห้องเรียนแออัดวิกฤต</button>
+          <button class="cluster-tab-btn" data-filter="small">โรงเรียนขนาดเล็ก</button>
+        </div>
+
         <div class="responsive-table-wrapper">
           <table class="dashboard-table" id="schoolTable">
             <thead>
@@ -641,6 +649,52 @@
           </label>
         </div>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- School Detail Modal (New interactive drill-down) -->
+  <div id="schoolDetailModal" class="school-modal-overlay" style="display: none;">
+    <div class="school-modal-card">
+      <div class="school-modal-header">
+        <div>
+          <h3 id="modalSchoolName">ชื่อโรงเรียน</h3>
+          <p id="modalSchoolDistrict">สังกัด สพม.สกลนคร</p>
+        </div>
+        <button id="closeSchoolDetailBtn" class="modal-close-btn">&times;</button>
+      </div>
+      <div class="school-modal-body">
+        <!-- KPI Summary Cards -->
+        <div class="school-modal-kpi-row">
+          <div class="school-modal-kpi-card">
+            <h4>นักเรียนปี 2568</h4>
+            <p id="modalKpiStd68">0 คน</p>
+          </div>
+          <div class="school-modal-kpi-card">
+            <h4>นักเรียนปี 2569</h4>
+            <p id="modalKpiStd69">0 คน</p>
+          </div>
+          <div class="school-modal-kpi-card">
+            <h4>ห้องเรียนปี 2569</h4>
+            <p id="modalKpiRooms69">0 ห้อง</p>
+          </div>
+        </div>
+        
+        <!-- Charts Layout -->
+        <div class="school-modal-charts-row">
+          <div class="school-modal-chart-container">
+            <h4>สถิติเปรียบเทียบตามชั้นเรียน (ม.1 - ม.6)</h4>
+            <div style="position: relative; height: 220px; width: 100%;">
+              <canvas id="modalGradesChart"></canvas>
+            </div>
+          </div>
+          <div class="school-modal-chart-container">
+            <h4>สัดส่วนเพศ (ชาย / หญิง) ปี 2569</h4>
+            <div style="position: relative; height: 220px; width: 100%;">
+              <canvas id="modalGenderChart"></canvas>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

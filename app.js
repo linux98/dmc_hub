@@ -29,6 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let searchQuery = '';
   let currentSortKey = 'change';
   let currentSortDir = 'desc';
+  let currentClusterFilter = 'all'; // 'all', 'decline', 'overcrowded', 'small'
+  let modalGradesChart = null;
+  let modalGenderChart = null;
 
   // State variables for executive control center
   let chartMetric = 'students'; // 'students', 'rooms', 'density'
@@ -142,6 +145,33 @@ document.addEventListener('DOMContentLoaded', () => {
     btnRefresh.addEventListener('click', (e) => {
       e.preventDefault();
       updateDashboard();
+    });
+
+    // Close School Detail Modal Event Listeners
+    const closeSchoolDetailBtn = document.getElementById('closeSchoolDetailBtn');
+    const schoolDetailModal = document.getElementById('schoolDetailModal');
+    
+    if (closeSchoolDetailBtn && schoolDetailModal) {
+      closeSchoolDetailBtn.addEventListener('click', () => {
+        schoolDetailModal.style.display = 'none';
+      });
+      
+      schoolDetailModal.addEventListener('click', (e) => {
+        if (e.target === schoolDetailModal) {
+          schoolDetailModal.style.display = 'none';
+        }
+      });
+    }
+
+    // School Clustering Tabs Click Event Listeners
+    const clusterButtons = document.querySelectorAll('.cluster-tab-btn');
+    clusterButtons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        clusterButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentClusterFilter = btn.getAttribute('data-filter');
+        renderTable();
+      });
     });
 
     if (btnPresent) {
@@ -881,11 +911,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Render comparative table
   function renderTable() {
-    // Filter by school sizes
-    const filteredSchoolsForTable = DASHBOARD_DATA.filter(s => {
+    // Filter by school sizes and clustering tabs
+    let filteredSchoolsForTable = DASHBOARD_DATA.filter(s => {
       const size = getSchoolSize(s);
       return selectedSchoolSizes.includes(size);
     });
+
+    if (currentClusterFilter === 'decline') {
+      filteredSchoolsForTable = filteredSchoolsForTable.filter(s => {
+        const std68 = s.y68.total.total;
+        const std69 = s.y69.total.total;
+        const diff = std69 - std68;
+        const change = std68 > 0 ? (diff / std68) * 100 : 0;
+        return change < thresholdDecline;
+      });
+    } else if (currentClusterFilter === 'overcrowded') {
+      filteredSchoolsForTable = filteredSchoolsForTable.filter(s => {
+        const std69 = s.y69.total.total;
+        const rooms69 = s.y69.total.rooms;
+        const ratio = rooms69 > 0 ? std69 / rooms69 : 0;
+        return ratio > thresholdDensity;
+      });
+    } else if (currentClusterFilter === 'small') {
+      filteredSchoolsForTable = filteredSchoolsForTable.filter(s => {
+        const std69 = s.y69.total.total;
+        return std69 < 120;
+      });
+    }
 
     let records = filteredSchoolsForTable.map((school, index) => {
       let std68 = 0, room68 = 0;
@@ -1099,11 +1151,122 @@ document.addEventListener('DOMContentLoaded', () => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
         const schoolId = link.dataset.id;
-        schoolSelector.value = schoolId;
-        selectedSchool = schoolId;
-        updateDashboard();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        openSchoolDetailModal(schoolId);
       });
+    });
+  }
+
+  // --- School Detail Drill-down Modal Functions ---
+
+  function openSchoolDetailModal(schoolId) {
+    const school = DASHBOARD_DATA.find(s => s.id === schoolId);
+    if (!school) return;
+
+    // Set textual information
+    document.getElementById('modalSchoolName').textContent = school.name;
+    document.getElementById('modalSchoolDistrict').textContent = school.districtName || 'สังกัด สพม.สกลนคร';
+    
+    // Set KPI summary cards
+    document.getElementById('modalKpiStd68').textContent = `${school.y68.total.total.toLocaleString()} คน`;
+    document.getElementById('modalKpiStd69').textContent = `${school.y69.total.total.toLocaleString()} คน`;
+    document.getElementById('modalKpiRooms69').textContent = `${school.y69.total.rooms.toLocaleString()} ห้อง`;
+
+    // Render detailed charts
+    renderModalCharts(school);
+
+    // Show modal overlay
+    const modal = document.getElementById('schoolDetailModal');
+    if (modal) modal.style.display = 'flex';
+  }
+
+  function renderModalCharts(school) {
+    // 1. Grades Chart (ม.1 - ม.6)
+    if (modalGradesChart) {
+      modalGradesChart.destroy();
+    }
+    
+    const gradesCtx = document.getElementById('modalGradesChart').getContext('2d');
+    const grades = ['ม1', 'ม2', 'ม3', 'ม4', 'ม5', 'ม6'];
+    const data68 = grades.map(g => school.y68.grades[g] ? school.y68.grades[g].total : 0);
+    const data69 = grades.map(g => school.y69.grades[g] ? school.y69.grades[g].total : 0);
+
+    modalGradesChart = new Chart(gradesCtx, {
+      type: 'bar',
+      data: {
+        labels: ['ม.1', 'ม.2', 'ม.3', 'ม.4', 'ม.5', 'ม.6'],
+        datasets: [
+          {
+            label: 'ปีการศึกษา 2568',
+            data: data68,
+            backgroundColor: '#98989d',
+            borderRadius: 4
+          },
+          {
+            label: 'ปีการศึกษา 2569',
+            data: data69,
+            backgroundColor: currentPrimaryColor,
+            borderRadius: 4
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: {
+              boxWidth: 12,
+              font: { family: 'Google Sans, Sarabun' }
+            }
+          }
+        },
+        scales: {
+          x: { grid: { display: false } },
+          y: {
+            beginAtZero: true,
+            ticks: { precision: 0 }
+          }
+        }
+      }
+    });
+
+    // 2. Gender Chart (Pie Chart for 2569)
+    if (modalGenderChart) {
+      modalGenderChart.destroy();
+    }
+    
+    const genderCtx = document.getElementById('modalGenderChart').getContext('2d');
+    const m69 = school.y69.total.m;
+    const f69 = school.y69.total.f;
+
+    modalGenderChart = new Chart(genderCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['นักเรียนชาย', 'นักเรียนหญิง'],
+        datasets: [{
+          data: [m69, f69],
+          backgroundColor: [
+            currentPrimaryColor,
+            '#e67e22'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              boxWidth: 12,
+              font: { family: 'Google Sans, Sarabun' }
+            }
+          }
+        },
+        cutout: '60%'
+      }
     });
   }
 

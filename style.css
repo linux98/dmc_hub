@@ -1351,6 +1351,238 @@ body.dark-theme .comparison-grid .kpi-card {
   background-color: var(--bg-card);
 }
 
+/* --- School Detail Modal (Drill-down) --- */
+.school-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  backdrop-filter: blur(4px);
+  transition: var(--transition-fast);
+}
+
+.school-modal-card {
+  background-color: #ffffff;
+  border-radius: var(--radius-lg);
+  width: 95%;
+  max-width: 800px;
+  max-height: 90vh;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  border: 1px solid var(--border-color);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  animation: modalSlideIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body.dark-theme .school-modal-card {
+  background-color: #1e1e24;
+  color: #f1f3f4;
+  border-color: #3c4043;
+}
+
+.school-modal-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.school-modal-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 2px;
+}
+
+.school-modal-header p {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.school-modal-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.school-modal-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.school-modal-kpi-card {
+  background-color: #f8f9fa;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  text-align: center;
+}
+
+body.dark-theme .school-modal-kpi-card {
+  background-color: #25262b;
+}
+
+.school-modal-kpi-card h4 {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.school-modal-kpi-card p {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.school-modal-charts-row {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .school-modal-charts-row {
+    grid-template-columns: 1fr;
+  }
+  .school-modal-kpi-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.school-modal-chart-container {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  background-color: #ffffff;
+  min-height: 280px;
+  position: relative;
+}
+
+body.dark-theme .school-modal-chart-container {
+  background-color: #1e1e24;
+}
+
+.school-modal-chart-container h4 {
+  font-size: 12.5px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--text-main);
+}
+
+/* --- School Clustering Tab styling --- */
+.cluster-tabs-container {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.cluster-tab-btn {
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: var(--transition-fast);
+}
+
+.cluster-tab-btn:hover {
+  background-color: #f1f3f4;
+  color: var(--text-main);
+}
+
+.cluster-tab-btn.active {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+body.dark-theme .cluster-tab-btn {
+  background-color: #1e1e24;
+  color: var(--text-muted);
+}
+
+body.dark-theme .cluster-tab-btn:hover {
+  background-color: #2e3033;
+  color: #f1f3f4;
+}
+
+body.dark-theme .cluster-tab-btn.active {
+  background-color: rgba(26, 115, 232, 0.2);
+  color: #8ab4f8;
+  border-color: #8ab4f8;
+}
+
+/* --- Print Stylesheet (@media print) --- */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  
+  .sidebar,
+  .top-bar-right,
+  .page-actions,
+  .table-controls,
+  .modal-overlay,
+  .school-modal-overlay,
+  .theme-toggle,
+  .btn-refresh,
+  #closeSettingsBtn,
+  #btnExport,
+  .cluster-tabs-container {
+    display: none !important;
+  }
+  
+  .main-content {
+    margin-left: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+  
+  .card-panel,
+  .kpi-card,
+  table.dashboard-table {
+    border: 1px solid #000000 !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+  
+  table.dashboard-table th {
+    background-color: #f0f0f0 !important;
+    color: #000000 !important;
+  }
+  
+  .kpi-row {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 10px !important;
+  }
+  
+  .vis-row {
+    grid-template-columns: 1fr !important;
+    gap: 15px !important;
+  }
+  
+  .chart-area {
+    height: 300px !important;
+    page-break-inside: avoid;
+  }
+}
+
 
 
 
