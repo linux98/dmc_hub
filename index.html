@@ -142,42 +142,116 @@
     <!-- Main Content Area -->
     <main class="main-content">
       
-      <!-- Top Search & Controls -->
-      <div class="top-bar" id="topSection">
-        <button class="menu-toggle-btn" id="menuToggleBtn" title="เมนู">
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-        </button>
-        <div class="search-box">
-          <input type="text" id="topSearchInput" placeholder="ค้นหา...">
-        </div>
-        <div class="top-bar-right">
-          <button class="top-icon-btn" title="การแจ้งเตือน">🔔</button>
-          <div class="user-profile-avatar">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
+      <!-- Executive Header & Control Hub (Clean, Compact, Professional UX/UI) -->
+      <header class="executive-header" id="topSection">
+        <!-- Top Row: Identity, Global Search, Export & User Actions -->
+        <div class="header-main-row">
+          <div class="header-identity">
+            <button class="menu-toggle-btn" id="menuToggleBtn" title="เมนู">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </svg>
+            </button>
+            <div class="header-titles">
+              <div class="header-title-flex">
+                <h1 class="system-title">DMC Hub</h1>
+                <span class="system-badge">สพม.สกลนคร</span>
+                <span class="status-pill"><span class="status-dot"></span> 3 รอบข้อมูลพร้อมใช้</span>
+              </div>
+              <p class="system-subtitle">ศูนย์สารสนเทศและระบบวิเคราะห์เปรียบเทียบสถิตินักเรียน</p>
+            </div>
+          </div>
+
+          <!-- Quick Global Search in Center -->
+          <div class="header-search">
+            <div class="search-box modern-search">
+              <input type="text" id="topSearchInput" placeholder="ค้นหาโรงเรียน, รหัสสถานศึกษา...">
+            </div>
+          </div>
+
+          <!-- Top Actions: Excel Export, PDF Export, Alerts & User -->
+          <div class="header-actions">
+            <!-- Excel Export Button with Dropdown Trigger -->
+            <div class="export-dropdown-wrapper">
+              <button class="btn-excel" id="btnExportExcel" title="ส่งออกข้อมูลเป็นไฟล์ Excel (.xlsx)">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                  <path d="M21.17 3.25Q21.5 3.25 21.76 3.5 22 3.74 22 4.08V19.92Q22 20.26 21.76 20.5 21.5 20.75 21.17 20.75H7.83Q7.5 20.75 7.24 20.5 7 20.26 7 19.92V17H2.83Q2.5 17 2.24 16.76 2 16.5 2 16.17V7.83Q2 7.5 2.24 7.24 2.5 7 2.83 7H7V4.08Q7 3.74 7.24 3.5 7.5 3.25 7.83 3.25M7 15H8.5V13.5H7M7 12H8.5V10.5H7M7 9H8.5V7.5H7M10 15H11.5V13.5H10M10 12H11.5V10.5H10M10 9H11.5V7.5H10M13 15H14.5V13.5H13M13 12H14.5V10.5H13M13 9H14.5V7.5H13M16 15H17.5V13.5H16M16 12H17.5V10.5H16M16 9H17.5V7.5H16M19 15H20.5V13.5H19M19 12H20.5V10.5H19M19 9H20.5V7.5H19M3.5 8.5L5 12L3.5 15.5H5.1L6 13.2L6.9 15.5H8.5L7 12L8.5 8.5H6.9L6 10.8L5.1 8.5Z"/>
+                </svg>
+                <span>ส่งออก Excel</span>
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+              
+              <!-- Excel Export Dropdown Menu -->
+              <div class="dropdown-menu" id="excelDropdownMenu">
+                <div class="dropdown-header">เลือกรูปแบบข้อมูล Excel (.xlsx)</div>
+                <button class="dropdown-item" id="exportActiveViewBtn">
+                  <span class="dropdown-icon">📊</span>
+                  <div class="dropdown-text">
+                    <strong>ข้อมูลการเปรียบเทียบปัจจุบัน</strong>
+                    <small id="exportActiveLabel">รอบตั้งต้น ➔ รอบเปรียบเทียบ (45 โรงเรียน)</small>
+                  </div>
+                </button>
+                <button class="dropdown-item" id="exportY68Btn">
+                  <span class="dropdown-icon">📗</span>
+                  <div class="dropdown-text">
+                    <strong>ข้อมูลปีการศึกษา 2568 (เต็มรูปแบบ)</strong>
+                    <small>แจกแจง ม.1 - ม.6 (ชาย/หญิง/ห้องเรียน)</small>
+                  </div>
+                </button>
+                <button class="dropdown-item" id="exportY69_1Btn">
+                  <span class="dropdown-icon">📘</span>
+                  <div class="dropdown-text">
+                    <strong>ข้อมูลปี 2569 เทอม 1 (10 มิ.ย. 69)</strong>
+                    <small>แจกแจง ม.1 - ม.6 (ชาย/หญิง/ห้องเรียน)</small>
+                  </div>
+                </button>
+                <button class="dropdown-item" id="exportY69_2Btn">
+                  <span class="dropdown-icon">📙</span>
+                  <div class="dropdown-text">
+                    <strong>ข้อมูลปี 2569 เทอม 2 (10 พ.ย. 69)</strong>
+                    <small>แจกแจง ม.1 - ม.6 (ชาย/หญิง/ห้องเรียน)</small>
+                  </div>
+                </button>
+                <div class="dropdown-divider"></div>
+                <button class="dropdown-item highlight" id="exportAllPeriodsBtn">
+                  <span class="dropdown-icon">📑</span>
+                  <div class="dropdown-text">
+                    <strong>ส่งออกรวมทุกรอบ (Master Workbook)</strong>
+                    <small>แยกหลาย Sheet (เปรียบเทียบ, 2568, 69/1, 69/2)</small>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <!-- PDF Export Button -->
+            <button class="btn-primary btn-sm" id="btnExport" title="พิมพ์หรือส่งออกรายงาน PDF">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              <span>ส่งออก PDF</span>
+            </button>
+
+            <!-- Alerts & Profile -->
+            <button class="top-icon-btn" title="การแจ้งเตือน">🔔</button>
+            <div class="user-profile-avatar" title="ผู้บริหาร สพม.สกลนคร">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Title & Action Buttons -->
-      <div class="page-title-row">
-        <div class="page-title">
-          <h1>DMC Hub</h1>
-          <p>ศูนย์สารสนเทศและระบบวิเคราะห์เปรียบเทียบสถิตินักเรียน สพม.สกลนคร</p>
-        </div>
-        <div class="page-actions" style="flex-wrap: wrap; gap: 8px;">
-          <!-- School Selector Dropdown -->
-          <select id="schoolSelector" class="control-select">
-            <option value="ALL">ภาพรวมทั้งหมด (45 โรงเรียน)</option>
-          </select>
-          
-          <!-- Custom Pairwise Period Selector (ระบบเลือกจับคู่รอบข้อมูลแบบอิสระ) -->
+        <!-- Filter & Analytics Control Toolbar Ribbon (Single Compact Row) -->
+        <div class="filter-toolbar-ribbon">
+          <!-- Left: School Selector -->
+          <div class="toolbar-group">
+            <select id="schoolSelector" class="control-select">
+              <option value="ALL">🏫 ภาพรวมทั้งหมด (45 โรงเรียน)</option>
+            </select>
+          </div>
+
+          <!-- Center: Custom Pairwise Period Selector & Presets -->
           <div class="pairwise-period-bar" id="pairwisePeriodBar" title="เลือกจับคู่รอบข้อมูลเปรียบเทียบอิสระ">
             <div class="pairwise-select-wrapper">
               <span class="pairwise-label">รอบตั้งต้น:</span>
@@ -189,7 +263,7 @@
             </div>
             
             <div class="pairwise-arrow-icon" title="เปรียบเทียบกับ">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
                 <polyline points="12 5 19 12 12 19"></polyline>
               </svg>
@@ -212,26 +286,22 @@
             </div>
           </div>
 
-          <!-- Level Selector Tabs -->
-          <div class="tab-group" id="levelTabs">
-            <button class="tab-control-btn level-btn active" data-level="ALL">ทั้งหมด</button>
-            <button class="tab-control-btn level-btn" data-level="มต้น">ม.ต้น</button>
-            <button class="tab-control-btn level-btn" data-level="มปลาย">ม.ปลาย</button>
+          <!-- Right: Level Selector Tabs & Refresh -->
+          <div class="toolbar-group right-group">
+            <div class="tab-group" id="levelTabs">
+              <button class="tab-control-btn level-btn active" data-level="ALL">ทั้งหมด</button>
+              <button class="tab-control-btn level-btn" data-level="มต้น">ม.ต้น</button>
+              <button class="tab-control-btn level-btn" data-level="มปลาย">ม.ปลาย</button>
+            </div>
+
+            <button class="btn-refresh" id="btnRefresh" title="รีเฟรชข้อมูล">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+              </svg>
+            </button>
           </div>
-
-          <!-- Refresh Button -->
-          <button class="btn-refresh" id="btnRefresh" title="รีเฟรชข้อมูล">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-            </svg>
-          </button>
-
-          <!-- Blue Button (Mission BOSS style) -->
-          <button class="btn-primary" id="btnExport">
-            <span>+ ส่งออกรายงาน PDF</span>
-          </button>
         </div>
-      </div>
+      </header>
 
       <!-- KPI Overview Cards (Modern Minimal SVG Icons instead of emojis) -->
       <section class="kpi-row" id="kpiSection">
@@ -743,6 +813,7 @@
 
   <!-- Javascript Inclusions -->
   <script src="data.js?v=2.0"></script>
+  <script src="xlsx.full.min.js"></script>
   <script src="app.js?v=2.0"></script>
 </body>
 </html>

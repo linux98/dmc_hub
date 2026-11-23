@@ -75,6 +75,26 @@ document.addEventListener('DOMContentLoaded', () => {
     return 'XL';
   }
 
+  // Helper to get pairwise comparison statistics for a school
+  function getSchoolStats(sch, bPer = basePeriod, tPer = targetPeriod) {
+    const pBase = sch[bPer] || sch.y68;
+    const pTarget = sch[tPer] || sch.y69_2;
+    const std1 = pBase?.total?.total || 0;
+    const std2 = pTarget?.total?.total || 0;
+    const diff = std2 - std1;
+    const change = std1 > 0 ? (diff / std1) * 100 : 0;
+    const roomsActive = pTarget?.total?.rooms || 0;
+    const ratioActive = roomsActive > 0 ? std2 / roomsActive : 0;
+    
+    const size = getSchoolSize(sch);
+    let sizeText = 'ขนาดเล็ก (S)';
+    if (size === 'M') sizeText = 'ขนาดกลาง (M)';
+    if (size === 'L') sizeText = 'ขนาดใหญ่ (L)';
+    if (size === 'XL') sizeText = 'ขนาดใหญ่พิเศษ (XL)';
+
+    return { std1, std2, diff, change, roomsActive, ratioActive, sizeText };
+  }
+
   // Populate school dropdown dynamically based on selected sizes
   function populateSchoolDropdown() {
     // Clear original options except the first one
@@ -625,6 +645,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const baseLabel = getPeriodLabel(basePeriod);
     const targetLabel = getPeriodLabel(targetPeriod);
+
+    const exportActiveLabel = document.getElementById('exportActiveLabel');
+    if (exportActiveLabel) {
+      exportActiveLabel.textContent = `${baseLabel} ➔ ${targetLabel} (45 โรงเรียน)`;
+    }
 
     if (kpiStudentsUnit) kpiStudentsUnit.textContent = `คน (${targetLabel})`;
     if (kpiRoomsUnit) kpiRoomsUnit.textContent = `ห้อง (${targetLabel})`;
@@ -1459,25 +1484,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const baseLabel = getPeriodLabel(basePeriod);
     const targetLabel = getPeriodLabel(targetPeriod);
 
-    const getSchoolStats = (sch) => {
-      const pBase = sch[basePeriod] || sch.y68;
-      const pTarget = sch[targetPeriod] || sch.y69_2;
-      const std1 = pBase.total.total;
-      const std2 = pTarget.total.total;
-      const diff = std2 - std1;
-      const change = std1 > 0 ? (diff / std1) * 100 : 0;
-      const roomsActive = pTarget.total.rooms;
-      const ratioActive = roomsActive > 0 ? std2 / roomsActive : 0;
-      
-      const size = getSchoolSize(sch);
-      let sizeText = 'ขนาดเล็ก (S)';
-      if (size === 'M') sizeText = 'ขนาดกลาง (M)';
-      if (size === 'L') sizeText = 'ขนาดใหญ่ (L)';
-      if (size === 'XL') sizeText = 'ขนาดใหญ่พิเศษ (XL)';
-
-      return { std1, std2, diff, change, roomsActive, ratioActive, sizeText };
-    };
-
     const statsA = getSchoolStats(schA);
     const statsB = getSchoolStats(schB);
 
@@ -1763,5 +1769,330 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Hook initComparison inside init()
   initComparison();
+
+
+    // ==========================================
+    // Excel Export Feature (SheetJS + CSV Fallback)
+    // ==========================================
+    const btnExportExcel = document.getElementById('btnExportExcel');
+    const excelDropdownMenu = document.getElementById('excelDropdownMenu');
+    const exportActiveViewBtn = document.getElementById('exportActiveViewBtn');
+    const exportY68Btn = document.getElementById('exportY68Btn');
+    const exportY69_1Btn = document.getElementById('exportY69_1Btn');
+    const exportY69_2Btn = document.getElementById('exportY69_2Btn');
+    const exportAllPeriodsBtn = document.getElementById('exportAllPeriodsBtn');
+
+    if (btnExportExcel && excelDropdownMenu) {
+      btnExportExcel.addEventListener('click', (e) => {
+        e.stopPropagation();
+        excelDropdownMenu.classList.toggle('show');
+      });
+
+      document.addEventListener('click', () => {
+        excelDropdownMenu.classList.remove('show');
+      });
+
+      excelDropdownMenu.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+    }
+
+    function downloadSingleSheetExcel(rows, filename, sheetName) {
+      if (typeof XLSX !== 'undefined') {
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        XLSX.utils.book_append_sheet(wb, ws, sheetName || 'Data');
+        XLSX.writeFile(wb, filename);
+      } else {
+        const csvContent = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+        const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename.replace('.xlsx', '.csv');
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    }
+
+    function getPeriodSheetRows(pKey, pTitle) {
+      const rows = [
+        ['สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาสกลนคร (สพม.สกลนคร)'],
+        [`รายงานสถิติจำนวนนักเรียนและห้องเรียนจำแนกรายระดับชั้น (ม.1 - ม.6) - ${pTitle}`],
+        [`วันที่ส่งออกข้อมูล: ${new Date().toLocaleDateString('th-TH')} | จำนวนโรงเรียน: 45 โรงเรียน`],
+        [],
+        [
+          'ลำดับ', 'ชื่อโรงเรียน', 'อำเภอ', 'ขนาด',
+          'ม.1 (คน)', 'ม.1 (ห้อง)',
+          'ม.2 (คน)', 'ม.2 (ห้อง)',
+          'ม.3 (คน)', 'ม.3 (ห้อง)',
+          'รวม ม.ต้น (คน)', 'รวม ม.ต้น (ห้อง)',
+          'ม.4 (คน)', 'ม.4 (ห้อง)',
+          'ม.5 (คน)', 'ม.5 (ห้อง)',
+          'ม.6 (คน)', 'ม.6 (ห้อง)',
+          'รวม ม.ปลาย (คน)', 'รวม ม.ปลาย (ห้อง)',
+          'นักเรียนชาย (คน)',
+          'นักเรียนหญิง (คน)',
+          'รวมนักเรียนทั้งสิ้น (คน)',
+          'รวมห้องเรียน (ห้อง)',
+          'เฉลี่ย นร./ห้อง'
+        ]
+      ];
+
+      let sum = {
+        m1_s: 0, m1_r: 0, m2_s: 0, m2_r: 0, m3_s: 0, m3_r: 0, low_s: 0, low_r: 0,
+        m4_s: 0, m4_r: 0, m5_s: 0, m5_r: 0, m6_s: 0, m6_r: 0, high_s: 0, high_r: 0,
+        male: 0, female: 0, total_s: 0, total_r: 0
+      };
+
+      DASHBOARD_DATA.forEach((s, idx) => {
+        const p = s[pKey] || {};
+        const g = p.grades || {};
+        const grp = p.groups || {};
+        const tot = p.total || {};
+
+        const m1_s = g.ม1?.total || 0; const m1_r = g.ม1?.rooms || 0;
+        const m2_s = g.ม2?.total || 0; const m2_r = g.ม2?.rooms || 0;
+        const m3_s = g.ม3?.total || 0; const m3_r = g.ม3?.rooms || 0;
+        const low_s = grp.มต้น?.total || (m1_s + m2_s + m3_s);
+        const low_r = grp.มต้น?.rooms || (m1_r + m2_r + m3_r);
+
+        const m4_s = g.ม4?.total || 0; const m4_r = g.ม4?.rooms || 0;
+        const m5_s = g.ม5?.total || 0; const m5_r = g.ม5?.rooms || 0;
+        const m6_s = g.ม6?.total || 0; const m6_r = g.ม6?.rooms || 0;
+        const high_s = grp.มปลาย?.total || (m4_s + m5_s + m6_s);
+        const high_r = grp.มปลาย?.rooms || (m4_r + m5_r + m6_r);
+
+        const male = tot.m || 0;
+        const female = tot.f || 0;
+        const total_s = tot.total || (male + female);
+        const total_r = tot.rooms || (low_r + high_r);
+        const ratio = total_r > 0 ? Number((total_s / total_r).toFixed(1)) : 0;
+
+        sum.m1_s += m1_s; sum.m1_r += m1_r;
+        sum.m2_s += m2_s; sum.m2_r += m2_r;
+        sum.m3_s += m3_s; sum.m3_r += m3_r;
+        sum.low_s += low_s; sum.low_r += low_r;
+        sum.m4_s += m4_s; sum.m4_r += m4_r;
+        sum.m5_s += m5_s; sum.m5_r += m5_r;
+        sum.m6_s += m6_s; sum.m6_r += m6_r;
+        sum.high_s += high_s; sum.high_r += high_r;
+        sum.male += male; sum.female += female;
+        sum.total_s += total_s; sum.total_r += total_r;
+
+        rows.push([
+          idx + 1,
+          s.name,
+          s.district || '',
+          s.size || '',
+          m1_s, m1_r,
+          m2_s, m2_r,
+          m3_s, m3_r,
+          low_s, low_r,
+          m4_s, m4_r,
+          m5_s, m5_r,
+          m6_s, m6_r,
+          high_s, high_r,
+          male, female,
+          total_s, total_r,
+          ratio
+        ]);
+      });
+
+      const sumRatio = sum.total_r > 0 ? Number((sum.total_s / sum.total_r).toFixed(1)) : 0;
+      rows.push([
+        '', 'รวมทั้งเขตพื้นที่การศึกษา (45 โรงเรียน)', '', '',
+        sum.m1_s, sum.m1_r,
+        sum.m2_s, sum.m2_r,
+        sum.m3_s, sum.m3_r,
+        sum.low_s, sum.low_r,
+        sum.m4_s, sum.m4_r,
+        sum.m5_s, sum.m5_r,
+        sum.m6_s, sum.m6_r,
+        sum.high_s, sum.high_r,
+        sum.male, sum.female,
+        sum.total_s, sum.total_r,
+        sumRatio
+      ]);
+
+      return rows;
+    }
+
+    function exportActiveComparisonExcel() {
+      const periodNames = {
+        'y68': 'ปี 2568',
+        'y69_1': '2569 เทอม 1',
+        'y69_2': '2569 เทอม 2'
+      };
+      const bName = periodNames[basePeriod] || basePeriod;
+      const tName = periodNames[targetPeriod] || targetPeriod;
+
+      const rows = [
+        ['ศูนย์สารสนเทศและระบบวิเคราะห์เปรียบเทียบสถิตินักเรียน สพม.สกลนคร (DMC Hub)'],
+        [`รายงานเปรียบเทียบสถิตินักเรียนและห้องเรียน: ${bName} ➔ ${tName}`],
+        [`วันที่ส่งออกข้อมูล: ${new Date().toLocaleDateString('th-TH')} | จำนวนโรงเรียน: 45 โรงเรียน`],
+        [],
+        [
+          'ลำดับ',
+          'ชื่อสถานศึกษา',
+          'อำเภอ',
+          'ขนาดโรงเรียน',
+          `นักเรียน ${bName} (คน)`,
+          `นักเรียน ${tName} (คน)`,
+          'ผลต่าง (คน)',
+          'ร้อยละการเปลี่ยนแปลง (%)',
+          `จำนวนห้องเรียน ${tName} (ห้อง)`,
+          `เฉลี่ย นร./ห้อง ${tName}`
+        ]
+      ];
+
+      let totalB = 0, totalT = 0, totalRooms = 0;
+
+      DASHBOARD_DATA.forEach((s, idx) => {
+        const stats = getSchoolStats(s);
+        totalB += stats.std1;
+        totalT += stats.std2;
+        totalRooms += stats.roomsActive;
+
+        rows.push([
+          idx + 1,
+          s.name,
+          s.district || '',
+          stats.sizeText,
+          stats.std1,
+          stats.std2,
+          stats.diff,
+          Number(stats.change.toFixed(2)),
+          stats.roomsActive,
+          Number(stats.ratioActive.toFixed(1))
+        ]);
+      });
+
+      const totalDiff = totalT - totalB;
+      const totalChange = totalB > 0 ? (totalDiff / totalB) * 100 : 0;
+      const totalRatio = totalRooms > 0 ? totalT / totalRooms : 0;
+
+      rows.push([
+        '', 'รวมทั้งเขตพื้นที่การศึกษา (45 โรงเรียน)', '', '',
+        totalB, totalT, totalDiff, Number(totalChange.toFixed(2)),
+        totalRooms, Number(totalRatio.toFixed(1))
+      ]);
+
+      const filename = `DMC_Hub_Comparison_${basePeriod}_vs_${targetPeriod}.xlsx`;
+      downloadSingleSheetExcel(rows, filename, `เทียบ_${basePeriod}_${targetPeriod}`);
+      if (excelDropdownMenu) excelDropdownMenu.classList.remove('show');
+    }
+
+    function exportSpecificPeriodExcel(pKey, pTitle, filename) {
+      const rows = getPeriodSheetRows(pKey, pTitle);
+      downloadSingleSheetExcel(rows, filename, pTitle.replace(/[\/\*\[\]\?:]/g, '_'));
+      if (excelDropdownMenu) excelDropdownMenu.classList.remove('show');
+    }
+
+    function exportAllPeriodsMasterExcel() {
+      if (typeof XLSX === 'undefined') {
+        exportActiveComparisonExcel();
+        return;
+      }
+
+      const wb = XLSX.utils.book_new();
+
+      // 1. Overview Comparison Sheet
+      const overviewRows = [
+        ['ศูนย์สารสนเทศและระบบวิเคราะห์เปรียบเทียบสถิตินักเรียน สพม.สกลนคร (DMC Hub)'],
+        ['รายงานสรุปเปรียบเทียบสถิตินักเรียน 3 รอบข้อมูล (ปี 2568, 2569 เทอม 1, 2569 เทอม 2)'],
+        [`วันที่ส่งออกข้อมูล: ${new Date().toLocaleDateString('th-TH')}`],
+        [],
+        [
+          'ลำดับ', 'ชื่อโรงเรียน', 'อำเภอ', 'ขนาด',
+          'นักเรียน 2568', 'ห้อง 2568',
+          '2569 เทอม 1', 'ห้อง 69/1',
+          '2569 เทอม 2', 'ห้อง 69/2',
+          'ผลต่าง (69/1 ➔ 69/2)', '% เปลี่ยนแปลง',
+          'ผลต่าง (68 ➔ 69/2)', '% เปลี่ยนแปลง'
+        ]
+      ];
+
+      let t68 = 0, r68 = 0, t69_1 = 0, r69_1 = 0, t69_2 = 0, r69_2 = 0;
+
+      DASHBOARD_DATA.forEach((s, idx) => {
+        const s68 = s.y68?.total?.total || 0;
+        const ro68 = s.y68?.total?.rooms || 0;
+        const s69_1 = s.y69_1?.total?.total || 0;
+        const ro69_1 = s.y69_1?.total?.rooms || 0;
+        const s69_2 = s.y69_2?.total?.total || 0;
+        const ro69_2 = s.y69_2?.total?.rooms || 0;
+
+        const diffTerm = s69_2 - s69_1;
+        const pctTerm = s69_1 > 0 ? (diffTerm / s69_1) * 100 : 0;
+        const diffYear = s69_2 - s68;
+        const pctYear = s68 > 0 ? (diffYear / s68) * 100 : 0;
+
+        t68 += s68; r68 += ro68;
+        t69_1 += s69_1; r69_1 += ro69_1;
+        t69_2 += s69_2; r69_2 += ro69_2;
+
+        overviewRows.push([
+          idx + 1, s.name, s.district || '', s.size || '',
+          s68, ro68,
+          s69_1, ro69_1,
+          s69_2, ro69_2,
+          diffTerm, Number(pctTerm.toFixed(2)),
+          diffYear, Number(pctYear.toFixed(2))
+        ]);
+      });
+
+      const sumDiffTerm = t69_2 - t69_1;
+      const sumPctTerm = t69_1 > 0 ? (sumDiffTerm / t69_1) * 100 : 0;
+      const sumDiffYear = t69_2 - t68;
+      const sumPctYear = t68 > 0 ? (sumDiffYear / t68) * 100 : 0;
+
+      overviewRows.push([
+        '', 'รวมทั้งเขต (45 โรงเรียน)', '', '',
+        t68, r68,
+        t69_1, r69_1,
+        t69_2, r69_2,
+        sumDiffTerm, Number(sumPctTerm.toFixed(2)),
+        sumDiffYear, Number(sumPctYear.toFixed(2))
+      ]);
+
+      const wsOverview = XLSX.utils.aoa_to_sheet(overviewRows);
+      XLSX.utils.book_append_sheet(wb, wsOverview, 'สรุปเปรียบเทียบทุกรอบ');
+
+      // 2. Individual Period Sheets
+      const periods = [
+        { key: 'y68', name: 'ปี 2568' },
+        { key: 'y69_1', name: '2569 เทอม 1' },
+        { key: 'y69_2', name: '2569 เทอม 2' }
+      ];
+
+      periods.forEach(p => {
+        const rows = getPeriodSheetRows(p.key, p.name);
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        XLSX.utils.book_append_sheet(wb, ws, p.name);
+      });
+
+      XLSX.writeFile(wb, 'DMC_Hub_SakonNakhon_Master_2568_2569.xlsx');
+      if (excelDropdownMenu) excelDropdownMenu.classList.remove('show');
+    }
+
+    // Event Listeners for Excel Export Buttons
+    if (exportActiveViewBtn) {
+      exportActiveViewBtn.addEventListener('click', () => exportActiveComparisonExcel());
+    }
+    if (exportY68Btn) {
+      exportY68Btn.addEventListener('click', () => exportSpecificPeriodExcel('y68', 'ปีการศึกษา 2568', 'DMC_Hub_Year2568_Full.xlsx'));
+    }
+    if (exportY69_1Btn) {
+      exportY69_1Btn.addEventListener('click', () => exportSpecificPeriodExcel('y69_1', 'ปี 2569 เทอม 1', 'DMC_Hub_Year2569_Term1_Full.xlsx'));
+    }
+    if (exportY69_2Btn) {
+      exportY69_2Btn.addEventListener('click', () => exportSpecificPeriodExcel('y69_2', 'ปี 2569 เทอม 2', 'DMC_Hub_Year2569_Term2_Full.xlsx'));
+    }
+    if (exportAllPeriodsBtn) {
+      exportAllPeriodsBtn.addEventListener('click', () => exportAllPeriodsMasterExcel());
+    }
 
 });
