@@ -1481,11 +1481,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const statsA = getSchoolStats(schA);
     const statsB = getSchoolStats(schB);
 
+    // Update dynamic period labels for School A & B
+    const labelBaseA = document.getElementById('compareLabelBaseA');
+    const labelTargetA = document.getElementById('compareLabelTargetA');
+    const labelBaseB = document.getElementById('compareLabelBaseB');
+    const labelTargetB = document.getElementById('compareLabelTargetB');
+    if (labelBaseA) labelBaseA.textContent = `นักเรียน ${baseLabel}`;
+    if (labelTargetA) labelTargetA.textContent = `นักเรียน ${targetLabel}`;
+    if (labelBaseB) labelBaseB.textContent = `นักเรียน ${baseLabel}`;
+    if (labelTargetB) labelTargetB.textContent = `นักเรียน ${targetLabel}`;
+
+    const chartTitleEl = document.getElementById('comparisonBarChartTitle');
+    if (chartTitleEl) {
+      chartTitleEl.innerHTML = `📊 กราฟแท่งเปรียบเทียบสัดส่วนนักเรียนรายชั้นเรียน (${targetLabel}) (ม.1 - ม.6)`;
+    }
+
     // Update School A Card
     document.getElementById('compareNameA').textContent = schA.name;
     document.getElementById('compareSizeBadgeA').textContent = statsA.sizeText;
-    document.getElementById('compareStd68A').textContent = `${statsA.std1.toLocaleString()} คน (${baseLabel})`;
-    document.getElementById('compareStd69A').textContent = `${statsA.std2.toLocaleString()} คน (${targetLabel})`;
+    document.getElementById('compareStd68A').textContent = `${statsA.std1.toLocaleString()} คน`;
+    document.getElementById('compareStd69A').textContent = `${statsA.std2.toLocaleString()} คน`;
     
     const badgeA = document.getElementById('compareChangeBadgeA');
     badgeA.classList.remove('positive', 'negative', 'stable');
@@ -1506,8 +1521,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update School B Card
     document.getElementById('compareNameB').textContent = schB.name;
     document.getElementById('compareSizeBadgeB').textContent = statsB.sizeText;
-    document.getElementById('compareStd68B').textContent = `${statsB.std1.toLocaleString()} คน (${baseLabel})`;
-    document.getElementById('compareStd69B').textContent = `${statsB.std2.toLocaleString()} คน (${targetLabel})`;
+    document.getElementById('compareStd68B').textContent = `${statsB.std1.toLocaleString()} คน`;
+    document.getElementById('compareStd69B').textContent = `${statsB.std2.toLocaleString()} คน`;
 
     const badgeB = document.getElementById('compareChangeBadgeB');
     badgeB.classList.remove('positive', 'negative', 'stable');

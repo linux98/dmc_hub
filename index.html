@@ -400,11 +400,11 @@
             
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; background: rgba(0,0,0,0.015); padding: 12px; border-radius: var(--radius-md);">
               <div style="display: flex; flex-direction: column; gap: 2px;">
-                <span style="font-size: 11px; color: var(--text-muted);">นักเรียน 2568</span>
+                <span style="font-size: 11px; color: var(--text-muted);" id="compareLabelBaseA">รอบตั้งต้น</span>
                 <span style="font-weight: 700; font-size: 15px;" id="compareStd68A">0 คน</span>
               </div>
               <div style="display: flex; flex-direction: column; gap: 2px;">
-                <span style="font-size: 11px; color: var(--text-muted);">นักเรียน 2569</span>
+                <span style="font-size: 11px; color: var(--text-muted);" id="compareLabelTargetA">รอบเปรียบเทียบ</span>
                 <span style="font-weight: 700; font-size: 15px;" id="compareStd69A">0 คน</span>
               </div>
               <div style="display: flex; flex-direction: column; gap: 2px;">
@@ -440,11 +440,11 @@
             
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; background: rgba(0,0,0,0.015); padding: 12px; border-radius: var(--radius-md);">
               <div style="display: flex; flex-direction: column; gap: 2px;">
-                <span style="font-size: 11px; color: var(--text-muted);">นักเรียน 2568</span>
+                <span style="font-size: 11px; color: var(--text-muted);" id="compareLabelBaseB">รอบตั้งต้น</span>
                 <span style="font-weight: 700; font-size: 15px;" id="compareStd68B">0 คน</span>
               </div>
               <div style="display: flex; flex-direction: column; gap: 2px;">
-                <span style="font-size: 11px; color: var(--text-muted);">นักเรียน 2569</span>
+                <span style="font-size: 11px; color: var(--text-muted);" id="compareLabelTargetB">รอบเปรียบเทียบ</span>
                 <span style="font-weight: 700; font-size: 15px;" id="compareStd69B">0 คน</span>
               </div>
               <div style="display: flex; flex-direction: column; gap: 2px;">
@@ -474,8 +474,8 @@
 
         <!-- Grade Distribution Comparison Chart -->
         <div style="margin-top: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px;">
-          <h4 style="font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-            📊 กราฟแท่งเปรียบเทียบสัดส่วนนักเรียนรายชั้นเรียนปี 2569 (ม.1 - ม.6)
+          <h4 id="comparisonBarChartTitle" style="font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+            📊 กราฟแท่งเปรียบเทียบสัดส่วนนักเรียนรายชั้นเรียน (ม.1 - ม.6)
           </h4>
           <div class="chart-area" style="height: 240px; position: relative; width: 100%;">
             <canvas id="comparisonBarChart"></canvas>
