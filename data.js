@@ -1,8 +1,9 @@
-// Auto-generated data file for DMC Dashboard (5 Periods: 2568 Term 1, 2568 Term 2, 2568 End-Year, 2569 Term 1, 2569 Term 2)
+// Auto-generated data file for DMC Dashboard (5 Periods with Two-Tier Naming Architecture)
 const DASHBOARD_DATA = [
   {
     "id": "47012001",
     "name": "สกลราชวิทยานุกูล",
+    "shortName": "สกลราชวิทยานุกูล",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -369,6 +370,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47012002",
     "name": "ดงมะไฟวิทยา",
+    "shortName": "ดงมะไฟวิทยา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -735,6 +737,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47012003",
     "name": "สกลนครพัฒนศึกษา",
+    "shortName": "สกลนครพัฒนศึกษา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -1101,6 +1104,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47012004",
     "name": "ธาตุนารายณ์วิทยา",
+    "shortName": "ธาตุนารายณ์วิทยา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -1467,6 +1471,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47012005",
     "name": "ท่าแร่ศึกษา",
+    "shortName": "ท่าแร่ศึกษา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -1833,6 +1838,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47012007",
     "name": "เฉลิมพระเกียรติพระบาทสมเด็จพระเจ้าอยู่หัวภูมิพลอดุลยเดชฯ ทรงครองสิริราชสมบัติครบ ๕๐ ปี จังหวัดสกลนคร",
+    "shortName": "เฉลิมพระเกียรติฯ ๕๐ ปี สกลนคร",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -2199,6 +2205,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47012008",
     "name": "กุสุมาลย์วิทยาคม",
+    "shortName": "กุสุมาลย์วิทยาคม",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -2565,6 +2572,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47012009",
     "name": "โพธิแสนวิทยา",
+    "shortName": "โพธิแสนวิทยา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -2931,6 +2939,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47012010",
     "name": "เต่างอยพัฒนศึกษา",
+    "shortName": "เต่างอยพัฒนศึกษา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -3297,6 +3306,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47012011",
     "name": "ร่มเกล้า",
+    "shortName": "ร่มเกล้า",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -3663,6 +3673,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47012012",
     "name": "ด่านม่วงคำพิทยาคม",
+    "shortName": "ด่านม่วงคำพิทยาคม",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -4029,6 +4040,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47012013",
     "name": "โพนพิทยาคม",
+    "shortName": "โพนพิทยาคม",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -4395,6 +4407,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47012014",
     "name": "คำเพิ่มพิทยา",
+    "shortName": "คำเพิ่มพิทยา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -4761,6 +4774,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47012015",
     "name": "ท่านผู้หญิงจันทิมาพึ่งบารมี",
+    "shortName": "ท่านผู้หญิงจันทิมาพึ่งบารมี",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -5127,6 +5141,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47022001",
     "name": "พังโคนวิทยาคม",
+    "shortName": "พังโคนวิทยาคม",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -5493,6 +5508,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47022002",
     "name": "กุดบากพัฒนาศึกษา",
+    "shortName": "กุดบากพัฒนาศึกษา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -5859,6 +5875,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47022003",
     "name": "พรรณาวุฒาจารย์",
+    "shortName": "พรรณาวุฒาจารย์",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -6225,6 +6242,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47022004",
     "name": "บ้านบัวราษฎร์บำรุง",
+    "shortName": "บ้านบัวราษฎร์บำรุง",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -6591,6 +6609,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47022005",
     "name": "ลำปลาหางวิทยา",
+    "shortName": "ลำปลาหางวิทยา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -6957,6 +6976,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47022007",
     "name": "เทพสวัสดิ์วิทยา",
+    "shortName": "เทพสวัสดิ์วิทยา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -7323,6 +7343,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47022008",
     "name": "ภูริทัตต์วิทยา",
+    "shortName": "ภูริทัตต์วิทยา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -7689,6 +7710,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47022009",
     "name": "บะฮีวิทยาคม",
+    "shortName": "บะฮีวิทยาคม",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -8055,6 +8077,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47022010",
     "name": "ช้างมิ่งพิทยานุกูล",
+    "shortName": "ช้างมิ่งพิทยานุกูล",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -8421,6 +8444,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47022012",
     "name": "มัธยมวาริชภูมิ",
+    "shortName": "มัธยมวาริชภูมิ",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -8787,6 +8811,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47022013",
     "name": "ธรรมบวรวิทยา",
+    "shortName": "ธรรมบวรวิทยา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -9153,6 +9178,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47022014",
     "name": "วาริชวิทยา",
+    "shortName": "วาริชวิทยา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -9519,6 +9545,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47022015",
     "name": "นิคมน้ำอูนเจริญวิทยา",
+    "shortName": "นิคมน้ำอูนเจริญวิทยา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -9885,6 +9912,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47022016",
     "name": "เตรียมอุดมศึกษา ภาคตะวันออกเฉียงเหนือ",
+    "shortName": "เตรียมอุดมศึกษา ภาคตะวันออกเฉียงเหนือ",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -10251,6 +10279,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47022017",
     "name": "แวงพิทยาคม",
+    "shortName": "แวงพิทยาคม",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -10617,6 +10646,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47022018",
     "name": "หนองหลวงศึกษา",
+    "shortName": "หนองหลวงศึกษา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -10983,6 +11013,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47022019",
     "name": "โคกสีวิทยาสรรค์",
+    "shortName": "โคกสีวิทยาสรรค์",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -11349,6 +11380,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47022020",
     "name": "บงเหนือวิทยาคม",
+    "shortName": "บงเหนือวิทยาคม",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -11715,6 +11747,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47022021",
     "name": "สว่างแดนดิน",
+    "shortName": "สว่างแดนดิน",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -12081,6 +12114,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47022022",
     "name": "ส่องดาววิทยาคม",
+    "shortName": "ส่องดาววิทยาคม",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -12447,6 +12481,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47032001",
     "name": "มัธยมวานรนิวาส",
+    "shortName": "มัธยมวานรนิวาส",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -12813,6 +12848,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47032002",
     "name": "คำตากล้าราชประชาสงเคราะห์",
+    "shortName": "คำตากล้าราชประชาสงเคราะห์",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -13179,6 +13215,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47032003",
     "name": "กุดเรือคำพิทยาคาร",
+    "shortName": "กุดเรือคำพิทยาคาร",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -13545,6 +13582,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47032004",
     "name": "ศึกษาประชาสามัคคี",
+    "shortName": "ศึกษาประชาสามัคคี",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -13911,6 +13949,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47032007",
     "name": "หนองแวงวิทยา",
+    "shortName": "หนองแวงวิทยา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -14277,6 +14316,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47032009",
     "name": "บ้านม่วงพิทยาคม",
+    "shortName": "บ้านม่วงพิทยาคม",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -14643,6 +14683,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47032010",
     "name": "พระเทพญาณวิศิษฏ์โพธิ์ชัยทองวิทย์",
+    "shortName": "พระเทพญาณวิศิษฏ์โพธิ์ชัยทองวิทย์",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -15009,6 +15050,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47032012",
     "name": "อากาศอำนวยศึกษา",
+    "shortName": "อากาศอำนวยศึกษา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -15375,6 +15417,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47032013",
     "name": "โพนงามศึกษา",
+    "shortName": "โพนงามศึกษา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -15741,6 +15784,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47032014",
     "name": "ท่าสงครามวิทยา",
+    "shortName": "ท่าสงครามวิทยา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {
@@ -16107,6 +16151,7 @@ const DASHBOARD_DATA = [
   {
     "id": "47032015",
     "name": "เจริญศิลป์ศึกษา(โพธิ์คำอนุสรณ์)",
+    "shortName": "เจริญศิลป์ศึกษา(โพธิ์คำอนุสรณ์)",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
     "y68": {

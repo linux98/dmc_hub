@@ -76,6 +76,12 @@ document.addEventListener('DOMContentLoaded', () => {
   let comparisonSchoolB = '';
   let comparisonBarChart = null;
 
+  // Helper to get clean display name (Two-tier naming architecture)
+  function getSchoolDisplayName(school) {
+    if (!school) return '';
+    return school.shortName || school.name;
+  }
+
   // Helper to determine school size based on OBEC standards (2569 total)
   function getSchoolSize(school) {
     const pData = school[targetPeriod] || school[selectedPeriod] || school.y69_2 || school.y69;
@@ -116,11 +122,12 @@ document.addEventListener('DOMContentLoaded', () => {
       return selectedSchoolSizes.includes(size);
     });
     
-    const sortedSchools = [...filteredSchoolsForDropdown].sort((a, b) => a.name.localeCompare(b.name, 'th'));
+    const sortedSchools = [...filteredSchoolsForDropdown].sort((a, b) => getSchoolDisplayName(a).localeCompare(getSchoolDisplayName(b), 'th'));
     sortedSchools.forEach(school => {
       const option = document.createElement('option');
       option.value = school.id;
-      option.textContent = school.name;
+      option.textContent = getSchoolDisplayName(school);
+      option.title = school.name;
       if (school.id === selectedSchool) {
         option.selected = true;
       }
@@ -1088,7 +1095,8 @@ document.addEventListener('DOMContentLoaded', () => {
         count = pData.levels[selectedLevel].total;
       }
       return {
-        name: school.name,
+        name: getSchoolDisplayName(school),
+        fullName: school.name,
         count: count
       };
     });
@@ -1104,7 +1112,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const itemHTML = `
         <div class="progress-item">
           <div class="progress-meta">
-            <span class="progress-name" title="${sch.name}">${sch.name}</span>
+            <span class="progress-name" title="${sch.fullName || sch.name}">${sch.name}</span>
             <span class="progress-val">${sch.count.toLocaleString()} คน</span>
           </div>
           <div class="progress-bar-bg">
@@ -1138,7 +1146,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let std2 = selectedLevel === 'ALL' ? pTarget.total.total : pTarget.levels[selectedLevel].total;
         let diff = std2 - std1;
         let pct = std1 > 0 ? (diff / std1) * 100 : 0;
-        return { name: s.name, pct: pct, diff: diff };
+        return { name: getSchoolDisplayName(s), pct: pct, diff: diff };
       })
       .filter(s => s.diff < 0)
       .sort((a, b) => a.pct - b.pct);
@@ -1156,7 +1164,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let std2 = selectedLevel === 'ALL' ? pTarget.total.total : pTarget.levels[selectedLevel].total;
         let diff = std2 - std1;
         let pct = std1 > 0 ? (diff / std1) * 100 : 0;
-        return { name: s.name, pct: pct, diff: diff };
+        return { name: getSchoolDisplayName(s), pct: pct, diff: diff };
       })
       .filter(s => s.diff > 0)
       .sort((a, b) => b.diff - a.diff);
@@ -1172,7 +1180,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let std = selectedLevel === 'ALL' ? pData.total.total : pData.levels[selectedLevel].total;
         let room = selectedLevel === 'ALL' ? pData.total.rooms : pData.levels[selectedLevel].rooms;
         let ratio = room > 0 ? std / room : 0;
-        return { name: s.name, ratio: ratio };
+        return { name: getSchoolDisplayName(s), ratio: ratio };
       })
       .filter(s => s.ratio > thresholdDensity)
       .sort((a, b) => b.ratio - a.ratio);
@@ -1290,7 +1298,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       return {
         id: school.id,
-        name: school.name,
+        name: getSchoolDisplayName(school),
+        fullName: school.name,
         std68,
         std69_1,
         std69_2,
@@ -1308,7 +1317,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (searchQuery) {
-      records = records.filter(r => r.name.toLowerCase().includes(searchQuery));
+      records = records.filter(r => 
+        r.name.toLowerCase().includes(searchQuery) || 
+        (r.fullName && r.fullName.toLowerCase().includes(searchQuery))
+      );
     }
 
     records.sort((a, b) => {
@@ -1385,7 +1397,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <td class="col-name">
           <div style="display: flex; align-items: center;">
             ${warningIndicator}
-            <a href="#" class="table-school-link" data-id="${rec.id}">
+            <a href="#" class="table-school-link" data-id="${rec.id}" title="${rec.fullName || rec.name}">
               ${rec.name}
             </a>
           </div>
@@ -1485,7 +1497,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!school) return;
 
     // Set textual information
-    document.getElementById('modalSchoolName').textContent = school.name;
+    const modalTitleEl = document.getElementById('modalSchoolName');
+    if (modalTitleEl) {
+      if (school.shortName && school.shortName !== school.name) {
+        modalTitleEl.innerHTML = `${school.name} <span class="system-badge" style="font-size: 11px; margin-left: 8px; vertical-align: middle; background: rgba(13, 31, 60, 0.08); color: var(--color-primary); padding: 3px 8px; border-radius: 4px; font-weight: 500;">ชื่อย่อ: ${school.shortName}</span>`;
+      } else {
+        modalTitleEl.textContent = school.name;
+      }
+    }
     document.getElementById('modalSchoolDistrict').textContent = school.districtName || 'สังกัด สพม.สกลนคร';
     
     // Set KPI summary cards
@@ -1647,17 +1666,19 @@ document.addEventListener('DOMContentLoaded', () => {
     compareSelectorA.innerHTML = '';
     compareSelectorB.innerHTML = '';
 
-    const sortedSchools = [...DASHBOARD_DATA].sort((a, b) => a.name.localeCompare(b.name, 'th'));
+    const sortedSchools = [...DASHBOARD_DATA].sort((a, b) => getSchoolDisplayName(a).localeCompare(getSchoolDisplayName(b), 'th'));
 
     sortedSchools.forEach(school => {
       const optA = document.createElement('option');
       optA.value = school.id;
-      optA.textContent = school.name;
+      optA.textContent = getSchoolDisplayName(school);
+      optA.title = school.name;
       compareSelectorA.appendChild(optA);
 
       const optB = document.createElement('option');
       optB.value = school.id;
-      optB.textContent = school.name;
+      optB.textContent = getSchoolDisplayName(school);
+      optB.title = school.name;
       compareSelectorB.appendChild(optB);
     });
 
@@ -1709,7 +1730,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Update School A Card
-    document.getElementById('compareNameA').textContent = schA.name;
+    const nameAEl = document.getElementById('compareNameA');
+    nameAEl.textContent = getSchoolDisplayName(schA);
+    nameAEl.title = schA.name;
     document.getElementById('compareSizeBadgeA').textContent = statsA.sizeText;
     document.getElementById('compareStd68A').textContent = `${statsA.std1.toLocaleString()} คน`;
     document.getElementById('compareStd69A').textContent = `${statsA.std2.toLocaleString()} คน`;
@@ -1731,7 +1754,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('compareRatioA').textContent = `${statsA.ratioActive.toFixed(1)} คน/ห้อง`;
 
     // Update School B Card
-    document.getElementById('compareNameB').textContent = schB.name;
+    const nameBEl = document.getElementById('compareNameB');
+    nameBEl.textContent = getSchoolDisplayName(schB);
+    nameBEl.title = schB.name;
     document.getElementById('compareSizeBadgeB').textContent = statsB.sizeText;
     document.getElementById('compareStd68B').textContent = `${statsB.std1.toLocaleString()} คน`;
     document.getElementById('compareStd69B').textContent = `${statsB.std2.toLocaleString()} คน`;
@@ -1785,7 +1810,7 @@ document.addEventListener('DOMContentLoaded', () => {
         labels: labels,
         datasets: [
           {
-            label: `${schA.name} (${targetLabel})`,
+            label: `${getSchoolDisplayName(schA)} (${targetLabel})`,
             data: dataA,
             backgroundColor: colorA,
             borderRadius: 4,
@@ -1793,7 +1818,7 @@ document.addEventListener('DOMContentLoaded', () => {
             categoryPercentage: 0.7
           },
           {
-            label: `${schB.name} (${targetLabel})`,
+            label: `${getSchoolDisplayName(schB)} (${targetLabel})`,
             data: dataB,
             backgroundColor: colorB,
             borderRadius: 4,
