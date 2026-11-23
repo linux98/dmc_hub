@@ -183,6 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
       basePeriodSelect.addEventListener('change', (e) => {
         basePeriod = e.target.value;
         syncPresetButtons();
+        syncTimelineButtons();
         updateDashboard();
       });
 
@@ -190,6 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
         targetPeriod = e.target.value;
         selectedPeriod = targetPeriod;
         syncPresetButtons();
+        syncTimelineButtons();
         updateDashboard();
       });
     }
@@ -204,8 +206,44 @@ document.addEventListener('DOMContentLoaded', () => {
           selectedPeriod = targetPeriod;
           if (basePeriodSelect) basePeriodSelect.value = basePeriod;
           if (targetPeriodSelect) targetPeriodSelect.value = targetPeriod;
+          syncTimelineButtons();
           updateDashboard();
         });
+      });
+    }
+
+    const timelineButtons = document.querySelectorAll('.timeline-btn');
+    if (timelineButtons) {
+      timelineButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const p = btn.dataset.period;
+          targetPeriod = p;
+          selectedPeriod = p;
+          // Set sensible base comparison for single-period inspection
+          if (p === 'y68_1') basePeriod = 'y68_1';
+          else if (p === 'y68_2') basePeriod = 'y68_1';
+          else if (p === 'y68_3') basePeriod = 'y68_2';
+          else if (p === 'y69_1') basePeriod = 'y68_1';
+          else if (p === 'y69_2') basePeriod = 'y69_1';
+
+          if (basePeriodSelect) basePeriodSelect.value = basePeriod;
+          if (targetPeriodSelect) targetPeriodSelect.value = targetPeriod;
+          syncPresetButtons();
+          syncTimelineButtons();
+          updateDashboard();
+        });
+      });
+    }
+
+    function syncTimelineButtons() {
+      const timelineButtons = document.querySelectorAll('.timeline-btn');
+      if (!timelineButtons) return;
+      timelineButtons.forEach(btn => {
+        if (btn.dataset.period === targetPeriod) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
       });
     }
 
@@ -860,6 +898,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportActiveLabel = document.getElementById('exportActiveLabel');
     if (exportActiveLabel) {
       exportActiveLabel.textContent = `${baseLabel} ➔ ${targetLabel} (45 โรงเรียน)`;
+    }
+
+    const bannerTargetPeriodBadge = document.getElementById('bannerTargetPeriodBadge');
+    const bannerCompareText = document.getElementById('bannerCompareText');
+    if (bannerTargetPeriodBadge) {
+      bannerTargetPeriodBadge.textContent = `${targetLabel}`;
+    }
+    if (bannerCompareText) {
+      if (basePeriod !== targetPeriod) {
+        bannerCompareText.innerHTML = `เปรียบเทียบกับรอบตั้งต้น: <strong>${baseLabel}</strong>`;
+      } else {
+        bannerCompareText.innerHTML = `<em>(แสดงข้อมูลเดี่ยวเฉพาะรอบนี้)</em>`;
+      }
+    }
+
+    const timelineButtons = document.querySelectorAll('.timeline-btn');
+    if (timelineButtons) {
+      timelineButtons.forEach(btn => {
+        if (btn.dataset.period === targetPeriod) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
     }
 
     if (kpiStudentsUnit) kpiStudentsUnit.textContent = `คน (${targetLabel})`;

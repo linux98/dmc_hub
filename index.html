@@ -220,7 +220,7 @@
               <div class="header-title-flex">
                 <h1 class="system-title">DMC Hub</h1>
                 <span class="system-badge">สพม.สกลนคร</span>
-                <span class="status-pill"><span class="status-dot"></span> 3 รอบข้อมูลพร้อมใช้</span>
+                <span class="status-pill"><span class="status-dot"></span> 5 รอบข้อมูลพร้อมใช้ (ปี 68 - 69)</span>
               </div>
               <p class="system-subtitle">ศูนย์สารสนเทศและระบบวิเคราะห์เปรียบเทียบสถิตินักเรียน</p>
             </div>
@@ -385,6 +385,26 @@
           </div>
         </div>
       </header>
+
+      <!-- Active Period Status & Quick Timeline Navigation Ribbon -->
+      <div class="active-period-banner" id="activePeriodBanner">
+        <div class="period-indicator-left">
+          <span class="period-pulse-dot" title="สถานะข้อมูลเรียลไทม์"></span>
+          <span class="period-indicator-label">รอบข้อมูลที่กำลังแสดงผล:</span>
+          <span class="period-badge-target" id="bannerTargetPeriodBadge">ปี 2569 เทอม 2 (10 พ.ย. 69)</span>
+          <span class="period-compare-text" id="bannerCompareText">เปรียบเทียบกับรอบตั้งต้น: <strong>ปี 2569 เทอม 1 (10 มิ.ย. 69)</strong></span>
+        </div>
+        <div class="single-period-timeline">
+          <span class="timeline-label">คลิกเพื่อดูข้อมูลย้อนหลังรายรอบ (1-Click):</span>
+          <div class="timeline-buttons">
+            <button class="timeline-btn" data-period="y68_1" title="ดูข้อมูลปี 2568 เทอม 1 (10 มิ.ย. 68)">เทอม 1/68 (10 มิ.ย. 68)</button>
+            <button class="timeline-btn" data-period="y68_2" title="ดูข้อมูลปี 2568 เทอม 2 (10 พ.ย. 68)">เทอม 2/68 (10 พ.ย. 68)</button>
+            <button class="timeline-btn" data-period="y68_3" title="ดูข้อมูลปี 2568 สิ้นปีการศึกษา (30 เม.ย. 69)">สิ้นปี 68 (30 เม.ย. 69)</button>
+            <button class="timeline-btn" data-period="y69_1" title="ดูข้อมูลปี 2569 เทอม 1 (10 มิ.ย. 69)">เทอม 1/69 (10 มิ.ย. 69)</button>
+            <button class="timeline-btn active" data-period="y69_2" title="ดูข้อมูลปี 2569 เทอม 2 (10 พ.ย. 69 - ล่าสุด)">เทอม 2/69 (10 พ.ย. 69) ⭐ ล่าสุด</button>
+          </div>
+        </div>
+      </div>
 
       <!-- KPI Overview Cards (Modern Minimal SVG Icons instead of emojis) -->
       <section class="kpi-row" id="kpiSection">
