@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DMC Executive Dashboard (2568 - 2569) | Mission BOSS style</title>
+  <title>DMC Hub | ศูนย์สารสนเทศและวิเคราะห์สถิตินักเรียน สพม.สกลนคร</title>
   <!-- Google Fonts for Google Sans and Sarabun (exact link provided by user) -->
   <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css?v=1.5">
@@ -24,8 +24,8 @@
             </svg>
           </div>
           <div class="brand-name">
-            <h2>DMC 68 vs 69</h2>
-            <p>สพม.สกลนคร</p>
+            <h2>DMC Hub</h2>
+            <p>สพม.สกลนคร • Data Analytics</p>
           </div>
         </div>
 
@@ -168,20 +168,48 @@
       <!-- Title & Action Buttons -->
       <div class="page-title-row">
         <div class="page-title">
-          <h1>Dashboard</h1>
-          <p>ภาพรวมภารกิจข้อมูลสถิตินักเรียนและห้องเรียน ปีการศึกษา 2568 - 2569</p>
+          <h1>DMC Hub</h1>
+          <p>ศูนย์สารสนเทศและระบบวิเคราะห์เปรียบเทียบสถิตินักเรียน สพม.สกลนคร</p>
         </div>
-        <div class="page-actions">
+        <div class="page-actions" style="flex-wrap: wrap; gap: 8px;">
           <!-- School Selector Dropdown -->
           <select id="schoolSelector" class="control-select">
             <option value="ALL">ภาพรวมทั้งหมด (45 โรงเรียน)</option>
           </select>
           
-          <!-- Period Selector Tabs (สลับเลือกรอบข้อมูล) -->
-          <div class="tab-group" id="periodTabs" title="เลือกรอบข้อมูล DMC">
-            <button class="tab-control-btn period-btn" data-period="y68">ปี 2568</button>
-            <button class="tab-control-btn period-btn" data-period="y69_1">2569 เทอม 1</button>
-            <button class="tab-control-btn period-btn active" data-period="y69_2">2569 เทอม 2</button>
+          <!-- Custom Pairwise Period Selector (ระบบเลือกจับคู่รอบข้อมูลแบบอิสระ) -->
+          <div class="pairwise-period-bar" id="pairwisePeriodBar" title="เลือกจับคู่รอบข้อมูลเปรียบเทียบอิสระ">
+            <div class="pairwise-select-wrapper">
+              <span class="pairwise-label">รอบตั้งต้น:</span>
+              <select id="basePeriodSelect" class="pairwise-select" title="เลือกรอบฐานเปรียบเทียบ">
+                <option value="y68">ปี 2568</option>
+                <option value="y69_1" selected>2569 เทอม 1</option>
+                <option value="y69_2">2569 เทอม 2</option>
+              </select>
+            </div>
+            
+            <div class="pairwise-arrow-icon" title="เปรียบเทียบกับ">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </div>
+            
+            <div class="pairwise-select-wrapper">
+              <span class="pairwise-label">รอบเปรียบเทียบ:</span>
+              <select id="targetPeriodSelect" class="pairwise-select" title="เลือกรอบเปรียบเทียบ">
+                <option value="y68">ปี 2568</option>
+                <option value="y69_1">2569 เทอม 1</option>
+                <option value="y69_2" selected>2569 เทอม 2</option>
+              </select>
+            </div>
+
+            <!-- Quick Comparison Presets -->
+            <div class="tab-group" id="quickComparePresets">
+              <button class="tab-control-btn preset-btn active" data-base="y69_1" data-target="y69_2" title="เปรียบเทียบการเปลี่ยนแปลงระหว่างเทอม 1 และ เทอม 2 ของปี 2569">🔄 เทียบเทอม (69/1 ➔ 69/2)</button>
+              <button class="tab-control-btn preset-btn" data-base="y68" data-target="y69_2" title="เปรียบเทียบการเปลี่ยนแปลงข้ามปีจากปี 2568 สู่ 2569 เทอม 2">📈 เทียบปี (68 ➔ 69/2)</button>
+              <button class="tab-control-btn preset-btn" data-base="y68" data-target="y69_1" title="เปรียบเทียบปี 2568 กับ 2569 เทอม 1">📊 เทียบปี (68 ➔ 69/1)</button>
+            </div>
           </div>
 
           <!-- Level Selector Tabs -->
@@ -565,7 +593,7 @@
 
       <!-- Footer -->
       <footer class="footer-row">
-        <p>รายงานเชิงสารสนเทศวิเคราะห์สถิตินักเรียน DMC © 2026 สพม.สกลนคร ✨</p>
+        <p>DMC Hub — ศูนย์สารสนเทศและวิเคราะห์สถิตินักเรียนเชิงลึก © 2026 สพม.สกลนคร ✨</p>
       </footer>
 
     </main>

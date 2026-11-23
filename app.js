@@ -4,7 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Elements
   const schoolSelector = document.getElementById('schoolSelector');
   const levelTabButtons = document.querySelectorAll('#levelTabs .tab-control-btn');
-  const periodTabButtons = document.querySelectorAll('#periodTabs .tab-control-btn');
+  const basePeriodSelect = document.getElementById('basePeriodSelect');
+  const targetPeriodSelect = document.getElementById('targetPeriodSelect');
+  const quickComparePresets = document.querySelectorAll('#quickComparePresets .preset-btn');
   const tableSearchInput = document.getElementById('tableSearchInput');
   const topSearchInput = document.getElementById('topSearchInput');
   const schoolTableBody = document.getElementById('schoolTableBody');
@@ -29,11 +31,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const thRooms = document.getElementById('thRooms');
   const thDensity = document.getElementById('thDensity');
 
-  // State
+  // State (Custom Pairwise Comparison)
   let selectedSchool = 'ALL';
   let selectedLevel = 'ALL'; // 'ALL', 'มต้น', 'มปลาย'
-  let selectedPeriod = 'y69_2'; // 'y68', 'y69_1', 'y69_2'
+  let basePeriod = 'y69_1'; // รอบตั้งต้น: 'y68', 'y69_1', 'y69_2'
+  let targetPeriod = 'y69_2'; // รอบเปรียบเทียบ: 'y68', 'y69_1', 'y69_2'
+  let selectedPeriod = 'y69_2'; // alias to targetPeriod
   let searchQuery = '';
+
+  // Helper for human-readable period labels
+  function getPeriodLabel(pKey) {
+    if (pKey === 'y68') return 'ปี 2568';
+    if (pKey === 'y69_1') return '2569 เทอม 1';
+    if (pKey === 'y69_2') return '2569 เทอม 2';
+    return pKey;
+  }
   let currentSortKey = 'change';
   let currentSortDir = 'desc';
   let currentClusterFilter = 'all'; // 'all', 'decline', 'overcrowded', 'small'
@@ -55,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Helper to determine school size based on OBEC standards (2569 total)
   function getSchoolSize(school) {
-    const pData = school[selectedPeriod] || school.y69_2 || school.y69;
+    const pData = school[targetPeriod] || school[selectedPeriod] || school.y69_2 || school.y69;
     const totalStudents = pData.total.total;
     if (totalStudents < 120) return 'S';
     if (totalStudents < 500) return 'M';
@@ -104,14 +116,47 @@ document.addEventListener('DOMContentLoaded', () => {
       updateDashboard();
     });
 
-    periodTabButtons.forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        periodTabButtons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        selectedPeriod = btn.dataset.period;
+    // Custom Pairwise Period Selectors
+    if (basePeriodSelect && targetPeriodSelect) {
+      basePeriodSelect.addEventListener('change', (e) => {
+        basePeriod = e.target.value;
+        syncPresetButtons();
         updateDashboard();
       });
-    });
+
+      targetPeriodSelect.addEventListener('change', (e) => {
+        targetPeriod = e.target.value;
+        selectedPeriod = targetPeriod;
+        syncPresetButtons();
+        updateDashboard();
+      });
+    }
+
+    if (quickComparePresets) {
+      quickComparePresets.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          quickComparePresets.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          basePeriod = btn.dataset.base;
+          targetPeriod = btn.dataset.target;
+          selectedPeriod = targetPeriod;
+          if (basePeriodSelect) basePeriodSelect.value = basePeriod;
+          if (targetPeriodSelect) targetPeriodSelect.value = targetPeriod;
+          updateDashboard();
+        });
+      });
+    }
+
+    function syncPresetButtons() {
+      if (!quickComparePresets) return;
+      quickComparePresets.forEach(btn => {
+        if (btn.dataset.base === basePeriod && btn.dataset.target === targetPeriod) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+    }
 
     levelTabButtons.forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -517,9 +562,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     let stats = {
-      68: initStat(),
-      '69_1': initStat(),
-      '69_2': initStat()
+      y68: initStat(),
+      y69_1: initStat(),
+      y69_2: initStat(),
+      68: null,
+      '69_1': null,
+      '69_2': null
     };
 
     const accumulate = (target, pData) => {
@@ -543,13 +591,15 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     filteredSchools.forEach(sch => {
-      accumulate(stats[68], sch.y68);
-      accumulate(stats['69_1'], sch.y69_1);
-      accumulate(stats['69_2'], sch.y69_2);
+      accumulate(stats.y68, sch.y68);
+      accumulate(stats.y69_1, sch.y69_1);
+      accumulate(stats.y69_2, sch.y69_2);
     });
 
-    const activeKey = selectedPeriod === 'y68' ? 68 : (selectedPeriod === 'y69_1' ? '69_1' : '69_2');
-    stats[69] = stats[activeKey];
+    stats[68] = stats.y68;
+    stats['69_1'] = stats.y69_1;
+    stats['69_2'] = stats.y69_2;
+    stats[69] = stats[targetPeriod] || stats.y69_2;
 
     return stats;
   }
@@ -570,74 +620,54 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updateKPIs(stats) {
-    // School Count Card
     const totalSchoolsCount = selectedSchool === 'ALL' ? DASHBOARD_DATA.length : 1;
     kpiSchoolsVal.textContent = totalSchoolsCount;
 
-    let activeKey = '69_2';
-    let baseKey = '69_1';
-    let periodName = 'ปี 2569 เทอม 2';
-    let compareName = 'เทอม 1';
+    const baseLabel = getPeriodLabel(basePeriod);
+    const targetLabel = getPeriodLabel(targetPeriod);
 
-    if (selectedPeriod === 'y68') {
-      activeKey = 68;
-      baseKey = null;
-      periodName = 'ปี 2568';
-      compareName = 'ฐานตั้งต้น';
-    } else if (selectedPeriod === 'y69_1') {
-      activeKey = '69_1';
-      baseKey = 68;
-      periodName = 'ปี 2569 เทอม 1';
-      compareName = 'ปี 2568';
-    } else {
-      activeKey = '69_2';
-      baseKey = '69_1';
-      periodName = 'ปี 2569 เทอม 2';
-      compareName = 'เทอม 1';
-    }
-
-    if (kpiStudentsUnit) kpiStudentsUnit.textContent = `คน (${periodName})`;
-    if (kpiRoomsUnit) kpiRoomsUnit.textContent = `ห้อง (${periodName})`;
+    if (kpiStudentsUnit) kpiStudentsUnit.textContent = `คน (${targetLabel})`;
+    if (kpiRoomsUnit) kpiRoomsUnit.textContent = `ห้อง (${targetLabel})`;
 
     // Students Card
-    const stdActive = stats[activeKey].students;
-    const stdBase = baseKey ? stats[baseKey].students : stdActive;
-    const stdDiff = stdActive - stdBase;
+    const stdBase = (stats[basePeriod] || stats.y68).students;
+    const stdTarget = (stats[targetPeriod] || stats.y69_2).students;
+    const stdDiff = stdTarget - stdBase;
     const stdPct = stdBase > 0 ? (stdDiff / stdBase) * 100 : 0;
     
-    kpiStudentsVal.textContent = stdActive.toLocaleString();
-    if (baseKey) {
-      updateBadge(badgeStudents, stdPct, true, false, compareName);
+    kpiStudentsVal.textContent = stdTarget.toLocaleString();
+    if (basePeriod !== targetPeriod) {
+      updateBadge(badgeStudents, stdPct, true, false, baseLabel);
     } else {
       badgeStudents.className = 'trend-badge stable';
-      badgeStudents.textContent = 'ฐานข้อมูลตั้งต้น';
+      badgeStudents.textContent = 'รอบเดียวกัน (0%)';
     }
 
     // Rooms Card
-    const rmsActive = stats[activeKey].rooms;
-    const rmsBase = baseKey ? stats[baseKey].rooms : rmsActive;
-    const rmsDiff = rmsActive - rmsBase;
+    const rmsBase = (stats[basePeriod] || stats.y68).rooms;
+    const rmsTarget = (stats[targetPeriod] || stats.y69_2).rooms;
+    const rmsDiff = rmsTarget - rmsBase;
     const rmsPct = rmsBase > 0 ? (rmsDiff / rmsBase) * 100 : 0;
     
-    kpiRoomsVal.textContent = rmsActive.toLocaleString();
-    if (baseKey) {
-      updateBadge(badgeRooms, rmsPct, true, false, compareName);
+    kpiRoomsVal.textContent = rmsTarget.toLocaleString();
+    if (basePeriod !== targetPeriod) {
+      updateBadge(badgeRooms, rmsPct, true, false, baseLabel);
     } else {
       badgeRooms.className = 'trend-badge stable';
-      badgeRooms.textContent = 'ฐานข้อมูลตั้งต้น';
+      badgeRooms.textContent = 'รอบเดียวกัน (0%)';
     }
 
     // Density Card (Students/Room Ratio)
-    const ratioActive = rmsActive > 0 ? stdActive / rmsActive : 0;
-    const ratioBase = rmsBase > 0 ? stdBase / rmsBase : ratioActive;
-    const ratioDiff = ratioActive - ratioBase;
+    const ratioBase = rmsBase > 0 ? stdBase / rmsBase : 0;
+    const ratioTarget = rmsTarget > 0 ? stdTarget / rmsTarget : 0;
+    const ratioDiff = ratioTarget - ratioBase;
 
-    kpiDensityVal.textContent = ratioActive.toFixed(1);
-    if (baseKey) {
-      updateBadge(badgeDensity, ratioDiff, false, true, compareName);
+    kpiDensityVal.textContent = ratioTarget.toFixed(1);
+    if (basePeriod !== targetPeriod) {
+      updateBadge(badgeDensity, ratioDiff, false, true, baseLabel);
     } else {
       badgeDensity.className = 'trend-badge stable';
-      badgeDensity.textContent = 'ฐานข้อมูลตั้งต้น';
+      badgeDensity.textContent = 'รอบเดียวกัน (0.0)';
     }
   }
 
@@ -660,36 +690,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Render Line Area Chart (Mission BOSS Light Minimal style with 3 periods)
+  // Render Line Area Chart for Pairwise Comparison
   function renderLineChart(stats) {
     const isDarkTheme = document.body.classList.contains('dark-theme');
     const gridColor = isDarkTheme ? '#3c4043' : '#eef1f6'; 
     const textColor = isDarkTheme ? '#9aa0a6' : '#5f6368'; 
 
     let labels = [];
-    let data68 = [];
-    let data69_1 = [];
-    let data69_2 = [];
+    let dataBase = [];
+    let dataTarget = [];
     let metricLabel = 'คน';
 
-    const getGradeArray = (yKey) => {
-      const g = stats[yKey].grades;
+    const getGradeArray = (pKey) => {
+      const g = (stats[pKey] || stats.y68).grades;
       if (selectedLevel === 'ALL') return [g.ม1, g.ม2, g.ม3, g.ม4, g.ม5, g.ม6];
       if (selectedLevel === 'มต้น') return [g.ม1, g.ม2, g.ม3];
       return [g.ม4, g.ม5, g.ม6];
     };
 
-    const getRoomsArray = (yKey) => {
-      const r = stats[yKey].roomsGrades;
+    const getRoomsArray = (pKey) => {
+      const r = (stats[pKey] || stats.y68).roomsGrades;
       if (selectedLevel === 'ALL') return [r.ม1, r.ม2, r.ม3, r.ม4, r.ม5, r.ม6];
       if (selectedLevel === 'มต้น') return [r.ม1, r.ม2, r.ม3];
       return [r.ม4, r.ม5, r.ม6];
     };
 
-    const getDensityArray = (yKey) => {
+    const getDensityArray = (pKey) => {
       const getRatio = (std, rms) => rms > 0 ? Number((std / rms).toFixed(1)) : 0;
-      const g = stats[yKey].grades;
-      const r = stats[yKey].roomsGrades;
+      const g = (stats[pKey] || stats.y68).grades;
+      const r = (stats[pKey] || stats.y68).roomsGrades;
       if (selectedLevel === 'ALL') return [getRatio(g.ม1, r.ม1), getRatio(g.ม2, r.ม2), getRatio(g.ม3, r.ม3), getRatio(g.ม4, r.ม4), getRatio(g.ม5, r.ม5), getRatio(g.ม6, r.ม6)];
       if (selectedLevel === 'มต้น') return [getRatio(g.ม1, r.ม1), getRatio(g.ม2, r.ม2), getRatio(g.ม3, r.ม3)];
       return [getRatio(g.ม4, r.ม4), getRatio(g.ม5, r.ม5), getRatio(g.ม6, r.ม6)];
@@ -705,19 +734,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (chartMetric === 'students') {
       metricLabel = 'คน';
-      data68 = getGradeArray(68);
-      data69_1 = getGradeArray('69_1');
-      data69_2 = getGradeArray('69_2');
+      dataBase = getGradeArray(basePeriod);
+      dataTarget = getGradeArray(targetPeriod);
     } else if (chartMetric === 'rooms') {
       metricLabel = 'ห้อง';
-      data68 = getRoomsArray(68);
-      data69_1 = getRoomsArray('69_1');
-      data69_2 = getRoomsArray('69_2');
+      dataBase = getRoomsArray(basePeriod);
+      dataTarget = getRoomsArray(targetPeriod);
     } else {
       metricLabel = 'คน/ห้อง';
-      data68 = getDensityArray(68);
-      data69_1 = getDensityArray('69_1');
-      data69_2 = getDensityArray('69_2');
+      dataBase = getDensityArray(basePeriod);
+      dataTarget = getDensityArray(targetPeriod);
+    }
+
+    const baseLabel = getPeriodLabel(basePeriod);
+    const targetLabel = getPeriodLabel(targetPeriod);
+
+    const subTitleElem = document.getElementById('chartSubTitle');
+    if (subTitleElem) {
+      subTitleElem.textContent = `เปรียบเทียบแนวโน้มจำนวนนักเรียนระดับชั้น ม.1 - ม.6 (${baseLabel} ➔ ${targetLabel})`;
     }
 
     if (mainLineChart) {
@@ -726,73 +760,79 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const ctx = document.getElementById('mainLineChart').getContext('2d');
     
-    // Create clean dynamic area gradient
-    const gradientActive = ctx.createLinearGradient(0, 0, 0, 260);
-    gradientActive.addColorStop(0, currentPrimaryColor + '33'); 
-    gradientActive.addColorStop(1, currentPrimaryColor + '00');
-
-    const gradient69_1 = ctx.createLinearGradient(0, 0, 0, 260);
-    gradient69_1.addColorStop(0, 'rgba(2, 132, 199, 0.20)');
-    gradient69_1.addColorStop(1, 'rgba(2, 132, 199, 0.00)');
+    // Dynamic area gradient
+    const gradientTarget = ctx.createLinearGradient(0, 0, 0, 260);
+    gradientTarget.addColorStop(0, currentPrimaryColor + '38'); 
+    gradientTarget.addColorStop(1, currentPrimaryColor + '00');
 
     const isGridChecked = document.getElementById('settingGridlines') ? document.getElementById('settingGridlines').checked : true;
+
+    const datasets = [
+      {
+        label: `รอบตั้งต้น (${baseLabel})`,
+        data: dataBase,
+        borderColor: '#98989d',
+        borderWidth: 2.2,
+        borderDash: [5, 5],
+        backgroundColor: 'transparent',
+        fill: false,
+        tension: 0.35,
+        pointRadius: 4,
+        pointBackgroundColor: '#98989d'
+      },
+      {
+        label: `รอบเปรียบเทียบ (${targetLabel})`,
+        data: dataTarget,
+        borderColor: currentPrimaryColor,
+        borderWidth: 3.2,
+        backgroundColor: gradientTarget,
+        fill: true,
+        tension: 0.35,
+        pointRadius: 5,
+        pointBackgroundColor: currentPrimaryColor
+      }
+    ];
 
     mainLineChart = new Chart(ctx, {
       type: 'line',
       data: {
         labels: labels,
-        datasets: [
-          {
-            label: 'ปี 2568',
-            data: data68,
-            borderColor: '#98989d',
-            borderWidth: selectedPeriod === 'y68' ? 3.5 : 1.8,
-            borderDash: selectedPeriod === 'y68' ? [] : [4, 4],
-            backgroundColor: 'transparent',
-            fill: false,
-            tension: 0.35,
-            pointRadius: selectedPeriod === 'y68' ? 4 : 2.5,
-            pointBackgroundColor: '#98989d'
-          },
-          {
-            label: '2569 เทอม 1',
-            data: data69_1,
-            borderColor: '#0284c7',
-            borderWidth: selectedPeriod === 'y69_1' ? 3.5 : 2.0,
-            backgroundColor: selectedPeriod === 'y69_1' ? gradient69_1 : 'transparent',
-            fill: selectedPeriod === 'y69_1',
-            tension: 0.35,
-            pointRadius: selectedPeriod === 'y69_1' ? 4.5 : 3,
-            pointBackgroundColor: '#0284c7'
-          },
-          {
-            label: '2569 เทอม 2',
-            data: data69_2,
-            borderColor: currentPrimaryColor,
-            borderWidth: selectedPeriod === 'y69_2' ? 3.5 : 2.2,
-            backgroundColor: selectedPeriod === 'y69_2' ? gradientActive : 'transparent',
-            fill: selectedPeriod === 'y69_2',
-            tension: 0.35,
-            pointRadius: selectedPeriod === 'y69_2' ? 5 : 3.5,
-            pointBackgroundColor: currentPrimaryColor
-          }
-        ]
+        datasets: datasets
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { display: false },
+          legend: {
+            display: true,
+            position: 'top',
+            labels: {
+              boxWidth: 12,
+              font: { family: 'Google Sans, Sarabun', size: 12 },
+              color: isDarkTheme ? '#f1f3f4' : '#202124'
+            }
+          },
           tooltip: {
             backgroundColor: isDarkTheme ? '#1e1f22' : '#ffffff',
             titleColor: isDarkTheme ? '#f1f3f4' : '#202124',
             bodyColor: isDarkTheme ? '#bdc1c6' : '#3c4043',
             borderColor: isDarkTheme ? '#3c4043' : '#dadce0',
             borderWidth: 1,
-            boxPadding: 4,
+            boxPadding: 6,
             usePointStyle: true,
             callbacks: {
-              label: (context) => ` ${context.dataset.label}: ${context.parsed.y.toLocaleString()} ${metricLabel}`
+              label: (context) => ` ${context.dataset.label}: ${context.parsed.y.toLocaleString()} ${metricLabel}`,
+              afterBody: (items) => {
+                if (items.length >= 2) {
+                  const bVal = items[0].parsed.y;
+                  const tVal = items[1].parsed.y;
+                  const diff = tVal - bVal;
+                  const pct = bVal > 0 ? (diff / bVal) * 100 : 0;
+                  return `
+ผลต่างการเปลี่ยนแปลง: ${diff >= 0 ? '+' : ''}${diff.toLocaleString()} ${metricLabel} (${diff >= 0 ? '+' : ''}${pct.toFixed(1)}%)`;
+                }
+                return '';
+              }
             }
           }
         },
@@ -830,7 +870,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let schoolList = filteredListForTop.map(school => {
       let count = 0;
-      const pData = school[selectedPeriod] || school.y69_2 || school.y69;
+      const pData = school[targetPeriod] || school[selectedPeriod] || school.y69_2;
       if (selectedLevel === 'ALL') {
         count = pData.total.total;
       } else {
@@ -875,59 +915,49 @@ document.addEventListener('DOMContentLoaded', () => {
       return selectedSchoolSizes.includes(size);
     });
 
+    const baseLabel = getPeriodLabel(basePeriod);
+    const targetLabel = getPeriodLabel(targetPeriod);
+
     if (selectedSchool === 'ALL') {
-      if (selectedPeriod === 'y69_2') {
-        // Find schools with student drop between Term 1 and Term 2
-        const termDeclining = activeSchools.map(s => {
-          let std1 = selectedLevel === 'ALL' ? s.y69_1.total.total : s.y69_1.levels[selectedLevel].total;
-          let std2 = selectedLevel === 'ALL' ? s.y69_2.total.total : s.y69_2.levels[selectedLevel].total;
-          let diff = std2 - std1;
-          let pct = std1 > 0 ? (diff / std1) * 100 : 0;
-          return { name: s.name, pct: pct, diff: diff };
-        })
-        .filter(s => s.pct < -1.0)
-        .sort((a, b) => a.pct - b.pct);
+      // 1. Find schools with student drop in this pair
+      const pairDeclining = activeSchools.map(s => {
+        const pBase = s[basePeriod] || s.y68;
+        const pTarget = s[targetPeriod] || s.y69_2;
+        let std1 = selectedLevel === 'ALL' ? pBase.total.total : pBase.levels[selectedLevel].total;
+        let std2 = selectedLevel === 'ALL' ? pTarget.total.total : pTarget.levels[selectedLevel].total;
+        let diff = std2 - std1;
+        let pct = std1 > 0 ? (diff / std1) * 100 : 0;
+        return { name: s.name, pct: pct, diff: diff };
+      })
+      .filter(s => s.diff < 0)
+      .sort((a, b) => a.pct - b.pct);
 
-        if (termDeclining.length > 0) {
-          const names = termDeclining.slice(0, 3).map(s => `${s.name} (${s.pct.toFixed(1)}%)`);
-          alerts.push(`<div class="alert-item">⚠️ **สูญเสียนักเรียนระหว่างเทอม (เทอม 1 ➡️ 2 เกิน 1%)**: ${names.join(', ')} ${termDeclining.length > 3 ? `และอีก ${termDeclining.length - 3} แห่ง` : ''}</div>`);
-        }
-
-        // Positive growth in term 2
-        const termGrowing = activeSchools.map(s => {
-          let std1 = selectedLevel === 'ALL' ? s.y69_1.total.total : s.y69_1.levels[selectedLevel].total;
-          let std2 = selectedLevel === 'ALL' ? s.y69_2.total.total : s.y69_2.levels[selectedLevel].total;
-          let diff = std2 - std1;
-          let pct = std1 > 0 ? (diff / std1) * 100 : 0;
-          return { name: s.name, pct: pct, diff: diff };
-        })
-        .filter(s => s.diff > 0)
-        .sort((a, b) => b.diff - a.diff);
-
-        if (termGrowing.length > 0) {
-          const topGrow = termGrowing.slice(0, 3).map(s => `${s.name} (+${s.diff} คน)`);
-          alerts.push(`<div class="alert-item" style="color:var(--color-success)">🟢 **นักเรียนเพิ่มขึ้นในเทอม 2**: ${topGrow.join(', ')} (${termGrowing.length} โรงเรียนมียอดนักเรียนเพิ่มขึ้น)</div>`);
-        }
-      } else {
-        const decliningSchools = activeSchools.map(s => {
-          let std68 = selectedLevel === 'ALL' ? s.y68.total.total : s.y68.levels[selectedLevel].total;
-          let stdActive = selectedLevel === 'ALL' ? (s[selectedPeriod] || s.y69).total.total : (s[selectedPeriod] || s.y69).levels[selectedLevel].total;
-          let diff = stdActive - std68;
-          let pct = std68 > 0 ? (diff / std68) * 100 : 0;
-          return { name: s.name, pct: pct, diff: diff };
-        })
-        .filter(s => s.pct < thresholdDecline)
-        .sort((a, b) => a.pct - b.pct);
-
-        if (decliningSchools.length > 0) {
-          const schoolNames = decliningSchools.slice(0, 3).map(s => `${s.name} (${s.pct.toFixed(1)}%)`);
-          alerts.push(`<div class="alert-item">⚠️ **นักเรียนลดลงวิกฤต vs 2568** (เกินเกณฑ์ ${thresholdDecline.toFixed(1)}%): ${schoolNames.join(', ')} ${decliningSchools.length > 3 ? `และโรงเรียนอื่นอีก ${decliningSchools.length - 3} แห่ง` : ''}</div>`);
-        }
+      if (pairDeclining.length > 0) {
+        const names = pairDeclining.slice(0, 3).map(s => `${s.name} (${s.diff} คน / ${s.pct.toFixed(1)}%)`);
+        alerts.push(`<div class="alert-item">⚠️ **โรงเรียนที่นักเรียนลดลงสูงสุด (${baseLabel} ➔ ${targetLabel})**: ${names.join(', ')} ${pairDeclining.length > 3 ? `และอีก ${pairDeclining.length - 3} แห่ง` : ''}</div>`);
       }
 
-      // 2. Find schools with high classroom density
+      // 2. Positive growth in this pair
+      const pairGrowing = activeSchools.map(s => {
+        const pBase = s[basePeriod] || s.y68;
+        const pTarget = s[targetPeriod] || s.y69_2;
+        let std1 = selectedLevel === 'ALL' ? pBase.total.total : pBase.levels[selectedLevel].total;
+        let std2 = selectedLevel === 'ALL' ? pTarget.total.total : pTarget.levels[selectedLevel].total;
+        let diff = std2 - std1;
+        let pct = std1 > 0 ? (diff / std1) * 100 : 0;
+        return { name: s.name, pct: pct, diff: diff };
+      })
+      .filter(s => s.diff > 0)
+      .sort((a, b) => b.diff - a.diff);
+
+      if (pairGrowing.length > 0) {
+        const topGrow = pairGrowing.slice(0, 3).map(s => `${s.name} (+${s.diff} คน / +${s.pct.toFixed(1)}%)`);
+        alerts.push(`<div class="alert-item" style="color:var(--color-success)">🟢 **โรงเรียนที่นักเรียนเพิ่มขึ้น (${baseLabel} ➔ ${targetLabel})**: ${topGrow.join(', ')} (${pairGrowing.length} โรงเรียนมียอดนักเรียนเพิ่มขึ้น)</div>`);
+      }
+
+      // 3. Find schools with high classroom density in targetPeriod
       const denseSchools = activeSchools.map(s => {
-        const pData = s[selectedPeriod] || s.y69_2 || s.y69;
+        const pData = s[targetPeriod] || s.y69_2;
         let std = selectedLevel === 'ALL' ? pData.total.total : pData.levels[selectedLevel].total;
         let room = selectedLevel === 'ALL' ? pData.total.rooms : pData.levels[selectedLevel].rooms;
         let ratio = room > 0 ? std / room : 0;
@@ -938,46 +968,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (denseSchools.length > 0) {
         const schoolNames = denseSchools.slice(0, 3).map(s => `${s.name} (${s.ratio.toFixed(1)} คน/ห้อง)`);
-        alerts.push(`<div class="alert-item">⚠️ **ห้องเรียนแออัดวิกฤต** (เกินเกณฑ์ ${thresholdDensity} คน/ห้อง): ${schoolNames.join(', ')} ${denseSchools.length > 3 ? `และโรงเรียนอื่นอีก ${denseSchools.length - 3} แห่ง` : ''}</div>`);
+        alerts.push(`<div class="alert-item">⚠️ **ห้องเรียนแออัดวิกฤตใน ${targetLabel}** (เกินเกณฑ์ ${thresholdDensity} คน/ห้อง): ${schoolNames.join(', ')} ${denseSchools.length > 3 ? `และโรงเรียนอื่นอีก ${denseSchools.length - 3} แห่ง` : ''}</div>`);
       }
 
     } else {
-      // Alerts for a single school
+      // Single school alerts
       const school = DASHBOARD_DATA.find(s => s.id === selectedSchool);
       if (school) {
-        const pData = school[selectedPeriod] || school.y69_2 || school.y69;
-        let std68 = selectedLevel === 'ALL' ? school.y68.total.total : school.y68.levels[selectedLevel].total;
-        let stdActive = selectedLevel === 'ALL' ? pData.total.total : pData.levels[selectedLevel].total;
-        let roomActive = selectedLevel === 'ALL' ? pData.total.rooms : pData.levels[selectedLevel].rooms;
+        const pBase = school[basePeriod] || school.y68;
+        const pTarget = school[targetPeriod] || school.y69_2;
+        let std1 = selectedLevel === 'ALL' ? pBase.total.total : pBase.levels[selectedLevel].total;
+        let std2 = selectedLevel === 'ALL' ? pTarget.total.total : pTarget.levels[selectedLevel].total;
+        let room2 = selectedLevel === 'ALL' ? pTarget.total.rooms : pTarget.levels[selectedLevel].rooms;
         
-        let diff = stdActive - std68;
-        let pct = std68 > 0 ? (diff / std68) * 100 : 0;
-        let ratio = roomActive > 0 ? stdActive / roomActive : 0;
+        let diff = std2 - std1;
+        let pct = std1 > 0 ? (diff / std1) * 100 : 0;
+        let ratio = room2 > 0 ? std2 / room2 : 0;
 
-        if (selectedPeriod === 'y69_2') {
-          let std1 = selectedLevel === 'ALL' ? school.y69_1.total.total : school.y69_1.levels[selectedLevel].total;
-          let diffTerm = stdActive - std1;
-          let pctTerm = std1 > 0 ? (diffTerm / std1) * 100 : 0;
-          if (diffTerm < 0) {
-            alerts.push(`<div class="alert-item">⚠️ **การเปลี่ยนแปลงระหว่างเทอม**: ยอดนักเรียนลดลง ${Math.abs(diffTerm)} คน (${pctTerm.toFixed(1)}% vs เทอม 1)</div>`);
-          } else if (diffTerm > 0) {
-            alerts.push(`<div class="alert-item" style="color:var(--color-success)">🟢 **การเปลี่ยนแปลงระหว่างเทอม**: ยอดนักเรียนเพิ่มขึ้น +${diffTerm} คน (+${pctTerm.toFixed(1)}% vs เทอม 1)</div>`);
-          }
+        if (diff < 0) {
+          alerts.push(`<div class="alert-item">⚠️ **การเปลี่ยนแปลง (${baseLabel} ➔ ${targetLabel})**: นักเรียนลดลง ${Math.abs(diff)} คน (${pct.toFixed(1)}%)</div>`);
+        } else if (diff > 0) {
+          alerts.push(`<div class="alert-item" style="color:var(--color-success)">🟢 **การเปลี่ยนแปลง (${baseLabel} ➔ ${targetLabel})**: นักเรียนเพิ่มขึ้น +${diff} คน (+${pct.toFixed(1)}%)</div>`);
+        } else {
+          alerts.push(`<div class="alert-item" style="color:var(--color-success)">🟢 ยอดนักเรียนคงที่สมบูรณ์แบบระหว่างสองช่วงเวลา</div>`);
         }
 
-        if (pct < thresholdDecline) {
-          alerts.push(`<div class="alert-item">⚠️ **อัตรานักเรียนลดวิกฤต vs 2568**: ลดลง ${Math.abs(diff)} คน (${pct.toFixed(1)}%) เกินเกณฑ์เฉลี่ยวิกฤต</div>`);
-        }
         if (ratio > thresholdDensity) {
           alerts.push(`<div class="alert-item">⚠️ **ความแออัดเฉลี่ยสูงวิกฤต**: เฉลี่ย ${ratio.toFixed(1)} คน/ห้อง เกินเกณฑ์ ${thresholdDensity} คน/ห้อง</div>`);
         } else if (ratio < 20.0 && ratio > 0) {
-          alerts.push(`<div class="alert-item" style="color:var(--color-success)">🟢 **สัดส่วนห้องเรียนดีเยี่ยม**: เฉลี่ย ${ratio.toFixed(1)} คน/ห้อง จัดอยู่ในเกณฑ์ดูแลนักเรียนได้อย่างทั่วถึง</div>`);
+          alerts.push(`<div class="alert-item" style="color:var(--color-success)">🟢 **สัดส่วนห้องเรียนดีเยี่ยม**: เฉลี่ย ${ratio.toFixed(1)} คน/ห้อง ดูแลนักเรียนได้อย่างทั่วถึง</div>`);
         }
       }
-      
-      if (alerts.length === 0) {
-        alerts.push(`<div class="alert-item" style="color:var(--color-success)">🟢 ดัชนีความหนาแน่นและยอดรวมนักเรียนอยู่ในเกณฑ์ปกติเรียบร้อยดี</div>`);
-      }
+    }
+
+    if (alerts.length === 0) {
+      alerts.push(`<div class="alert-item" style="color:var(--color-success)">🟢 ดัชนีความหนาแน่นและยอดรวมนักเรียนอยู่ในเกณฑ์ปกติเรียบร้อยดี</div>`);
     }
 
     alertsContainer.innerHTML = alerts.join('<div style="height: 8px;"></div>');
@@ -985,12 +1010,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Render comparative table
   function renderTable() {
-    const periodLabel = selectedPeriod === 'y68' ? 'ปี 2568' : (selectedPeriod === 'y69_1' ? '69 เทอม 1' : '69 เทอม 2');
+    const baseLabel = getPeriodLabel(basePeriod);
+    const targetLabel = getPeriodLabel(targetPeriod);
+
     if (thChange) {
-      thChange.textContent = selectedPeriod === 'y69_2' ? 'ผลต่าง (เทอม 1 ➡️ 2) ↕' : (selectedPeriod === 'y69_1' ? 'ผลต่าง (68 ➡️ 69/1) ↕' : 'ผลต่าง vs 68 ↕');
+      thChange.textContent = `ผลต่าง (${baseLabel} ➔ ${targetLabel}) ↕`;
     }
-    if (thRooms) thRooms.textContent = `ห้องเรียน (${periodLabel}) ↕`;
-    if (thDensity) thDensity.textContent = `นร./ห้อง (${periodLabel}) ↕`;
+    if (thRooms) thRooms.textContent = `ห้องเรียน (${targetLabel}) ↕`;
+    if (thDensity) thDensity.textContent = `นร./ห้อง (${targetLabel}) ↕`;
 
     // Filter by school sizes and clustering tabs
     let filteredSchoolsForTable = DASHBOARD_DATA.filter(s => {
@@ -1000,21 +1027,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (currentClusterFilter === 'decline') {
       filteredSchoolsForTable = filteredSchoolsForTable.filter(s => {
-        if (selectedPeriod === 'y69_2') {
-          const s1 = s.y69_1.total.total;
-          const s2 = s.y69_2.total.total;
-          return s1 > 0 && ((s2 - s1) / s1 * 100) < -1.0;
-        } else {
-          const std68 = s.y68.total.total;
-          const stdActive = (s[selectedPeriod] || s.y69_2 || s.y69).total.total;
-          const diff = stdActive - std68;
-          const change = std68 > 0 ? (diff / std68) * 100 : 0;
-          return change < thresholdDecline;
-        }
+        const s1 = (s[basePeriod] || s.y68).total.total;
+        const s2 = (s[targetPeriod] || s.y69_2).total.total;
+        return s1 > 0 && ((s2 - s1) / s1 * 100) < -1.0;
       });
     } else if (currentClusterFilter === 'overcrowded') {
       filteredSchoolsForTable = filteredSchoolsForTable.filter(s => {
-        const pData = s[selectedPeriod] || s.y69_2 || s.y69;
+        const pData = s[targetPeriod] || s.y69_2;
         const std = pData.total.total;
         const rooms = pData.total.rooms;
         const ratio = rooms > 0 ? std / rooms : 0;
@@ -1022,7 +1041,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     } else if (currentClusterFilter === 'small') {
       filteredSchoolsForTable = filteredSchoolsForTable.filter(s => {
-        const pData = s[selectedPeriod] || s.y69_2 || s.y69;
+        const pData = s[targetPeriod] || s.y69_2;
         return pData.total.total < 120;
       });
     }
@@ -1048,27 +1067,15 @@ document.addEventListener('DOMContentLoaded', () => {
         room69_2 = school.y69_2.levels[selectedLevel].rooms;
       }
 
-      let diff = 0;
-      let change = 0;
-      let roomActive = room69_2;
-      let ratioActive = room69_2 > 0 ? std69_2 / room69_2 : 0;
+      const pBase = school[basePeriod] || school.y68;
+      const pTarget = school[targetPeriod] || school.y69_2;
+      const stdBaseVal = selectedLevel === 'ALL' ? pBase.total.total : pBase.levels[selectedLevel].total;
+      const stdTargetVal = selectedLevel === 'ALL' ? pTarget.total.total : pTarget.levels[selectedLevel].total;
+      const roomTargetVal = selectedLevel === 'ALL' ? pTarget.total.rooms : pTarget.levels[selectedLevel].rooms;
 
-      if (selectedPeriod === 'y69_2') {
-        diff = std69_2 - std69_1;
-        change = std69_1 > 0 ? (diff / std69_1) * 100 : 0;
-        roomActive = room69_2;
-        ratioActive = room69_2 > 0 ? std69_2 / room69_2 : 0;
-      } else if (selectedPeriod === 'y69_1') {
-        diff = std69_1 - std68;
-        change = std68 > 0 ? (diff / std68) * 100 : 0;
-        roomActive = room69_1;
-        ratioActive = room69_1 > 0 ? std69_1 / room69_1 : 0;
-      } else {
-        diff = 0;
-        change = 0;
-        roomActive = room68;
-        ratioActive = room68 > 0 ? std68 / room68 : 0;
-      }
+      const diff = stdTargetVal - stdBaseVal;
+      const change = stdBaseVal > 0 ? (diff / stdBaseVal) * 100 : 0;
+      const ratioActive = roomTargetVal > 0 ? stdTargetVal / roomTargetVal : 0;
 
       return {
         id: school.id,
@@ -1076,12 +1083,14 @@ document.addEventListener('DOMContentLoaded', () => {
         std68,
         std69_1,
         std69_2,
+        stdBaseVal,
+        stdTargetVal,
         change,
         diff,
         room68,
         room69_1,
         room69_2,
-        roomActive,
+        roomActive: roomTargetVal,
         ratioActive,
         originalIndex: index + 1
       };
@@ -1139,13 +1148,18 @@ document.addEventListener('DOMContentLoaded', () => {
         badgeClass = 'negative';
         changeText = `${rec.diff} คน (${rec.change.toFixed(1)}%)`;
       } else {
-        changeText = selectedPeriod === 'y68' ? 'ฐานตั้งต้น' : 'คงที่ (0%)';
+        changeText = basePeriod === targetPeriod ? 'รอบเดียวกัน' : 'คงที่ (0%)';
       }
 
       let warningIndicator = '';
-      if ((selectedPeriod === 'y69_2' && rec.change < -1.5) || rec.change < thresholdDecline || rec.ratioActive > thresholdDensity) {
+      if (rec.change < -1.5 || rec.ratioActive > thresholdDensity) {
         warningIndicator = `<span style="color: var(--color-error); font-weight: bold; font-size: 13px; margin-right: 4px;" title="วิกฤตความหนาแน่นหรืออัตรานักเรียนลดลง">⚠️</span>`;
       }
+
+      // Highlight active columns
+      const style68 = basePeriod === 'y68' || targetPeriod === 'y68' ? 'font-weight: 700; color: var(--text-main);' : 'color: #5f6368;';
+      const style69_1 = basePeriod === 'y69_1' || targetPeriod === 'y69_1' ? 'font-weight: 700; color: #0284c7;' : 'color: #5f6368;';
+      const style69_2 = basePeriod === 'y69_2' || targetPeriod === 'y69_2' ? 'font-weight: 700; color: var(--color-primary);' : 'color: #5f6368;';
 
       tr.innerHTML = `
         <td class="col-toggle" style="text-align: center; vertical-align: middle;">
@@ -1165,9 +1179,9 @@ document.addEventListener('DOMContentLoaded', () => {
             </a>
           </div>
         </td>
-        <td class="col-std68" style="color: #5f6368;">${rec.std68.toLocaleString()}</td>
-        <td class="col-std69_1" style="color: #0284c7; font-weight: 500;">${rec.std69_1.toLocaleString()}</td>
-        <td class="col-std69_2" style="color: var(--color-primary); font-weight: 700;">${rec.std69_2.toLocaleString()}</td>
+        <td class="col-std68" style="${style68}">${rec.std68.toLocaleString()}</td>
+        <td class="col-std69_1" style="${style69_1}">${rec.std69_1.toLocaleString()}</td>
+        <td class="col-std69_2" style="${style69_2}">${rec.std69_2.toLocaleString()}</td>
         <td class="col-change">
           <span class="table-change-badge ${badgeClass}">${changeText}</span>
         </td>
@@ -1211,23 +1225,23 @@ document.addEventListener('DOMContentLoaded', () => {
           let detailsHTML = '<div class="child-details-wrapper">';
           detailsHTML += `
             <div class="child-detail-item">
-              <span class="detail-label">นักเรียน 2568:</span>
-              <span class="detail-val">${rec.std68.toLocaleString()} คน</span>
+              <span class="detail-label">รอบตั้งต้น (${baseLabel}):</span>
+              <span class="detail-val">${rec.stdBaseVal.toLocaleString()} คน</span>
             </div>
             <div class="child-detail-item">
-              <span class="detail-label">2569 เทอม 1:</span>
-              <span class="detail-val" style="color: #0284c7;">${rec.std69_1.toLocaleString()} คน</span>
+              <span class="detail-label">รอบเปรียบเทียบ (${targetLabel}):</span>
+              <span class="detail-val" style="color: var(--color-primary); font-weight: 700;">${rec.stdTargetVal.toLocaleString()} คน</span>
             </div>
             <div class="child-detail-item">
-              <span class="detail-label">2569 เทอม 2:</span>
-              <span class="detail-val" style="color: var(--color-primary); font-weight: 700;">${rec.std69_2.toLocaleString()} คน</span>
+              <span class="detail-label">ผลต่าง:</span>
+              <span class="detail-val">${rec.diff >= 0 ? '+' : ''}${rec.diff} คน (${rec.diff >= 0 ? '+' : ''}${rec.change.toFixed(1)}%)</span>
             </div>
             <div class="child-detail-item">
-              <span class="detail-label">ห้องเรียน (${periodLabel}):</span>
+              <span class="detail-label">ห้องเรียน (${targetLabel}):</span>
               <span class="detail-val">${rec.roomActive} ห้อง</span>
             </div>
             <div class="child-detail-item">
-              <span class="detail-label">นร./ห้อง (${periodLabel}):</span>
+              <span class="detail-label">นร./ห้อง (${targetLabel}):</span>
               <span class="detail-val" style="font-weight: 700;">${rec.ratioActive.toFixed(1)} คน/ห้อง</span>
             </div>
           `;
@@ -1344,20 +1358,20 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // 2. Gender Chart (Pie Chart for active selected period)
+    // 2. Gender Chart (Pie Chart for target period)
     if (modalGenderChart) {
       modalGenderChart.destroy();
     }
     
     const genderCtx = document.getElementById('modalGenderChart').getContext('2d');
-    const pData = school[selectedPeriod] || school.y69_2 || school.y69;
+    const pData = school[targetPeriod] || school.y69_2;
     const mActive = pData.total.m;
     const fActive = pData.total.f;
-    const periodLabel = selectedPeriod === 'y68' ? 'ปี 2568' : (selectedPeriod === 'y69_1' ? '2569 เทอม 1' : '2569 เทอม 2');
+    const targetLabel = getPeriodLabel(targetPeriod);
 
     const genderTitle = document.getElementById('modalGenderTitle');
     if (genderTitle) {
-      genderTitle.textContent = `สัดส่วนเพศ (ชาย / หญิง) ${periodLabel}`;
+      genderTitle.textContent = `สัดส่วนเพศ (ชาย / หญิง) ${targetLabel}`;
     }
 
     modalGenderChart = new Chart(genderCtx, {
@@ -1442,27 +1456,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!schA || !schB) return;
 
+    const baseLabel = getPeriodLabel(basePeriod);
+    const targetLabel = getPeriodLabel(targetPeriod);
+
     const getSchoolStats = (sch) => {
-      const std68 = sch.y68.total.total;
-      const std69_1 = sch.y69_1.total.total;
-      const std69_2 = sch.y69_2.total.total;
-      const pData = sch[selectedPeriod] || sch.y69_2 || sch.y69;
-      const stdActive = pData.total.total;
-      const roomsActive = pData.total.rooms;
-      const ratioActive = roomsActive > 0 ? stdActive / roomsActive : 0;
-      
-      let diff = 0;
-      let change = 0;
-      if (selectedPeriod === 'y69_2') {
-        diff = std69_2 - std69_1;
-        change = std69_1 > 0 ? (diff / std69_1) * 100 : 0;
-      } else if (selectedPeriod === 'y69_1') {
-        diff = std69_1 - std68;
-        change = std68 > 0 ? (diff / std68) * 100 : 0;
-      } else {
-        diff = 0;
-        change = 0;
-      }
+      const pBase = sch[basePeriod] || sch.y68;
+      const pTarget = sch[targetPeriod] || sch.y69_2;
+      const std1 = pBase.total.total;
+      const std2 = pTarget.total.total;
+      const diff = std2 - std1;
+      const change = std1 > 0 ? (diff / std1) * 100 : 0;
+      const roomsActive = pTarget.total.rooms;
+      const ratioActive = roomsActive > 0 ? std2 / roomsActive : 0;
       
       const size = getSchoolSize(sch);
       let sizeText = 'ขนาดเล็ก (S)';
@@ -1470,19 +1475,17 @@ document.addEventListener('DOMContentLoaded', () => {
       if (size === 'L') sizeText = 'ขนาดใหญ่ (L)';
       if (size === 'XL') sizeText = 'ขนาดใหญ่พิเศษ (XL)';
 
-      return { std68, std69_1, std69_2, stdActive, diff, change, roomsActive, ratioActive, sizeText };
+      return { std1, std2, diff, change, roomsActive, ratioActive, sizeText };
     };
 
     const statsA = getSchoolStats(schA);
     const statsB = getSchoolStats(schB);
 
-    const periodLabel = selectedPeriod === 'y68' ? '2568' : (selectedPeriod === 'y69_1' ? '69/1' : '69/2');
-
     // Update School A Card
     document.getElementById('compareNameA').textContent = schA.name;
     document.getElementById('compareSizeBadgeA').textContent = statsA.sizeText;
-    document.getElementById('compareStd68A').textContent = `${statsA.std68.toLocaleString()} คน`;
-    document.getElementById('compareStd69A').textContent = `${statsA.stdActive.toLocaleString()} คน (${periodLabel})`;
+    document.getElementById('compareStd68A').textContent = `${statsA.std1.toLocaleString()} คน (${baseLabel})`;
+    document.getElementById('compareStd69A').textContent = `${statsA.std2.toLocaleString()} คน (${targetLabel})`;
     
     const badgeA = document.getElementById('compareChangeBadgeA');
     badgeA.classList.remove('positive', 'negative', 'stable');
@@ -1503,8 +1506,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update School B Card
     document.getElementById('compareNameB').textContent = schB.name;
     document.getElementById('compareSizeBadgeB').textContent = statsB.sizeText;
-    document.getElementById('compareStd68B').textContent = `${statsB.std68.toLocaleString()} คน`;
-    document.getElementById('compareStd69B').textContent = `${statsB.stdActive.toLocaleString()} คน (${periodLabel})`;
+    document.getElementById('compareStd68B').textContent = `${statsB.std1.toLocaleString()} คน (${baseLabel})`;
+    document.getElementById('compareStd69B').textContent = `${statsB.std2.toLocaleString()} คน (${targetLabel})`;
 
     const badgeB = document.getElementById('compareChangeBadgeB');
     badgeB.classList.remove('positive', 'negative', 'stable');
@@ -1530,8 +1533,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const grades = ['ม1', 'ม2', 'ม3', 'ม4', 'ม5', 'ม6'];
     const labels = ['ม.1', 'ม.2', 'ม.3', 'ม.4', 'ม.5', 'ม.6'];
 
-    const pA = schA[selectedPeriod] || schA.y69_2 || schA.y69;
-    const pB = schB[selectedPeriod] || schB.y69_2 || schB.y69;
+    const pA = schA[targetPeriod] || schA.y69_2;
+    const pB = schB[targetPeriod] || schB.y69_2;
     const dataA = grades.map(g => pA.grades[g] ? pA.grades[g].total : 0);
     const dataB = grades.map(g => pB.grades[g] ? pB.grades[g].total : 0);
 
@@ -1547,7 +1550,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const colorA = currentPrimaryColor;
     const colorB = '#b06000'; // Google orange
 
-    const periodLabel = selectedPeriod === 'y68' ? 'ปี 2568' : (selectedPeriod === 'y69_1' ? '2569 เทอม 1' : '2569 เทอม 2');
+    const targetLabel = getPeriodLabel(targetPeriod);
 
     comparisonBarChart = new Chart(ctx, {
       type: 'bar',
@@ -1555,7 +1558,7 @@ document.addEventListener('DOMContentLoaded', () => {
         labels: labels,
         datasets: [
           {
-            label: `${schA.name} (${periodLabel})`,
+            label: `${schA.name} (${targetLabel})`,
             data: dataA,
             backgroundColor: colorA,
             borderRadius: 4,
@@ -1563,7 +1566,7 @@ document.addEventListener('DOMContentLoaded', () => {
             categoryPercentage: 0.7
           },
           {
-            label: `${schB.name} (${periodLabel})`,
+            label: `${schB.name} (${targetLabel})`,
             data: dataB,
             backgroundColor: colorB,
             borderRadius: 4,
@@ -1627,7 +1630,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     DASHBOARD_DATA.forEach(sch => {
       const size = getSchoolSize(sch);
-      const pData = sch[selectedPeriod] || sch.y69_2 || sch.y69;
+      const pData = sch[targetPeriod] || sch.y69_2;
       if (sizeStats[size]) {
         sizeStats[size].count += 1;
         sizeStats[size].students += pData.total.total;
@@ -1666,7 +1669,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     DASHBOARD_DATA.forEach(sch => {
-      const pData = sch[selectedPeriod] || sch.y69_2 || sch.y69;
+      const pData = sch[targetPeriod] || sch.y69_2;
       const ratio = pData.total.rooms > 0 ? pData.total.total / pData.total.rooms : 0;
       const students = pData.total.total;
       
@@ -1683,7 +1686,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const totalStudentsOverall = DASHBOARD_DATA.reduce((sum, s) => {
-      const pData = s[selectedPeriod] || s.y69_2 || s.y69;
+      const pData = s[targetPeriod] || s.y69_2;
       return sum + pData.total.total;
     }, 0);
 
@@ -1712,26 +1715,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const policyInsightsContent = document.getElementById('policyInsightsContent');
     if (policyInsightsContent) {
-      let bullet1 = '';
-      let bullet2 = '';
-      let bullet3 = '';
-      let bullet4 = '';
+      const baseLabel = getPeriodLabel(basePeriod);
+      const targetLabel = getPeriodLabel(targetPeriod);
 
-      if (selectedPeriod === 'y69_2') {
-        bullet1 = `วิเคราะห์ข้อมูล DMC 2569 รอบเทอม 2 (10 พ.ย. 69) เปรียบเทียบกับเทอม 1 (10 มิ.ย. 69): จำนวนนักเรียนทั้งเขตลดลง **-252 คน (-0.56%)** โดยลดลงในระดับ ม.ต้น -126 คน และ ม.ปลาย -126 คน เท่ากันพอดี`;
-        bullet2 = `โรงเรียนที่มีการสูญเสียนักเรียนระหว่างเทอมสูงสุดคือ **รร.เตรียมอุดมศึกษา ภาคตะวันออกเฉียงเหนือ (-42 คน)**, **รร.ธาตุนารายณ์วิทยา (-39 คน)** และ **รร.มัธยมวานรนิวาส (-31 คน)**`;
-        bullet3 = `โรงเรียนที่มีการเพิ่มขึ้นของนักเรียนในเทอม 2 โดดเด่นที่สุดคือ **รร.เทพสวัสดิ์วิทยา (+23 คน หรือ +22.8%)** จาก 101 คน เพิ่มขึ้นเป็น 124 คน`;
-        bullet4 = `ข้อเสนอแนะเชิงบริหาร: การลดลงของห้องเรียนรวม -4 ห้องในเทอม 2 (จาก 1,396 เหลือ 1,392 ห้อง) ช่วยลดภาระงบประมาณรายหัว แต่ควรติดตามโรงเรียนขนาดใหญ่พิเศษเพื่อป้องกันการหลุดออกจากระบบของนักเรียน`;
-      } else if (selectedPeriod === 'y69_1') {
-        bullet1 = `ข้อมูล DMC 2569 รอบเทอม 1 (10 มิ.ย. 69) เปรียบเทียบปี 2568: ภาพรวมลดลง **-585 คน (-1.29%)** โดยวิกฤตเกิดขึ้นที่ชั้น ม.1 ลดลงถึง **-748 คน (-8.94%)**`;
-        bullet2 = `โรงเรียนขนาดเล็กและกลางสูญเสียนักเรียนรวดเร็วกว่าโรงเรียนขนาดใหญ่ถึง 5 เท่า (-4.7% ปะทะ -0.8%)`;
-        bullet3 = `โรงเรียนที่มีความหนาแน่นสูงสุดเกิน 37 คน/ห้อง ได้แก่ **รร.ธาตุนารายณ์วิทยา (37.6)** และ **รร.สกลราชวิทยานุกูล (37.3)**`;
-        bullet4 = `ข้อเสนอแนะ: วางแผนรับมืออัตราการเกิดลดลงที่จะกระทบโรงเรียนมัธยมศึกษาต่อเนื่องในอีก 3-5 ปีข้างหน้า`;
+      let bullet1 = `วิเคราะห์เปรียบเทียบเชิงมิติเวลา (${baseLabel} ➔ ${targetLabel}): เพื่อการบริหารจัดการและติดตามพัฒนาการประชากรนักเรียนในสังกัด สพม.สกลนคร`;
+      
+      if (basePeriod === 'y69_1' && targetPeriod === 'y69_2') {
+        bullet1 = `วิเคราะห์การคงอยู่ระหว่างภาคเรียน (เทอม 1 ➔ เทอม 2 ปี 2569): จำนวนนักเรียนทั้งเขตลดลง **-252 คน (-0.56%)** โดยลดลงในระดับ ม.ต้น -126 คน และ ม.ปลาย -126 คน เท่ากันพอดี`;
+        bullet2 = `โรงเรียนที่สูญเสียนักเรียนระหว่างเทอมสูงสุด: **รร.เตรียมอุดมศึกษาฯ (-42 คน)**, **รร.ธาตุนารายณ์วิทยา (-39 คน)** และ **รร.มัธยมวานรนิวาส (-31 คน)**`;
+        bullet3 = `โรงเรียนที่มีนักเรียนเพิ่มขึ้นสวนกระแสในเทอม 2: **รร.เทพสวัสดิ์วิทยา (+23 คน หรือ +22.8%)** เพิ่มจาก 101 เป็น 124 คน`;
+        bullet4 = `การบริหารห้องเรียน: ปรับลดลง -4 ห้อง (จาก 1,396 เหลือ 1,392 ห้อง) ช่วยเพิ่มประสิทธิภาพการจัดสรรงบประมาณครู`;
+      } else if (basePeriod === 'y68' && targetPeriod === 'y69_2') {
+        bullet1 = `วิเคราะห์การเปลี่ยนแปลงรอบ 1 ปี (2568 ➔ 2569 เทอม 2): นักเรียนทั้งเขตลดลงสุทธิ **-837 คน (-1.84%)** (จาก 45,403 เหลือ 44,566 คน)`;
+        bullet2 = `โรงเรียนขนาดเล็กและกลางลดลงรวดเร็วกว่าขนาดใหญ่ สะท้อนการเคลื่อนย้ายนักเรียนเข้าสู่สถานศึกษาศูนย์กลาง`;
+        bullet3 = `ห้องเรียนความหนาแน่นวิกฤต (> 37 คน/ห้อง) ยังคงกระจุกตัวที่ **รร.ธาตุนารายณ์วิทยา** และ **รร.สกลราชวิทยานุกูล**`;
+        bullet4 = `ข้อเสนอแนะ: เตรียมแผนรับมือนักเรียนแรกเข้า ม.1 ที่มีแนวโน้มลดลงต่อเนื่องตามอัตราการเกิดของประชากร`;
       } else {
-        bullet1 = `ข้อมูลสถิติปีการศึกษา 2568: ฐานข้อมูลตั้งต้นจำนวนนักเรียนรวม 45,403 คน จำนวนห้องเรียน 1,382 ห้อง`;
-        bullet2 = `สัดส่วนเพศ: นักเรียนหญิง 56.5% (25,681 คน) นักเรียนชาย 43.5% (19,722 คน)`;
-        bullet3 = `ความหนาแน่นเฉลี่ยทั้งเขตอยู่ที่ 32.9 คน/ห้อง`;
-        bullet4 = `สามารถคลิกเลือกดูรอบ '2569 เทอม 1' หรือ '2569 เทอม 2' ด้านบน เพื่อดูพัฒนาการและความเปลี่ยนแปลง`;
+        bullet1 = `วิเคราะห์เปรียบเทียบข้อมูลระหว่าง **${baseLabel}** และ **${targetLabel}**: สะท้อนแนวโน้มการเปลี่ยนแปลงตามนโยบาย`;
+        bullet2 = `สามารถเลือกสลับคู่เปรียบเทียบอื่นได้อิสระจากแถบควบคุมด้านบน`;
+        bullet3 = `รายงานระบบแสดงผลสถิติที่จัดกลุ่มตามขนาดโรงเรียนและความหนาแน่นห้องเรียนอย่างเป็นกลาง`;
+        bullet4 = `ส่งออกรายงานผ่านปุ่ม '+ ส่งออกรายงาน PDF' เพื่อนำเสนอต่อคณะกรรมการบริหารเขตพื้นที่ฯ ได้ทันที`;
       }
 
       policyInsightsContent.innerHTML = `
