@@ -550,6 +550,8 @@ body {
 
 .legend-color.y68 { background-color: var(--color-68); }
 .legend-color.y69 { background-color: var(--color-primary); }
+.legend-color.y69_1 { background-color: #0284c7; }
+.legend-color.y69_2 { background-color: var(--color-primary); }
 
 .chart-area {
   position: relative;

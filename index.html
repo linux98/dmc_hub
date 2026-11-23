@@ -177,11 +177,18 @@
             <option value="ALL">ภาพรวมทั้งหมด (45 โรงเรียน)</option>
           </select>
           
+          <!-- Period Selector Tabs (สลับเลือกรอบข้อมูล) -->
+          <div class="tab-group" id="periodTabs" title="เลือกรอบข้อมูล DMC">
+            <button class="tab-control-btn period-btn" data-period="y68">ปี 2568</button>
+            <button class="tab-control-btn period-btn" data-period="y69_1">2569 เทอม 1</button>
+            <button class="tab-control-btn period-btn active" data-period="y69_2">2569 เทอม 2</button>
+          </div>
+
           <!-- Level Selector Tabs -->
           <div class="tab-group" id="levelTabs">
-            <button class="tab-control-btn active" data-level="ALL">ทั้งหมด</button>
-            <button class="tab-control-btn" data-level="มต้น">ม.ต้น</button>
-            <button class="tab-control-btn" data-level="มปลาย">ม.ปลาย</button>
+            <button class="tab-control-btn level-btn active" data-level="ALL">ทั้งหมด</button>
+            <button class="tab-control-btn level-btn" data-level="มต้น">ม.ต้น</button>
+            <button class="tab-control-btn level-btn" data-level="มปลาย">ม.ปลาย</button>
           </div>
 
           <!-- Refresh Button -->
@@ -228,7 +235,7 @@
           <div class="kpi-info-block">
             <h4>นักเรียนทั้งหมด</h4>
             <span class="main-val" id="kpi-students-val">0</span>
-            <span class="unit-val">คน (ปี 2569)</span>
+            <span class="unit-val" id="kpi-students-unit">คน (2569 เทอม 2)</span>
           </div>
           <div class="kpi-trend-wrapper">
             <span class="trend-badge" id="badge-students">0.0%</span>
@@ -246,7 +253,7 @@
           <div class="kpi-info-block">
             <h4>ห้องเรียนทั้งหมด</h4>
             <span class="main-val" id="kpi-rooms-val">0</span>
-            <span class="unit-val">ห้อง (ปี 2569)</span>
+            <span class="unit-val" id="kpi-rooms-unit">ห้อง (2569 เทอม 2)</span>
           </div>
           <div class="kpi-trend-wrapper">
             <span class="trend-badge" id="badge-rooms">0.0%</span>
@@ -283,7 +290,7 @@
           <div class="panel-header">
             <div class="panel-title">
               <h3>สถิตินักเรียนเปรียบเทียบรายระดับชั้น</h3>
-              <p>เปรียบเทียบแนวโน้มจำนวนนักเรียนระดับชั้น ม.1 - ม.6 ปีการศึกษา 2568 และ 2569</p>
+              <p id="chartSubTitle">เปรียบเทียบแนวโน้มจำนวนนักเรียนระดับชั้น ม.1 - ม.6 (2568, 2569 เทอม 1, 2569 เทอม 2)</p>
             </div>
             <div class="panel-legend">
               <div class="legend-item">
@@ -291,8 +298,12 @@
                 <span>ปี 2568</span>
               </div>
               <div class="legend-item">
-                <span class="legend-color y69"></span>
-                <span>ปี 2569</span>
+                <span class="legend-color y69_1"></span>
+                <span>2569 เทอม 1</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color y69_2"></span>
+                <span>2569 เทอม 2</span>
               </div>
             </div>
           </div>
@@ -538,12 +549,11 @@
                 <th data-sort="index" class="col-seq">ลำดับ</th>
                 <th data-sort="name" class="col-name">ชื่อโรงเรียน ↕</th>
                 <th data-sort="std68" class="col-std68">นักเรียน 2568 ↕</th>
-                <th data-sort="std69" class="col-std69">นักเรียน 2569 ↕</th>
-                <th data-sort="change" class="col-change">การเปลี่ยนแปลง (%) ↕</th>
-                <th data-sort="room68" class="col-room68">ห้องเรียน 2568 ↕</th>
-                <th data-sort="room69" class="col-room69">ห้องเรียน 2569 ↕</th>
-                <th data-sort="ratio68" class="col-ratio68">นร./ห้อง 2568 ↕</th>
-                <th data-sort="ratio69" class="col-ratio69">นร./ห้อง 2569 ↕</th>
+                <th data-sort="std69_1" class="col-std69_1">2569 เทอม 1 ↕</th>
+                <th data-sort="std69_2" class="col-std69_2">2569 เทอม 2 ↕</th>
+                <th data-sort="change" class="col-change" id="thChange">ผลต่าง (คน/%) ↕</th>
+                <th data-sort="roomActive" class="col-room" id="thRooms">ห้องเรียน ↕</th>
+                <th data-sort="ratioActive" class="col-ratio" id="thDensity">นร./ห้อง ↕</th>
               </tr>
             </thead>
             <tbody id="schoolTableBody">
@@ -665,17 +675,21 @@
       </div>
       <div class="school-modal-body">
         <!-- KPI Summary Cards -->
-        <div class="school-modal-kpi-row">
+        <div class="school-modal-kpi-row" style="grid-template-columns: repeat(4, 1fr);">
           <div class="school-modal-kpi-card">
             <h4>นักเรียนปี 2568</h4>
             <p id="modalKpiStd68">0 คน</p>
           </div>
           <div class="school-modal-kpi-card">
-            <h4>นักเรียนปี 2569</h4>
-            <p id="modalKpiStd69">0 คน</p>
+            <h4>2569 เทอม 1</h4>
+            <p id="modalKpiStd69_1">0 คน</p>
           </div>
           <div class="school-modal-kpi-card">
-            <h4>ห้องเรียนปี 2569</h4>
+            <h4>2569 เทอม 2</h4>
+            <p id="modalKpiStd69_2">0 คน</p>
+          </div>
+          <div class="school-modal-kpi-card">
+            <h4>ห้องเรียน (เทอม 2)</h4>
             <p id="modalKpiRooms69">0 ห้อง</p>
           </div>
         </div>
@@ -683,13 +697,13 @@
         <!-- Charts Layout -->
         <div class="school-modal-charts-row">
           <div class="school-modal-chart-container">
-            <h4>สถิติเปรียบเทียบตามชั้นเรียน (ม.1 - ม.6)</h4>
+            <h4>สถิติเปรียบเทียบตามชั้นเรียน (ม.1 - ม.6) 3 รอบข้อมูล</h4>
             <div style="position: relative; height: 220px; width: 100%;">
               <canvas id="modalGradesChart"></canvas>
             </div>
           </div>
           <div class="school-modal-chart-container">
-            <h4>สัดส่วนเพศ (ชาย / หญิง) ปี 2569</h4>
+            <h4 id="modalGenderTitle">สัดส่วนเพศ (ชาย / หญิง) ปี 2569 เทอม 2</h4>
             <div style="position: relative; height: 220px; width: 100%;">
               <canvas id="modalGenderChart"></canvas>
             </div>
@@ -700,7 +714,7 @@
   </div>
 
   <!-- Javascript Inclusions -->
-  <script src="data.js?v=1.6"></script>
-  <script src="app.js?v=1.6"></script>
+  <script src="data.js?v=2.0"></script>
+  <script src="app.js?v=2.0"></script>
 </body>
 </html>
