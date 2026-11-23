@@ -6,6 +6,8 @@ const DASHBOARD_DATA = [
     "shortName": "สกลราชวิทยานุกูล",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "เมืองสกลนคร",
+    "cluster": "สหวิทยาเขตเมืองสกลนคร",
     "y68": {
       "grades": {
         "ม1": {
@@ -373,6 +375,8 @@ const DASHBOARD_DATA = [
     "shortName": "ดงมะไฟวิทยา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "เมืองสกลนคร",
+    "cluster": "สหวิทยาเขตเมืองสกลนคร",
     "y68": {
       "grades": {
         "ม1": {
@@ -740,6 +744,8 @@ const DASHBOARD_DATA = [
     "shortName": "สกลนครพัฒนศึกษา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "เมืองสกลนคร",
+    "cluster": "สหวิทยาเขตเมืองสกลนคร",
     "y68": {
       "grades": {
         "ม1": {
@@ -1107,6 +1113,8 @@ const DASHBOARD_DATA = [
     "shortName": "ธาตุนารายณ์วิทยา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "เมืองสกลนคร",
+    "cluster": "สหวิทยาเขตเมืองสกลนคร",
     "y68": {
       "grades": {
         "ม1": {
@@ -1474,6 +1482,8 @@ const DASHBOARD_DATA = [
     "shortName": "ท่าแร่ศึกษา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "เมืองสกลนคร",
+    "cluster": "สหวิทยาเขตเมืองสกลนคร",
     "y68": {
       "grades": {
         "ม1": {
@@ -1841,6 +1851,8 @@ const DASHBOARD_DATA = [
     "shortName": "เฉลิมพระเกียรติฯ ๕๐ ปี สกลนคร",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "เมืองสกลนคร",
+    "cluster": "สหวิทยาเขตเมืองสกลนคร",
     "y68": {
       "grades": {
         "ม1": {
@@ -2208,6 +2220,8 @@ const DASHBOARD_DATA = [
     "shortName": "กุสุมาลย์วิทยาคม",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "กุสุมาลย์",
+    "cluster": "สหวิทยาเขตเบญจมิตร",
     "y68": {
       "grades": {
         "ม1": {
@@ -2575,6 +2589,8 @@ const DASHBOARD_DATA = [
     "shortName": "โพธิแสนวิทยา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "กุสุมาลย์",
+    "cluster": "สหวิทยาเขตเบญจมิตร",
     "y68": {
       "grades": {
         "ม1": {
@@ -2942,6 +2958,8 @@ const DASHBOARD_DATA = [
     "shortName": "เต่างอยพัฒนศึกษา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "เต่างอย",
+    "cluster": "สหวิทยาเขตเบญจมิตร",
     "y68": {
       "grades": {
         "ม1": {
@@ -3309,6 +3327,8 @@ const DASHBOARD_DATA = [
     "shortName": "ร่มเกล้า",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "โคกศรีสุพรรณ",
+    "cluster": "สหวิทยาเขตเบญจมิตร",
     "y68": {
       "grades": {
         "ม1": {
@@ -3676,6 +3696,8 @@ const DASHBOARD_DATA = [
     "shortName": "ด่านม่วงคำพิทยาคม",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "โคกศรีสุพรรณ",
+    "cluster": "สหวิทยาเขตเบญจมิตร",
     "y68": {
       "grades": {
         "ม1": {
@@ -4043,6 +4065,8 @@ const DASHBOARD_DATA = [
     "shortName": "โพนพิทยาคม",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "โพนนาแก้ว",
+    "cluster": "สหวิทยาเขตเบญจมิตร",
     "y68": {
       "grades": {
         "ม1": {
@@ -4410,6 +4434,8 @@ const DASHBOARD_DATA = [
     "shortName": "คำเพิ่มพิทยา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "ภูพาน",
+    "cluster": "สหวิทยาเขตเบญจมิตร",
     "y68": {
       "grades": {
         "ม1": {
@@ -4777,6 +4803,8 @@ const DASHBOARD_DATA = [
     "shortName": "ท่านผู้หญิงจันทิมาพึ่งบารมี",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "ภูพาน",
+    "cluster": "สหวิทยาเขตเบญจมิตร",
     "y68": {
       "grades": {
         "ม1": {
@@ -5144,6 +5172,8 @@ const DASHBOARD_DATA = [
     "shortName": "พังโคนวิทยาคม",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "พังโคน",
+    "cluster": "สหวิทยาเขตวาริช-พังโคน-น้ำอูน",
     "y68": {
       "grades": {
         "ม1": {
@@ -5511,6 +5541,8 @@ const DASHBOARD_DATA = [
     "shortName": "กุดบากพัฒนาศึกษา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "กุดบาก",
+    "cluster": "สหวิทยาเขตพรรณา-กุดบาก",
     "y68": {
       "grades": {
         "ม1": {
@@ -5878,6 +5910,8 @@ const DASHBOARD_DATA = [
     "shortName": "พรรณาวุฒาจารย์",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "พรรณานิคม",
+    "cluster": "สหวิทยาเขตพรรณา-กุดบาก",
     "y68": {
       "grades": {
         "ม1": {
@@ -6245,6 +6279,8 @@ const DASHBOARD_DATA = [
     "shortName": "บ้านบัวราษฎร์บำรุง",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "พรรณานิคม",
+    "cluster": "สหวิทยาเขตพรรณา-กุดบาก",
     "y68": {
       "grades": {
         "ม1": {
@@ -6612,6 +6648,8 @@ const DASHBOARD_DATA = [
     "shortName": "ลำปลาหางวิทยา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "พังโคน",
+    "cluster": "สหวิทยาเขตวาริช-พังโคน-น้ำอูน",
     "y68": {
       "grades": {
         "ม1": {
@@ -6979,6 +7017,8 @@ const DASHBOARD_DATA = [
     "shortName": "เทพสวัสดิ์วิทยา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "พังโคน",
+    "cluster": "สหวิทยาเขตวาริช-พังโคน-น้ำอูน",
     "y68": {
       "grades": {
         "ม1": {
@@ -7346,6 +7386,8 @@ const DASHBOARD_DATA = [
     "shortName": "ภูริทัตต์วิทยา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "พรรณานิคม",
+    "cluster": "สหวิทยาเขตพรรณา-กุดบาก",
     "y68": {
       "grades": {
         "ม1": {
@@ -7713,6 +7755,8 @@ const DASHBOARD_DATA = [
     "shortName": "บะฮีวิทยาคม",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "พรรณานิคม",
+    "cluster": "สหวิทยาเขตพรรณา-กุดบาก",
     "y68": {
       "grades": {
         "ม1": {
@@ -8080,6 +8124,8 @@ const DASHBOARD_DATA = [
     "shortName": "ช้างมิ่งพิทยานุกูล",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "พรรณานิคม",
+    "cluster": "สหวิทยาเขตพรรณา-กุดบาก",
     "y68": {
       "grades": {
         "ม1": {
@@ -8447,6 +8493,8 @@ const DASHBOARD_DATA = [
     "shortName": "มัธยมวาริชภูมิ",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "วาริชภูมิ",
+    "cluster": "สหวิทยาเขตวาริช-พังโคน-น้ำอูน",
     "y68": {
       "grades": {
         "ม1": {
@@ -8814,6 +8862,8 @@ const DASHBOARD_DATA = [
     "shortName": "ธรรมบวรวิทยา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "วาริชภูมิ",
+    "cluster": "สหวิทยาเขตวาริช-พังโคน-น้ำอูน",
     "y68": {
       "grades": {
         "ม1": {
@@ -9181,6 +9231,8 @@ const DASHBOARD_DATA = [
     "shortName": "วาริชวิทยา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "วาริชภูมิ",
+    "cluster": "สหวิทยาเขตวาริช-พังโคน-น้ำอูน",
     "y68": {
       "grades": {
         "ม1": {
@@ -9548,6 +9600,8 @@ const DASHBOARD_DATA = [
     "shortName": "นิคมน้ำอูนเจริญวิทยา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "นิคมน้ำอูน",
+    "cluster": "สหวิทยาเขตวาริช-พังโคน-น้ำอูน",
     "y68": {
       "grades": {
         "ม1": {
@@ -9915,6 +9969,8 @@ const DASHBOARD_DATA = [
     "shortName": "เตรียมอุดมศึกษา ภาคตะวันออกเฉียงเหนือ",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "สว่างแดนดิน",
+    "cluster": "สหวิทยาเขตสว่างแดนดิน-ส่องดาว",
     "y68": {
       "grades": {
         "ม1": {
@@ -10282,6 +10338,8 @@ const DASHBOARD_DATA = [
     "shortName": "แวงพิทยาคม",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "สว่างแดนดิน",
+    "cluster": "สหวิทยาเขตสว่างแดนดิน-ส่องดาว",
     "y68": {
       "grades": {
         "ม1": {
@@ -10649,6 +10707,8 @@ const DASHBOARD_DATA = [
     "shortName": "หนองหลวงศึกษา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "สว่างแดนดิน",
+    "cluster": "สหวิทยาเขตสว่างแดนดิน-ส่องดาว",
     "y68": {
       "grades": {
         "ม1": {
@@ -11016,6 +11076,8 @@ const DASHBOARD_DATA = [
     "shortName": "โคกสีวิทยาสรรค์",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "สว่างแดนดิน",
+    "cluster": "สหวิทยาเขตสว่างแดนดิน-ส่องดาว",
     "y68": {
       "grades": {
         "ม1": {
@@ -11383,6 +11445,8 @@ const DASHBOARD_DATA = [
     "shortName": "บงเหนือวิทยาคม",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "สว่างแดนดิน",
+    "cluster": "สหวิทยาเขตสว่างแดนดิน-ส่องดาว",
     "y68": {
       "grades": {
         "ม1": {
@@ -11750,6 +11814,8 @@ const DASHBOARD_DATA = [
     "shortName": "สว่างแดนดิน",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "สว่างแดนดิน",
+    "cluster": "สหวิทยาเขตสว่างแดนดิน-ส่องดาว",
     "y68": {
       "grades": {
         "ม1": {
@@ -12117,6 +12183,8 @@ const DASHBOARD_DATA = [
     "shortName": "ส่องดาววิทยาคม",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "ส่องดาว",
+    "cluster": "สหวิทยาเขตสว่างแดนดิน-ส่องดาว",
     "y68": {
       "grades": {
         "ม1": {
@@ -12484,6 +12552,8 @@ const DASHBOARD_DATA = [
     "shortName": "มัธยมวานรนิวาส",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "วานรนิวาส",
+    "cluster": "สหวิทยาเขตวานร-คำตากล้า",
     "y68": {
       "grades": {
         "ม1": {
@@ -12851,6 +12921,8 @@ const DASHBOARD_DATA = [
     "shortName": "คำตากล้าราชประชาสงเคราะห์",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "คำตากล้า",
+    "cluster": "สหวิทยาเขตวานร-คำตากล้า",
     "y68": {
       "grades": {
         "ม1": {
@@ -13218,6 +13290,8 @@ const DASHBOARD_DATA = [
     "shortName": "กุดเรือคำพิทยาคาร",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "วานรนิวาส",
+    "cluster": "สหวิทยาเขตวานร-คำตากล้า",
     "y68": {
       "grades": {
         "ม1": {
@@ -13585,6 +13659,8 @@ const DASHBOARD_DATA = [
     "shortName": "ศึกษาประชาสามัคคี",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "วานรนิวาส",
+    "cluster": "สหวิทยาเขตวานร-คำตากล้า",
     "y68": {
       "grades": {
         "ม1": {
@@ -13952,6 +14028,8 @@ const DASHBOARD_DATA = [
     "shortName": "หนองแวงวิทยา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "วานรนิวาส",
+    "cluster": "สหวิทยาเขตวานร-คำตากล้า",
     "y68": {
       "grades": {
         "ม1": {
@@ -14319,6 +14397,8 @@ const DASHBOARD_DATA = [
     "shortName": "บ้านม่วงพิทยาคม",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "บ้านม่วง",
+    "cluster": "สหวิทยาเขตบ้านม่วง-อากาศ-เจริญศิลป์",
     "y68": {
       "grades": {
         "ม1": {
@@ -14686,6 +14766,8 @@ const DASHBOARD_DATA = [
     "shortName": "พระเทพญาณวิศิษฏ์โพธิ์ชัยทองวิทย์",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "ภูพาน",
+    "cluster": "สหวิทยาเขตเบญจมิตร",
     "y68": {
       "grades": {
         "ม1": {
@@ -15053,6 +15135,8 @@ const DASHBOARD_DATA = [
     "shortName": "อากาศอำนวยศึกษา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "อากาศอำนวย",
+    "cluster": "สหวิทยาเขตบ้านม่วง-อากาศ-เจริญศิลป์",
     "y68": {
       "grades": {
         "ม1": {
@@ -15420,6 +15504,8 @@ const DASHBOARD_DATA = [
     "shortName": "โพนงามศึกษา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "อากาศอำนวย",
+    "cluster": "สหวิทยาเขตบ้านม่วง-อากาศ-เจริญศิลป์",
     "y68": {
       "grades": {
         "ม1": {
@@ -15787,6 +15873,8 @@ const DASHBOARD_DATA = [
     "shortName": "ท่าสงครามวิทยา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "อากาศอำนวย",
+    "cluster": "สหวิทยาเขตบ้านม่วง-อากาศ-เจริญศิลป์",
     "y68": {
       "grades": {
         "ม1": {
@@ -16154,6 +16242,8 @@ const DASHBOARD_DATA = [
     "shortName": "เจริญศิลป์ศึกษา(โพธิ์คำอนุสรณ์)",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
+    "amphoe": "เจริญศิลป์",
+    "cluster": "สหวิทยาเขตบ้านม่วง-อากาศ-เจริญศิลป์",
     "y68": {
       "grades": {
         "ม1": {

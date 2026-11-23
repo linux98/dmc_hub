@@ -2,13 +2,62 @@
 """
 DMC Hub Data Builder
 Generates data.js from raw SchoolMIS CSV files.
-Maintains two-tier naming architecture (official legal name + clean display name).
+Maintains two-tier naming architecture (official legal name + clean display name)
+and geographic/cluster metadata (Amphoe + Sahawitthayakhet).
 """
 import json
 import os
 
 SCHOOL_SHORT_NAMES = {
     '47012007': 'เฉลิมพระเกียรติฯ ๕๐ ปี สกลนคร'
+}
+
+SCHOOL_GEO = {
+    '47012001': {'amphoe': 'เมืองสกลนคร', 'cluster': 'สหวิทยาเขตเมืองสกลนคร'},
+    '47012002': {'amphoe': 'เมืองสกลนคร', 'cluster': 'สหวิทยาเขตเมืองสกลนคร'},
+    '47012003': {'amphoe': 'เมืองสกลนคร', 'cluster': 'สหวิทยาเขตเมืองสกลนคร'},
+    '47012004': {'amphoe': 'เมืองสกลนคร', 'cluster': 'สหวิทยาเขตเมืองสกลนคร'},
+    '47012005': {'amphoe': 'เมืองสกลนคร', 'cluster': 'สหวิทยาเขตเมืองสกลนคร'},
+    '47012007': {'amphoe': 'เมืองสกลนคร', 'cluster': 'สหวิทยาเขตเมืองสกลนคร'},
+    '47012008': {'amphoe': 'กุสุมาลย์', 'cluster': 'สหวิทยาเขตเบญจมิตร'},
+    '47012009': {'amphoe': 'กุสุมาลย์', 'cluster': 'สหวิทยาเขตเบญจมิตร'},
+    '47012010': {'amphoe': 'เต่างอย', 'cluster': 'สหวิทยาเขตเบญจมิตร'},
+    '47012011': {'amphoe': 'โคกศรีสุพรรณ', 'cluster': 'สหวิทยาเขตเบญจมิตร'},
+    '47012012': {'amphoe': 'โคกศรีสุพรรณ', 'cluster': 'สหวิทยาเขตเบญจมิตร'},
+    '47012013': {'amphoe': 'โพนนาแก้ว', 'cluster': 'สหวิทยาเขตเบญจมิตร'},
+    '47012014': {'amphoe': 'ภูพาน', 'cluster': 'สหวิทยาเขตเบญจมิตร'},
+    '47012015': {'amphoe': 'ภูพาน', 'cluster': 'สหวิทยาเขตเบญจมิตร'},
+    '47022001': {'amphoe': 'พังโคน', 'cluster': 'สหวิทยาเขตวาริช-พังโคน-น้ำอูน'},
+    '47022002': {'amphoe': 'กุดบาก', 'cluster': 'สหวิทยาเขตพรรณา-กุดบาก'},
+    '47022003': {'amphoe': 'พรรณานิคม', 'cluster': 'สหวิทยาเขตพรรณา-กุดบาก'},
+    '47022004': {'amphoe': 'พรรณานิคม', 'cluster': 'สหวิทยาเขตพรรณา-กุดบาก'},
+    '47022005': {'amphoe': 'พังโคน', 'cluster': 'สหวิทยาเขตวาริช-พังโคน-น้ำอูน'},
+    '47022007': {'amphoe': 'พังโคน', 'cluster': 'สหวิทยาเขตวาริช-พังโคน-น้ำอูน'},
+    '47022008': {'amphoe': 'พรรณานิคม', 'cluster': 'สหวิทยาเขตพรรณา-กุดบาก'},
+    '47022009': {'amphoe': 'พรรณานิคม', 'cluster': 'สหวิทยาเขตพรรณา-กุดบาก'},
+    '47022010': {'amphoe': 'พรรณานิคม', 'cluster': 'สหวิทยาเขตพรรณา-กุดบาก'},
+    '47022012': {'amphoe': 'วาริชภูมิ', 'cluster': 'สหวิทยาเขตวาริช-พังโคน-น้ำอูน'},
+    '47022013': {'amphoe': 'วาริชภูมิ', 'cluster': 'สหวิทยาเขตวาริช-พังโคน-น้ำอูน'},
+    '47022014': {'amphoe': 'วาริชภูมิ', 'cluster': 'สหวิทยาเขตวาริช-พังโคน-น้ำอูน'},
+    '47022015': {'amphoe': 'นิคมน้ำอูน', 'cluster': 'สหวิทยาเขตวาริช-พังโคน-น้ำอูน'},
+    '47022016': {'amphoe': 'สว่างแดนดิน', 'cluster': 'สหวิทยาเขตสว่างแดนดิน-ส่องดาว'},
+    '47022017': {'amphoe': 'สว่างแดนดิน', 'cluster': 'สหวิทยาเขตสว่างแดนดิน-ส่องดาว'},
+    '47022018': {'amphoe': 'สว่างแดนดิน', 'cluster': 'สหวิทยาเขตสว่างแดนดิน-ส่องดาว'},
+    '47022019': {'amphoe': 'สว่างแดนดิน', 'cluster': 'สหวิทยาเขตสว่างแดนดิน-ส่องดาว'},
+    '47022020': {'amphoe': 'สว่างแดนดิน', 'cluster': 'สหวิทยาเขตสว่างแดนดิน-ส่องดาว'},
+    '47022021': {'amphoe': 'สว่างแดนดิน', 'cluster': 'สหวิทยาเขตสว่างแดนดิน-ส่องดาว'},
+    '47022022': {'amphoe': 'ส่องดาว', 'cluster': 'สหวิทยาเขตสว่างแดนดิน-ส่องดาว'},
+    '47032001': {'amphoe': 'วานรนิวาส', 'cluster': 'สหวิทยาเขตวานร-คำตากล้า'},
+    '47032002': {'amphoe': 'คำตากล้า', 'cluster': 'สหวิทยาเขตวานร-คำตากล้า'},
+    '47032003': {'amphoe': 'วานรนิวาส', 'cluster': 'สหวิทยาเขตวานร-คำตากล้า'},
+    '47032004': {'amphoe': 'วานรนิวาส', 'cluster': 'สหวิทยาเขตวานร-คำตากล้า'},
+    '47032007': {'amphoe': 'วานรนิวาส', 'cluster': 'สหวิทยาเขตวานร-คำตากล้า'},
+    '47032009': {'amphoe': 'บ้านม่วง', 'cluster': 'สหวิทยาเขตบ้านม่วง-อากาศ-เจริญศิลป์'},
+    '47032010': {'amphoe': 'ภูพาน', 'cluster': 'สหวิทยาเขตเบญจมิตร'},
+    '47032012': {'amphoe': 'อากาศอำนวย', 'cluster': 'สหวิทยาเขตบ้านม่วง-อากาศ-เจริญศิลป์'},
+    '47032013': {'amphoe': 'อากาศอำนวย', 'cluster': 'สหวิทยาเขตบ้านม่วง-อากาศ-เจริญศิลป์'},
+    '47032014': {'amphoe': 'อากาศอำนวย', 'cluster': 'สหวิทยาเขตบ้านม่วง-อากาศ-เจริญศิลป์'},
+    '47032015': {'amphoe': 'เจริญศิลป์', 'cluster': 'สหวิทยาเขตบ้านม่วง-อากาศ-เจริญศิลป์'}
 }
 
 CSV_FILES = {
@@ -38,6 +87,8 @@ def build():
                 dist_id = row[0]
                 dist_name = row[1]
                 
+                geo = SCHOOL_GEO.get(sch_id, {'amphoe': 'สกลนคร', 'cluster': 'ทั่วไป'})
+
                 if sch_id not in school_order:
                     school_order.append(sch_id)
                     school_info[sch_id] = {
@@ -45,7 +96,9 @@ def build():
                         'name': sch_name,
                         'shortName': SCHOOL_SHORT_NAMES.get(sch_id, sch_name),
                         'districtId': dist_id,
-                        'districtName': dist_name
+                        'districtName': dist_name,
+                        'amphoe': geo['amphoe'],
+                        'cluster': geo['cluster']
                     }
                 
                 p_data = {
@@ -77,6 +130,8 @@ def build():
             'shortName': school_info[sch_id]['shortName'],
             'districtId': school_info[sch_id]['districtId'],
             'districtName': school_info[sch_id]['districtName'],
+            'amphoe': school_info[sch_id]['amphoe'],
+            'cluster': school_info[sch_id]['cluster'],
             'y68': data_by_period.get('y68_1', {}).get(sch_id, {}),
             'y68_1': data_by_period.get('y68_1', {}).get(sch_id, {}),
             'y68_2': data_by_period.get('y68_2', {}).get(sch_id, {}),
@@ -93,11 +148,8 @@ def build():
         f.write(out_content)
 
     print(f"Successfully generated data.js! Total schools: {len(dashboard_data)}")
-    for s in dashboard_data:
-        if s['id'] == '47012007':
-            print(f"Verified School {s['id']}:")
-            print(f"  Official: {s['name']}")
-            print(f"  Display:  {s['shortName']}")
+    for s in dashboard_data[:3]:
+        print(f"School {s['id']} - {s['name']}: Amphoe = {s['amphoe']}, Cluster = {s['cluster']}")
 
 if __name__ == '__main__':
     build()

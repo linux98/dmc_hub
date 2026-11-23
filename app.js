@@ -76,6 +76,30 @@ document.addEventListener('DOMContentLoaded', () => {
   let comparisonSchoolB = '';
   let comparisonBarChart = null;
 
+  // State variables for Zero Dropout (Step 1)
+  let retentionCurrentMode = 'semester_69';
+  let retentionSearchQuery = '';
+  let retentionRiskFilter = 'ALL';
+  let retentionChartTopDropInstance = null;
+  let retentionChartByGradeInstance = null;
+
+  // State variables for District & Cluster Analytics (Step 2)
+  let districtCurrentView = 'cluster'; // 'cluster' or 'amphoe'
+  let districtChartShareInstance = null;
+  let districtChartDensityInstance = null;
+
+  // State variables for Predictive Analytics (Step 3)
+  let forecastCurrentScenario = 'baseline'; // 'baseline', 'optimistic', 'pessimistic'
+  let forecastSearchQuery = '';
+  let forecastChartTrendlineInstance = null;
+  let forecastChartByGradeInstance = null;
+
+  // State variables for Teacher Staffing & Budget (Step 4)
+  let resourceCurrentView = 'staffing'; // 'staffing' or 'budget'
+  let resourceSearchQuery = '';
+  let resourceChartStaffInstance = null;
+  let resourceChartBudgetInstance = null;
+
   // Helper to get clean display name (Two-tier naming architecture)
   function getSchoolDisplayName(school) {
     if (!school) return '';
@@ -283,17 +307,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 5. Sidebar Menu Click Navigation & Actions
     const menuDashboard = document.getElementById('menuDashboard');
+    const menuExecutive = document.getElementById('menuExecutive');
     const menuStudents = document.getElementById('menuStudents');
     const menuClassrooms = document.getElementById('menuClassrooms');
     const menuAnalytics = document.getElementById('menuAnalytics');
     const menuComparison = document.getElementById('menuComparison');
+    const menuRetention = document.getElementById('menuRetention');
+    const menuDistricts = document.getElementById('menuDistricts');
+    const menuForecast = document.getElementById('menuForecast');
+    const menuResources = document.getElementById('menuResources');
     const menuInsights = document.getElementById('menuInsights');
     const menuSettings = document.getElementById('menuSettings');
 
     const settingsModal = document.getElementById('settingsModal');
     const closeSettingsBtn = document.getElementById('closeSettingsBtn');
 
-    const menuItems = [menuDashboard, menuStudents, menuClassrooms, menuAnalytics, menuComparison, menuInsights, menuSettings];
+    const menuItems = [menuDashboard, menuExecutive, menuStudents, menuClassrooms, menuAnalytics, menuComparison, menuRetention, menuDistricts, menuForecast, menuResources, menuInsights, menuSettings];
 
     function setActiveMenu(activeItem) {
       menuItems.forEach(item => {
@@ -307,6 +336,21 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         setActiveMenu(menuDashboard);
         document.getElementById('topSection').scrollIntoView({ behavior: 'smooth' });
+      });
+    }
+
+    if (menuExecutive) {
+      menuExecutive.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveMenu(menuExecutive);
+        const panel = document.getElementById('executiveBriefSection');
+        if (panel) {
+          panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          panel.classList.remove('glow-highlight');
+          void panel.offsetWidth;
+          panel.classList.add('glow-highlight');
+          setTimeout(() => panel.classList.remove('glow-highlight'), 1500);
+        }
       });
     }
 
@@ -368,6 +412,66 @@ document.addEventListener('DOMContentLoaded', () => {
         void panel.offsetWidth;
         panel.classList.add('glow-highlight');
         setTimeout(() => panel.classList.remove('glow-highlight'), 1500);
+      });
+    }
+
+    if (menuRetention) {
+      menuRetention.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveMenu(menuRetention);
+        const panel = document.getElementById('retentionSection');
+        if (panel) {
+          panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          panel.classList.remove('glow-highlight');
+          void panel.offsetWidth;
+          panel.classList.add('glow-highlight');
+          setTimeout(() => panel.classList.remove('glow-highlight'), 1500);
+        }
+      });
+    }
+
+    if (menuDistricts) {
+      menuDistricts.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveMenu(menuDistricts);
+        const panel = document.getElementById('districtSection');
+        if (panel) {
+          panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          panel.classList.remove('glow-highlight');
+          void panel.offsetWidth;
+          panel.classList.add('glow-highlight');
+          setTimeout(() => panel.classList.remove('glow-highlight'), 1500);
+        }
+      });
+    }
+
+    if (menuForecast) {
+      menuForecast.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveMenu(menuForecast);
+        const panel = document.getElementById('forecastSection');
+        if (panel) {
+          panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          panel.classList.remove('glow-highlight');
+          void panel.offsetWidth;
+          panel.classList.add('glow-highlight');
+          setTimeout(() => panel.classList.remove('glow-highlight'), 1500);
+        }
+      });
+    }
+
+    if (menuResources) {
+      menuResources.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveMenu(menuResources);
+        const panel = document.getElementById('resourceSection');
+        if (panel) {
+          panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          panel.classList.remove('glow-highlight');
+          void panel.offsetWidth;
+          panel.classList.add('glow-highlight');
+          setTimeout(() => panel.classList.remove('glow-highlight'), 1500);
+        }
       });
     }
 
@@ -741,6 +845,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add call to new views
     updateComparison();
     updateInsightsView();
+    if (typeof updateDistrictView === 'function') updateDistrictView();
+    if (typeof updateForecastView === 'function') updateForecastView();
+    if (typeof updateResourceView === 'function') updateResourceView();
   }
 
   function updateKPIs(stats) {
@@ -1871,6 +1978,1576 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ==========================================
+  // Step 1: Zero Dropout & Student Retention Intelligence Module
+  // ==========================================
+  function initRetentionModule() {
+    const modeBtns = document.querySelectorAll('.retention-mode-btn');
+    modeBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        modeBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        retentionCurrentMode = btn.dataset.mode;
+        updateRetentionView();
+      });
+    });
+
+    const searchInput = document.getElementById('retentionSearchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        retentionSearchQuery = e.target.value.trim().toLowerCase();
+        const data = getRetentionModeData();
+        renderRetentionTable(data);
+      });
+    }
+
+    const riskSelect = document.getElementById('retentionRiskFilter');
+    if (riskSelect) {
+      riskSelect.addEventListener('change', (e) => {
+        retentionRiskFilter = e.target.value;
+        const data = getRetentionModeData();
+        renderRetentionTable(data);
+      });
+    }
+
+    const exportBtn = document.getElementById('exportRetentionExcelBtn');
+    if (exportBtn) {
+      exportBtn.addEventListener('click', () => {
+        exportRetentionToExcel();
+      });
+    }
+
+    updateRetentionView();
+  }
+
+  function getRetentionModeData() {
+    let title1 = '';
+    let title2 = '';
+    let periodLabel1 = '';
+    let periodLabel2 = '';
+    let baseColName = 'ต้นทาง (คน)';
+    let targetColName = 'ปลายทาง (คน)';
+
+    let totalBase = 0;
+    let totalTarget = 0;
+    let totalZeroCount = 0;
+
+    const grades = ['ม1', 'ม2', 'ม3', 'ม4', 'ม5', 'ม6'];
+    const gradeBaseTotals = { ม1: 0, ม2: 0, ม3: 0, ม4: 0, ม5: 0, ม6: 0 };
+    const gradeTargetTotals = { ม1: 0, ม2: 0, ม3: 0, ม4: 0, ม5: 0, ม6: 0 };
+
+    const records = DASHBOARD_DATA.map(s => {
+      const displayName = getSchoolDisplayName(s);
+      let baseVal = 0;
+      let targetVal = 0;
+
+      if (retentionCurrentMode === 'semester_69') {
+        baseVal = s.y69_1?.total?.total || 0;
+        targetVal = s.y69_2?.total?.total || 0;
+        grades.forEach(g => {
+          gradeBaseTotals[g] += s.y69_1?.grades[g]?.total || 0;
+          gradeTargetTotals[g] += s.y69_2?.grades[g]?.total || 0;
+        });
+      } else if (retentionCurrentMode === 'semester_68') {
+        baseVal = s.y68_1?.total?.total || 0;
+        targetVal = s.y68_2?.total?.total || 0;
+        grades.forEach(g => {
+          gradeBaseTotals[g] += s.y68_1?.grades[g]?.total || 0;
+          gradeTargetTotals[g] += s.y68_2?.grades[g]?.total || 0;
+        });
+      } else if (retentionCurrentMode === 'transition_m34') {
+        baseVal = s.y68_3?.grades?.['ม3']?.total || 0;
+        targetVal = s.y69_1?.grades?.['ม4']?.total || 0;
+        gradeBaseTotals['ม3'] += baseVal;
+        gradeTargetTotals['ม4'] += targetVal;
+      } else if (retentionCurrentMode === 'cohort_m12') {
+        baseVal = s.y68_1?.grades?.['ม1']?.total || 0;
+        targetVal = s.y69_1?.grades?.['ม2']?.total || 0;
+        gradeBaseTotals['ม1'] += baseVal;
+        gradeTargetTotals['ม2'] += targetVal;
+      }
+
+      const diff = targetVal - baseVal;
+      const rate = baseVal > 0 ? (targetVal / baseVal) * 100 : 0;
+      const pctChange = baseVal > 0 ? (diff / baseVal) * 100 : 0;
+
+      totalBase += baseVal;
+      totalTarget += targetVal;
+      if (diff >= 0) totalZeroCount++;
+
+      let riskLevel = 'NORMAL';
+      let riskBadge = '<span class="trend-badge positive" style="font-size: 11px;">🟢 ปกติ</span>';
+      let policyAdvice = 'การคงอยู่ของนักเรียนอยู่ในเกณฑ์ปกติ';
+
+      if (diff < 0) {
+        if (pctChange < -1.5) {
+          riskLevel = 'CRITICAL';
+          riskBadge = '<span class="trend-badge negative" style="font-size: 11px; background: rgba(197, 34, 31, 0.12); color: var(--color-error); font-weight: 700;">🔴 เสี่ยงวิกฤต</span>';
+          policyAdvice = 'เร่งลงพื้นที่เยี่ยมบ้าน / ประสานกลุ่มส่งเสริมฯ ติดตามรายคน';
+        } else if (pctChange <= -0.5) {
+          riskLevel = 'WARNING';
+          riskBadge = '<span class="trend-badge warning" style="font-size: 11px; background: rgba(194, 142, 56, 0.15); color: var(--color-gold); font-weight: 600;">🟡 เสี่ยงปานกลาง</span>';
+          policyAdvice = 'เฝ้าระวังเด็กย้ายถิ่นฐานตามฤดูกาล / ตรวจสอบชื่อในระบบ';
+        } else {
+          riskLevel = 'NORMAL';
+          riskBadge = '<span class="trend-badge stable" style="font-size: 11px;">🟡 เล็กน้อย</span>';
+          policyAdvice = 'แนวโน้มการย้ายเข้า-ออกตามปกติ';
+        }
+      } else if (diff > 0) {
+        riskLevel = 'EXCELLENT';
+        riskBadge = '<span class="trend-badge positive" style="font-size: 11px; background: rgba(19, 115, 51, 0.12); color: var(--color-success); font-weight: 700;">🟢 ยอดเพิ่มขึ้น</span>';
+        policyAdvice = 'โรงเรียนดึงดูดนักเรียนได้ดี มีการย้ายเข้าเพิ่ม';
+      } else {
+        riskLevel = 'EXCELLENT';
+        riskBadge = '<span class="trend-badge positive" style="font-size: 11px; background: rgba(19, 115, 51, 0.12); color: var(--color-success); font-weight: 600;">🟢 คงที่ 100%</span>';
+        policyAdvice = 'รักษานักเรียนไว้ได้ครบถ้วน 100% (Zero Loss)';
+      }
+
+      return {
+        id: s.id,
+        name: displayName,
+        fullName: s.name,
+        baseVal,
+        targetVal,
+        diff,
+        rate,
+        pctChange,
+        riskLevel,
+        riskBadge,
+        policyAdvice
+      };
+    });
+
+    if (retentionCurrentMode === 'semester_69') {
+      title1 = '🚨 8 อันดับโรงเรียนที่นักเรียนลดลงสูงสุด (ปี 2569 เทอม 1 ➔ 2)';
+      title2 = '📊 การเปลี่ยนแปลงนักเรียนแยกตามระดับชั้น (ปี 2569)';
+      periodLabel1 = '2569 เทอม 1 ➔ 2569 เทอม 2';
+      periodLabel2 = '2569 เทอม 1 vs เทอม 2';
+      baseColName = 'เทอม 1/69 (คน)';
+      targetColName = 'เทอม 2/69 (คน)';
+    } else if (retentionCurrentMode === 'semester_68') {
+      title1 = '🚨 8 อันดับโรงเรียนที่นักเรียนลดลงสูงสุด (ปี 2568 เทอม 1 ➔ 2)';
+      title2 = '📊 การเปลี่ยนแปลงนักเรียนแยกตามระดับชั้น (ปี 2568)';
+      periodLabel1 = '2568 เทอม 1 ➔ 2568 เทอม 2';
+      periodLabel2 = '2568 เทอม 1 vs เทอม 2';
+      baseColName = 'เทอม 1/68 (คน)';
+      targetColName = 'เทอม 2/68 (คน)';
+    } else if (retentionCurrentMode === 'transition_m34') {
+      title1 = '🚨 8 อันดับโรงเรียนที่มีอัตราการเรียนต่อ ม.4 ต่ำสุด';
+      title2 = '📊 เปรียบเทียบผู้จบ ม.3 (สิ้นปี 68) ➔ ผู้เข้าเรียน ม.4 (เทอม 1/69)';
+      periodLabel1 = 'จบ ม.3 ➔ เข้า ม.4';
+      periodLabel2 = 'ระดับเขต สพม.สกลนคร';
+      baseColName = 'จบ ม.3 (30 เม.ย. 69)';
+      targetColName = 'เข้า ม.4 (10 มิ.ย. 69)';
+    } else if (retentionCurrentMode === 'cohort_m12') {
+      title1 = '🚨 8 อันดับโรงเรียนที่มีอัตราคงอยู่รุ่น ม.1 ➔ ม.2 ต่ำสุด';
+      title2 = '📊 การติดตามรุ่น Cohort: ม.1 (ปี 68) ➔ ม.2 (ปี 69)';
+      periodLabel1 = 'ม.1/68 ➔ ม.2/69';
+      periodLabel2 = 'ระดับเขต สพม.สกลนคร';
+      baseColName = 'ม.1 (10 มิ.ย. 68)';
+      targetColName = 'ม.2 (10 มิ.ย. 69)';
+    }
+
+    return {
+      records,
+      totalBase,
+      totalTarget,
+      totalDiff: totalTarget - totalBase,
+      totalRate: totalBase > 0 ? (totalTarget / totalBase) * 100 : 0,
+      totalZeroCount,
+      title1,
+      title2,
+      periodLabel1,
+      periodLabel2,
+      baseColName,
+      targetColName,
+      gradeBaseTotals,
+      gradeTargetTotals
+    };
+  }
+
+  function updateRetentionView() {
+    const data = getRetentionModeData();
+
+    // Update KPI Card 1: Retention Rate
+    const rateEl = document.getElementById('retentionKpiRate');
+    const rateDiffEl = document.getElementById('retentionKpiRateDiff');
+    const rateSubEl = document.getElementById('retentionKpiRateSub');
+    if (rateEl) rateEl.textContent = `${data.totalRate.toFixed(2)}%`;
+    if (rateDiffEl) {
+      if (retentionCurrentMode === 'semester_69') {
+        rateDiffEl.textContent = '+0.22% vs ปี 68';
+        rateDiffEl.className = 'trend-badge positive';
+      } else if (retentionCurrentMode === 'semester_68') {
+        rateDiffEl.textContent = 'ฐานข้อมูลปี 2568';
+        rateDiffEl.className = 'trend-badge neutral';
+      } else if (retentionCurrentMode === 'transition_m34') {
+        rateDiffEl.textContent = 'เรียนต่อ ม.ปลาย 90.75%';
+        rateDiffEl.className = 'trend-badge positive';
+      } else {
+        rateDiffEl.textContent = 'คงอยู่รุ่น ม.1➔ม.2';
+        rateDiffEl.className = 'trend-badge positive';
+      }
+    }
+    if (rateSubEl) {
+      rateSubEl.textContent = `นักเรียนคงอยู่ ${data.totalTarget.toLocaleString()} / ${data.totalBase.toLocaleString()} คน`;
+    }
+
+    // Update KPI Card 2: Student Loss
+    const dropEl = document.getElementById('retentionKpiDrop');
+    const dropSubEl = document.getElementById('retentionKpiDropSub');
+    if (dropEl) {
+      dropEl.textContent = `${data.totalDiff > 0 ? '+' : ''}${data.totalDiff.toLocaleString()} คน`;
+      dropEl.style.color = data.totalDiff < 0 ? 'var(--color-error)' : 'var(--color-success)';
+    }
+    if (dropSubEl) {
+      const avgPerSch = (data.totalDiff / data.records.length).toFixed(1);
+      dropSubEl.textContent = `เฉลี่ย ${avgPerSch} คน/โรงเรียน (${data.records.length} โรงเรียน)`;
+    }
+
+    // Update KPI Card 3: Transition Rate
+    const transEl = document.getElementById('retentionKpiTransition');
+    const transSubEl = document.getElementById('retentionKpiTransitionSub');
+    if (transEl) {
+      if (retentionCurrentMode === 'transition_m34') {
+        transEl.textContent = `${data.totalRate.toFixed(2)}%`;
+      } else {
+        transEl.textContent = '90.75%';
+      }
+    }
+    if (transSubEl) {
+      transSubEl.textContent = 'เข้า ม.4: 7,064 คน | ไปสายอาชีพ/อื่น: 720 คน';
+    }
+
+    // Update KPI Card 4: Zero Loss Schools Count
+    const zeroEl = document.getElementById('retentionKpiZeroCount');
+    const zeroSubEl = document.getElementById('retentionKpiZeroSub');
+    if (zeroEl) {
+      zeroEl.textContent = `${data.totalZeroCount} แห่ง`;
+    }
+    if (zeroSubEl) {
+      const pctZero = ((data.totalZeroCount / data.records.length) * 100).toFixed(1);
+      zeroSubEl.textContent = `คิดเป็น ${pctZero}% ของโรงเรียนทั้งหมดในเขต`;
+    }
+
+    // Update Section Headers
+    const title1El = document.getElementById('retentionChartTitle1');
+    const label1El = document.getElementById('retentionChartPeriodLabel1');
+    const title2El = document.getElementById('retentionChartTitle2');
+    const label2El = document.getElementById('retentionChartPeriodLabel2');
+    const thBaseEl = document.getElementById('thRetColBase');
+    const thTargetEl = document.getElementById('thRetColTarget');
+
+    if (title1El) title1El.textContent = data.title1;
+    if (label1El) label1El.textContent = data.periodLabel1;
+    if (title2El) title2El.textContent = data.title2;
+    if (label2El) label2El.textContent = data.periodLabel2;
+    if (thBaseEl) thBaseEl.textContent = data.baseColName;
+    if (thTargetEl) thTargetEl.textContent = data.targetColName;
+
+    // Render Table and Charts
+    renderRetentionTable(data);
+    renderRetentionCharts(data);
+  }
+
+  function renderRetentionTable(data) {
+    const tbody = document.getElementById('retentionTableBody');
+    if (!tbody) return;
+
+    let filtered = [...data.records];
+
+    if (retentionSearchQuery) {
+      filtered = filtered.filter(r => 
+        r.name.toLowerCase().includes(retentionSearchQuery) || 
+        (r.fullName && r.fullName.toLowerCase().includes(retentionSearchQuery))
+      );
+    }
+
+    if (retentionRiskFilter !== 'ALL') {
+      filtered = filtered.filter(r => r.riskLevel === retentionRiskFilter);
+    }
+
+    // Sort: highest risk / most negative diff first
+    filtered.sort((a, b) => {
+      if (a.diff !== b.diff) return a.diff - b.diff;
+      return a.rate - b.rate;
+    });
+
+    tbody.innerHTML = '';
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">
+            ไม่พบข้อมูลโรงเรียนตามเงื่อนไขที่เลือก
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    filtered.forEach((r, idx) => {
+      const tr = document.createElement('tr');
+      tr.dataset.id = r.id;
+
+      let diffBadge = 'stable';
+      let diffSign = '';
+      if (r.diff > 0) {
+        diffBadge = 'positive';
+        diffSign = '+';
+      } else if (r.diff < 0) {
+        diffBadge = 'negative';
+      }
+
+      tr.innerHTML = `
+        <td style="text-align: center; color: var(--text-muted); font-size: 11.5px;">${idx + 1}</td>
+        <td>
+          <a href="#" class="table-school-link" data-id="${r.id}" title="${r.fullName || r.name}" style="font-weight: 500;">
+            ${r.name}
+          </a>
+        </td>
+        <td style="text-align: right; color: var(--text-muted);">${r.baseVal.toLocaleString()}</td>
+        <td style="text-align: right; font-weight: 600; color: var(--color-primary);">${r.targetVal.toLocaleString()}</td>
+        <td style="text-align: right;">
+          <span class="trend-badge ${diffBadge}" style="font-size: 11px;">${diffSign}${r.diff} คน (${diffSign}${r.pctChange.toFixed(1)}%)</span>
+        </td>
+        <td style="text-align: center; font-weight: 700; color: ${r.rate < 98 ? 'var(--color-error)' : 'var(--text-main)'};">
+          ${r.rate.toFixed(1)}%
+        </td>
+        <td style="text-align: center;">${r.riskBadge}</td>
+        <td style="font-size: 11.5px; color: var(--text-muted);">${r.policyAdvice}</td>
+      `;
+
+      // Click to open modal
+      const link = tr.querySelector('.table-school-link');
+      if (link) {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          openSchoolDetailModal(r.id);
+        });
+      }
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderRetentionCharts(data) {
+    const isDark = document.body.classList.contains('dark-theme');
+    const textColor = isDark ? '#9aa0a6' : '#5f6368';
+    const gridColor = isDark ? '#3c4043' : '#eef1f6';
+
+    // 1. Chart 1: Top Schools with Highest Drop
+    const ctx1 = document.getElementById('retentionChartTopDrop')?.getContext('2d');
+    if (ctx1) {
+      if (retentionChartTopDropInstance) {
+        retentionChartTopDropInstance.destroy();
+      }
+
+      // Sort by loss (most negative diff)
+      const dropSchools = [...data.records]
+        .sort((a, b) => a.diff - b.diff)
+        .slice(0, 8);
+
+      const labels1 = dropSchools.map(s => s.name);
+      const values1 = dropSchools.map(s => Math.abs(s.diff));
+      const colors1 = dropSchools.map(s => s.diff < 0 ? '#C5221F' : '#137333');
+
+      retentionChartTopDropInstance = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: labels1,
+          datasets: [{
+            label: 'จำนวนนักเรียนที่ลดลง (คน)',
+            data: values1,
+            backgroundColor: colors1,
+            borderRadius: 4,
+            barPercentage: 0.75
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (c) => {
+                  const sch = dropSchools[c.dataIndex];
+                  return ` ลดลง ${sch.diff} คน (คงอยู่ ${sch.rate.toFixed(1)}%)`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: gridColor },
+              ticks: { color: textColor, font: { family: 'Google Sans, Sarabun', size: 10.5 } }
+            },
+            y: {
+              grid: { display: false },
+              ticks: { color: textColor, font: { family: 'Google Sans, Sarabun', size: 10.5 } }
+            }
+          }
+        }
+      });
+    }
+
+    // 2. Chart 2: Grade Breakdown of Base vs Target
+    const ctx2 = document.getElementById('retentionChartByGrade')?.getContext('2d');
+    if (ctx2) {
+      if (retentionChartByGradeInstance) {
+        retentionChartByGradeInstance.destroy();
+      }
+
+      const gradeLabels = ['ม.1', 'ม.2', 'ม.3', 'ม.4', 'ม.5', 'ม.6'];
+      const gradesKeys = ['ม1', 'ม2', 'ม3', 'ม4', 'ม5', 'ม6'];
+      const baseData = gradesKeys.map(k => data.gradeBaseTotals[k] || 0);
+      const targetData = gradesKeys.map(k => data.gradeTargetTotals[k] || 0);
+
+      retentionChartByGradeInstance = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+          labels: gradeLabels,
+          datasets: [
+            {
+              label: data.baseColName,
+              data: baseData,
+              backgroundColor: '#C28E38', // Gold
+              borderRadius: 3,
+              barPercentage: 0.75,
+              categoryPercentage: 0.8
+            },
+            {
+              label: data.targetColName,
+              data: targetData,
+              backgroundColor: '#10233F', // Navy
+              borderRadius: 3,
+              barPercentage: 0.75,
+              categoryPercentage: 0.8
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top',
+              labels: {
+                color: isDark ? '#f1f3f4' : '#202124',
+                font: { family: 'Google Sans, Sarabun', size: 11 }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: (c) => ` ${c.dataset.label}: ${c.parsed.y.toLocaleString()} คน`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: gridColor },
+              ticks: { color: textColor, font: { family: 'Google Sans, Sarabun', size: 11 } }
+            },
+            y: {
+              grid: { color: gridColor },
+              ticks: { color: textColor, font: { family: 'Google Sans, Sarabun', size: 10.5 } }
+            }
+          }
+        }
+      });
+    }
+  }
+
+  function exportRetentionToExcel() {
+    if (typeof XLSX === 'undefined') {
+      alert('โมดูล Excel กำลังโหลด กรุณาลองใหม่อีกครั้ง');
+      return;
+    }
+    const data = getRetentionModeData();
+    const rows = [
+      ['ระบบติดตามและวิเคราะห์การคงอยู่ของนักเรียน (Zero Dropout & Retention Tracker) - สพม.สกลนคร'],
+      ['โหมดการวิเคราะห์:', data.periodLabel1],
+      ['วันที่จัดทำรายงาน:', new Date().toLocaleDateString('th-TH')],
+      ['สรุปภาพรวมทั้งเขต:', `ยอดต้นทาง ${data.totalBase.toLocaleString()} คน, ยอดปลายทาง ${data.totalTarget.toLocaleString()} คน, ผลต่าง ${data.totalDiff > 0 ? '+' : ''}${data.totalDiff} คน, อัตราคงอยู่ ${data.totalRate.toFixed(2)}%`],
+      [],
+      ['ลำดับ', 'รหัสโรงเรียน', 'ชื่อโรงเรียน', data.baseColName, data.targetColName, 'ผลต่าง (คน)', 'อัตราคงอยู่ (%)', 'ระดับความเสี่ยง', 'ข้อเสนอแนะเชิงนโยบาย']
+    ];
+
+    // Sort by risk (most negative diff first)
+    const sorted = [...data.records].sort((a, b) => a.diff - b.diff);
+
+    sorted.forEach((r, idx) => {
+      const riskText = r.riskLevel === 'CRITICAL' ? 'เสี่ยงวิกฤต' : (r.riskLevel === 'WARNING' ? 'เสี่ยงปานกลาง' : (r.riskLevel === 'EXCELLENT' ? 'คงอยู่ดีเยี่ยม' : 'ปกติ'));
+      rows.push([
+        idx + 1,
+        r.id,
+        r.fullName || r.name,
+        r.baseVal,
+        r.targetVal,
+        r.diff,
+        Number(r.rate.toFixed(2)),
+        riskText,
+        r.policyAdvice
+      ]);
+    });
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    XLSX.utils.book_append_sheet(wb, ws, 'Zero_Dropout');
+    XLSX.writeFile(wb, `Zero_Dropout_Report_${retentionCurrentMode}.xlsx`);
+  }
+
+  // ==========================================
+  // Step 2: District & Cluster Analytics Module
+  // ==========================================
+  function initDistrictModule() {
+    const viewBtns = document.querySelectorAll('.district-view-btn');
+    viewBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        viewBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        districtCurrentView = btn.dataset.view;
+        updateDistrictView();
+      });
+    });
+
+    const exportBtn = document.getElementById('exportDistrictExcelBtn');
+    if (exportBtn) {
+      exportBtn.addEventListener('click', () => {
+        exportDistrictToExcel();
+      });
+    }
+
+    updateDistrictView();
+  }
+
+  function getDistrictData() {
+    const isCluster = districtCurrentView === 'cluster';
+    const groups = {};
+
+    DASHBOARD_DATA.forEach(school => {
+      const groupKey = isCluster ? (school.cluster || 'สหวิทยาเขตทั่วไป') : (school.amphoe || 'ทั่วไป');
+      if (!groups[groupKey]) {
+        groups[groupKey] = {
+          name: groupKey,
+          schools: [],
+          baseStudents: 0,
+          targetStudents: 0,
+          targetRooms: 0
+        };
+      }
+
+      const pBase = school[basePeriod] || school.y68;
+      const pTarget = school[targetPeriod] || school.y69_2;
+
+      const stdBase = selectedLevel === 'ALL' ? pBase.total.total : pBase.levels[selectedLevel].total;
+      const stdTarget = selectedLevel === 'ALL' ? pTarget.total.total : pTarget.levels[selectedLevel].total;
+      const roomTarget = selectedLevel === 'ALL' ? pTarget.total.rooms : pTarget.levels[selectedLevel].rooms;
+
+      groups[groupKey].baseStudents += stdBase;
+      groups[groupKey].targetStudents += stdTarget;
+      groups[groupKey].targetRooms += roomTarget;
+      groups[groupKey].schools.push({
+        id: school.id,
+        name: getSchoolDisplayName(school),
+        fullName: school.name,
+        std: stdTarget,
+        rooms: roomTarget
+      });
+    });
+
+    const groupList = Object.values(groups).map(g => {
+      const diff = g.targetStudents - g.baseStudents;
+      const pctChange = g.baseStudents > 0 ? (diff / g.baseStudents) * 100 : 0;
+      const density = g.targetRooms > 0 ? g.targetStudents / g.targetRooms : 0;
+      
+      g.schools.sort((a, b) => b.std - a.std);
+      const hubSchool = g.schools.length > 0 ? g.schools[0].name : '-';
+
+      return {
+        name: g.name,
+        schoolCount: g.schools.length,
+        schools: g.schools,
+        baseStudents: g.baseStudents,
+        targetStudents: g.targetStudents,
+        diff,
+        pctChange,
+        rooms: g.targetRooms,
+        density,
+        hubSchool
+      };
+    });
+
+    groupList.sort((a, b) => b.targetStudents - a.targetStudents);
+    return groupList;
+  }
+
+  function updateDistrictView() {
+    const groupList = getDistrictData();
+    const targetLabel = getPeriodLabel(targetPeriod);
+    const baseLabel = getPeriodLabel(basePeriod);
+
+    const activePeriodLabel = document.getElementById('districtActivePeriodLabel');
+    if (activePeriodLabel) {
+      activePeriodLabel.textContent = `ข้อมูล: ${baseLabel} ➔ ${targetLabel}`;
+    }
+
+    const thName = document.getElementById('thDistName');
+    if (thName) {
+      thName.textContent = districtCurrentView === 'cluster' ? 'สหวิทยาเขต' : 'อำเภอ';
+    }
+
+    const thBase = document.getElementById('thDistStdBase');
+    const thTarget = document.getElementById('thDistStdTarget');
+    if (thBase) thBase.textContent = `นักเรียน (${baseLabel})`;
+    if (thTarget) thTarget.textContent = `นักเรียน (${targetLabel})`;
+
+    if (groupList.length > 0) {
+      const topGroup = groupList[0];
+      const totalStdAll = groupList.reduce((acc, g) => acc + g.targetStudents, 0);
+      const topShare = totalStdAll > 0 ? (topGroup.targetStudents / totalStdAll * 100).toFixed(1) : 0;
+
+      if (districtCurrentView === 'amphoe') {
+        const topAmphoeEl = document.getElementById('districtKpiTopAmphoe');
+        const topAmphoeShare = document.getElementById('districtKpiTopAmphoeShare');
+        const topAmphoeSub = document.getElementById('districtKpiTopAmphoeSub');
+        if (topAmphoeEl) topAmphoeEl.textContent = `อ.${topGroup.name}`;
+        if (topAmphoeShare) topAmphoeShare.textContent = `${topShare}%`;
+        if (topAmphoeSub) topAmphoeSub.textContent = `${topGroup.targetStudents.toLocaleString()} คน จาก ${topGroup.schoolCount} โรงเรียน`;
+      } else {
+        const topClusterEl = document.getElementById('districtKpiTopCluster');
+        const topClusterSub = document.getElementById('districtKpiTopClusterSub');
+        if (topClusterEl) topClusterEl.textContent = topGroup.name;
+        if (topClusterSub) topClusterSub.textContent = `${topGroup.schoolCount} โรงเรียน | ${topGroup.targetStudents.toLocaleString()} คน (${topShare}% ของเขต)`;
+      }
+    }
+
+    renderDistrictTable(groupList);
+    renderDistrictCharts(groupList);
+  }
+
+  function renderDistrictTable(groupList) {
+    const tbody = document.getElementById('districtTableBody');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+
+    groupList.forEach((g, idx) => {
+      const tr = document.createElement('tr');
+      let diffBadge = 'stable';
+      let diffSign = '';
+      if (g.diff > 0) {
+        diffBadge = 'positive';
+        diffSign = '+';
+      } else if (g.diff < 0) {
+        diffBadge = 'negative';
+      }
+
+      tr.innerHTML = `
+        <td style="text-align: center; color: var(--text-muted); font-size: 11.5px;">${idx + 1}</td>
+        <td style="font-weight: 600; color: var(--color-primary);">
+          ${districtCurrentView === 'amphoe' ? 'อ.' : ''}${g.name}
+        </td>
+        <td style="text-align: center;">
+          <span class="trend-badge stable" style="font-size: 11px;">${g.schoolCount} แห่ง</span>
+        </td>
+        <td style="text-align: right; color: var(--text-muted);">${g.baseStudents.toLocaleString()}</td>
+        <td style="text-align: right; font-weight: 700; color: var(--text-main);">${g.targetStudents.toLocaleString()}</td>
+        <td style="text-align: right;">
+          <span class="trend-badge ${diffBadge}" style="font-size: 11px;">${diffSign}${g.diff} (${diffSign}${g.pctChange.toFixed(1)}%)</span>
+        </td>
+        <td style="text-align: center; color: var(--text-muted);">${g.rooms}</td>
+        <td style="text-align: center; font-weight: 700; color: ${g.density > thresholdDensity ? 'var(--color-error)' : 'var(--color-primary)'};">
+          ${g.density.toFixed(1)}
+        </td>
+        <td style="font-size: 12px; color: var(--color-gold); font-weight: 500;">
+          ⭐ ${g.hubSchool}
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderDistrictCharts(groupList) {
+    const isDark = document.body.classList.contains('dark-theme');
+    const textColor = isDark ? '#9aa0a6' : '#5f6368';
+    const gridColor = isDark ? '#3c4043' : '#eef1f6';
+
+    const labels = groupList.map(g => (districtCurrentView === 'amphoe' ? 'อ.' : '') + g.name);
+    const studentData = groupList.map(g => g.targetStudents);
+    const densityData = groupList.map(g => Number(g.density.toFixed(1)));
+
+    const ctx1 = document.getElementById('districtChartShare')?.getContext('2d');
+    if (ctx1) {
+      if (districtChartShareInstance) districtChartShareInstance.destroy();
+
+      districtChartShareInstance = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'จำนวนนักเรียน (คน)',
+            data: studentData,
+            backgroundColor: '#10233F',
+            borderRadius: 4,
+            barPercentage: 0.75
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (c) => ` นักเรียน: ${c.parsed.y.toLocaleString()} คน`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: textColor, font: { family: 'Google Sans, Sarabun', size: 9.5 }, maxRotation: 45, minRotation: 30 }
+            },
+            y: {
+              grid: { color: gridColor },
+              ticks: { color: textColor, font: { family: 'Google Sans, Sarabun', size: 10 } }
+            }
+          }
+        }
+      });
+    }
+
+    const ctx2 = document.getElementById('districtChartDensity')?.getContext('2d');
+    if (ctx2) {
+      if (districtChartDensityInstance) districtChartDensityInstance.destroy();
+
+      districtChartDensityInstance = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'ความหนาแน่น (คน/ห้อง)',
+            data: densityData,
+            backgroundColor: '#C28E38',
+            borderRadius: 4,
+            barPercentage: 0.75
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (c) => ` ความหนาแน่นเฉลี่ย: ${c.parsed.y} คน/ห้อง`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: textColor, font: { family: 'Google Sans, Sarabun', size: 9.5 }, maxRotation: 45, minRotation: 30 }
+            },
+            y: {
+              grid: { color: gridColor },
+              ticks: { color: textColor, font: { family: 'Google Sans, Sarabun', size: 10 } }
+            }
+          }
+        }
+      });
+    }
+  }
+
+  function exportDistrictToExcel() {
+    if (typeof XLSX === 'undefined') {
+      alert('โมดูล Excel กำลังโหลด กรุณาลองใหม่อีกครั้ง');
+      return;
+    }
+    const groupList = getDistrictData();
+    const targetLabel = getPeriodLabel(targetPeriod);
+    const baseLabel = getPeriodLabel(basePeriod);
+    const viewName = districtCurrentView === 'cluster' ? 'สหวิทยาเขต' : 'อำเภอ';
+
+    const rows = [
+      [`รายงานสถิติข้อมูลเชิงพื้นที่และ${viewName} - สพม.สกลนคร`],
+      ['รอบเวลาที่เปรียบเทียบ:', `${baseLabel} ➔ ${targetLabel}`],
+      ['วันที่จัดทำรายงาน:', new Date().toLocaleDateString('th-TH')],
+      [],
+      ['ลำดับ', viewName, 'จำนวนโรงเรียน (แห่ง)', `นักเรียน (${baseLabel})`, `นักเรียน (${targetLabel})`, 'ผลต่าง (คน)', 'การเปลี่ยนแปลง (%)', 'ห้องเรียน', 'นร./ห้อง เฉลี่ย', 'โรงเรียนแกนนำ (Hub School)']
+    ];
+
+    groupList.forEach((g, idx) => {
+      rows.push([
+        idx + 1,
+        g.name,
+        g.schoolCount,
+        g.baseStudents,
+        g.targetStudents,
+        g.diff,
+        Number(g.pctChange.toFixed(2)),
+        g.rooms,
+        Number(g.density.toFixed(1)),
+        g.hubSchool
+      ]);
+    });
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    XLSX.utils.book_append_sheet(wb, ws, `District_${districtCurrentView}`);
+    XLSX.writeFile(wb, `District_Analytics_Report_${districtCurrentView}.xlsx`);
+  }
+
+  // ==========================================
+  // Step 3: Predictive Analytics & Demographic Forecasting Module (2570)
+  // ==========================================
+  function initForecastModule() {
+    const scenarioBtns = document.querySelectorAll('.forecast-scenario-btn');
+    scenarioBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        scenarioBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        forecastCurrentScenario = btn.dataset.scenario;
+        updateForecastView();
+      });
+    });
+
+    const searchInput = document.getElementById('forecastSearchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        forecastSearchQuery = e.target.value.trim().toLowerCase();
+        renderForecastTable();
+      });
+    }
+
+    const exportBtn = document.getElementById('exportForecastExcelBtn');
+    if (exportBtn) {
+      exportBtn.addEventListener('click', () => {
+        exportForecastToExcel();
+      });
+    }
+
+    updateForecastView();
+  }
+
+  function getForecastData() {
+    let factor = 1.0;
+    if (forecastCurrentScenario === 'optimistic') factor = 1.015;
+    if (forecastCurrentScenario === 'pessimistic') factor = 0.985;
+
+    let totalPred = 0;
+    let totalM1 = 0;
+    let totalM4 = 0;
+    let total68 = 0;
+    let total69 = 0;
+
+    const gradeForecastTotals = { ม1: 0, ม2: 0, ม3: 0, ม4: 0, ม5: 0, ม6: 0 };
+    const grade69Totals = { ม1: 0, ม2: 0, ม3: 0, ม4: 0, ม5: 0, ม6: 0 };
+
+    const records = DASHBOARD_DATA.map((s) => {
+      const displayName = getSchoolDisplayName(s);
+      const s68 = s.y68_1?.total?.total || 0;
+      const s69 = s.y69_2?.total?.total || s.y69_1?.total?.total || 0;
+      const rooms69 = s.y69_2?.total?.rooms || 0;
+
+      const g69 = s.y69_2?.grades || s.y69_1?.grades || {};
+      const m1_69 = g69['ม1']?.total || 0;
+      const m2_69 = g69['ม2']?.total || 0;
+      const m3_69 = g69['ม3']?.total || 0;
+      const m4_69 = g69['ม4']?.total || 0;
+      const m5_69 = g69['ม5']?.total || 0;
+      const m6_69 = g69['ม6']?.total || 0;
+
+      grade69Totals['ม1'] += m1_69;
+      grade69Totals['ม2'] += m2_69;
+      grade69Totals['ม3'] += m3_69;
+      grade69Totals['ม4'] += m4_69;
+      grade69Totals['ม5'] += m5_69;
+      grade69Totals['ม6'] += m6_69;
+
+      const pred_m1 = Math.round(m1_69 * 0.937 * factor);
+      const pred_m2 = Math.round(m1_69 * 0.995 * factor);
+      const pred_m3 = Math.round(m2_69 * 1.001 * factor);
+      const pred_m4 = Math.round(m3_69 * 0.9075 * factor);
+      const pred_m5 = Math.round(m4_69 * 0.977 * factor);
+      const pred_m6 = Math.round(m5_69 * 0.987 * factor);
+
+      const pred_total = pred_m1 + pred_m2 + pred_m3 + pred_m4 + pred_m5 + pred_m6;
+      const diffPred = pred_total - s69;
+      const pctPred = s69 > 0 ? (diffPred / s69) * 100 : 0;
+      const suggestedRooms = Math.max(6, Math.round(pred_total / 32));
+
+      gradeForecastTotals['ม1'] += pred_m1;
+      gradeForecastTotals['ม2'] += pred_m2;
+      gradeForecastTotals['ม3'] += pred_m3;
+      gradeForecastTotals['ม4'] += pred_m4;
+      gradeForecastTotals['ม5'] += pred_m5;
+      gradeForecastTotals['ม6'] += pred_m6;
+
+      totalPred += pred_total;
+      totalM1 += pred_m1;
+      totalM4 += pred_m4;
+      total68 += s68;
+      total69 += s69;
+
+      let advice = 'บริหารจัดการแผนชั้นเรียนตามปกติ';
+      if (pctPred < -3.0) {
+        advice = 'สุ่มเสี่ยงลดลงสูง แนะนำปรับลดแผนรับ ม.1 ลง 1 ห้อง';
+      } else if (pctPred > 1.0) {
+        advice = 'แนวโน้มเติบโตต่อเนื่อง เตรียมความพร้อมห้องเรียนรองรับ';
+      } else if (pred_total < 120) {
+        advice = 'เข้าเกณฑ์โรงเรียนขนาดเล็ก (< 120 คน) เตรียมแผนเรียนรวม';
+      }
+
+      return {
+        id: s.id,
+        name: displayName,
+        fullName: s.name,
+        s68,
+        s69,
+        pred_total,
+        pred_m1,
+        pred_m4,
+        diffPred,
+        pctPred,
+        rooms69,
+        suggestedRooms,
+        advice
+      };
+    });
+
+    return {
+      records,
+      totalPred,
+      totalM1,
+      totalM4,
+      total68,
+      total69,
+      diffTotal: totalPred - total69,
+      pctTotal: total69 > 0 ? ((totalPred - total69) / total69) * 100 : 0,
+      gradeForecastTotals,
+      grade69Totals
+    };
+  }
+
+  function updateForecastView() {
+    const data = getForecastData();
+
+    const totalEl = document.getElementById('forecastKpiTotal');
+    const totalDiffEl = document.getElementById('forecastKpiTotalDiff');
+    const totalSubEl = document.getElementById('forecastKpiTotalSub');
+    if (totalEl) totalEl.textContent = `${data.totalPred.toLocaleString()} คน`;
+    if (totalDiffEl) {
+      const sign = data.diffTotal > 0 ? '+' : '';
+      totalDiffEl.textContent = `${sign}${data.diffTotal.toLocaleString()} คน (${sign}${data.pctTotal.toFixed(1)}%)`;
+      totalDiffEl.className = data.diffTotal < 0 ? 'trend-badge negative' : 'trend-badge positive';
+    }
+    if (totalSubEl) {
+      totalSubEl.textContent = `จากฐาน 44,566 คน (${forecastCurrentScenario === 'baseline' ? 'แบบจำลองปกติ' : (forecastCurrentScenario === 'optimistic' ? 'สถานการณ์ดึงดูดสูง' : 'ประชากรลดลงเร่งตัว')})`;
+    }
+
+    const m1El = document.getElementById('forecastKpiM1');
+    if (m1El) m1El.textContent = `${data.totalM1.toLocaleString()} คน`;
+
+    const m4El = document.getElementById('forecastKpiM4');
+    if (m4El) m4El.textContent = `${data.totalM4.toLocaleString()} คน`;
+
+    renderForecastTable(data);
+    renderForecastCharts(data);
+  }
+
+  function renderForecastTable(data) {
+    if (!data) data = getForecastData();
+    const tbody = document.getElementById('forecastTableBody');
+    if (!tbody) return;
+
+    let filtered = [...data.records];
+    if (forecastSearchQuery) {
+      filtered = filtered.filter(r => 
+        r.name.toLowerCase().includes(forecastSearchQuery) || 
+        (r.fullName && r.fullName.toLowerCase().includes(forecastSearchQuery))
+      );
+    }
+
+    filtered.sort((a, b) => a.diffPred - b.diffPred);
+
+    tbody.innerHTML = '';
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">ไม่พบข้อมูลโรงเรียนตามที่ค้นหา</td></tr>`;
+      return;
+    }
+
+    filtered.forEach((r, idx) => {
+      const tr = document.createElement('tr');
+      let diffBadge = 'stable';
+      let diffSign = '';
+      if (r.diffPred > 0) {
+        diffBadge = 'positive';
+        diffSign = '+';
+      } else if (r.diffPred < 0) {
+        diffBadge = 'negative';
+      }
+
+      tr.innerHTML = `
+        <td style="text-align: center; color: var(--text-muted); font-size: 11.5px;">${idx + 1}</td>
+        <td>
+          <a href="#" class="table-school-link" data-id="${r.id}" title="${r.fullName || r.name}" style="font-weight: 500;">
+            ${r.name}
+          </a>
+        </td>
+        <td style="text-align: right; color: var(--text-muted);">${r.s68.toLocaleString()}</td>
+        <td style="text-align: right; color: var(--text-muted);">${r.s69.toLocaleString()}</td>
+        <td style="text-align: right; font-weight: 700; color: var(--color-gold); font-size: 13.5px;">
+          ${r.pred_total.toLocaleString()}
+        </td>
+        <td style="text-align: right;">
+          <span class="trend-badge ${diffBadge}" style="font-size: 11px;">${diffSign}${r.diffPred} (${diffSign}${r.pctPred.toFixed(1)}%)</span>
+        </td>
+        <td style="text-align: center; font-weight: 600;">
+          ${r.suggestedRooms} ห้อง <span style="font-size: 11px; color: var(--text-muted);">(${r.rooms69 > r.suggestedRooms ? 'ลด 1' : 'คงที่'})</span>
+        </td>
+        <td style="font-size: 11.5px; color: var(--text-muted);">${r.advice}</td>
+      `;
+
+      const link = tr.querySelector('.table-school-link');
+      if (link) {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          openSchoolDetailModal(r.id);
+        });
+      }
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderForecastCharts(data) {
+    const isDark = document.body.classList.contains('dark-theme');
+    const textColor = isDark ? '#9aa0a6' : '#5f6368';
+    const gridColor = isDark ? '#3c4043' : '#eef1f6';
+
+    const ctx1 = document.getElementById('forecastChartTrendline')?.getContext('2d');
+    if (ctx1) {
+      if (forecastChartTrendlineInstance) forecastChartTrendlineInstance.destroy();
+
+      const labels1 = ['68/1 (10 มิ.ย.)', '68/2 (10 พ.ย.)', '68/3 สิ้นปี', '69/1 (10 มิ.ย.)', '69/2 (10 พ.ย.)', '70/1 (พยากรณ์)', '70/2 (พยากรณ์)'];
+      const historicalPoints = [45403, 45047, 44808, 44818, 44566, null, null];
+      const forecastPoints = [null, null, null, null, 44566, data.totalPred + Math.round(data.totalPred * 0.006), data.totalPred];
+
+      forecastChartTrendlineInstance = new Chart(ctx1, {
+        type: 'line',
+        data: {
+          labels: labels1,
+          datasets: [
+            {
+              label: 'ข้อมูลจริง (2568 - 2569)',
+              data: historicalPoints,
+              borderColor: '#10233F',
+              backgroundColor: 'rgba(16, 35, 63, 0.08)',
+              borderWidth: 2.5,
+              tension: 0.3,
+              fill: false,
+              pointRadius: 4,
+              pointBackgroundColor: '#10233F'
+            },
+            {
+              label: `พยากรณ์ล่วงหน้าปี 2570 (${forecastCurrentScenario})`,
+              data: forecastPoints,
+              borderColor: '#C28E38',
+              borderWidth: 2.5,
+              borderDash: [6, 4],
+              tension: 0.3,
+              fill: false,
+              pointRadius: 5,
+              pointBackgroundColor: '#C28E38'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top',
+              labels: {
+                color: isDark ? '#f1f3f4' : '#202124',
+                font: { family: 'Google Sans, Sarabun', size: 10.5 }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: (c) => ` ${c.dataset.label}: ${c.parsed.y ? c.parsed.y.toLocaleString() + ' คน' : '-'}`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: textColor, font: { family: 'Google Sans, Sarabun', size: 9.5 } }
+            },
+            y: {
+              min: 43000,
+              max: 46000,
+              grid: { color: gridColor },
+              ticks: {
+                color: textColor,
+                font: { family: 'Google Sans, Sarabun', size: 10 },
+                callback: (val) => `${(val / 1000).toFixed(1)}k`
+              }
+            }
+          }
+        }
+      });
+    }
+
+    const ctx2 = document.getElementById('forecastChartByGrade')?.getContext('2d');
+    if (ctx2) {
+      if (forecastChartByGradeInstance) forecastChartByGradeInstance.destroy();
+
+      const gradeLabels = ['ม.1', 'ม.2', 'ม.3', 'ม.4', 'ม.5', 'ม.6'];
+      const keys = ['ม1', 'ม2', 'ม3', 'ม4', 'ม5', 'ม6'];
+      const data69 = keys.map(k => data.grade69Totals[k] || 0);
+      const data70 = keys.map(k => data.gradeForecastTotals[k] || 0);
+
+      forecastChartByGradeInstance = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+          labels: gradeLabels,
+          datasets: [
+            {
+              label: 'ปี 2569 เทอม 2 (ข้อมูลจริง)',
+              data: data69,
+              backgroundColor: '#10233F',
+              borderRadius: 3,
+              barPercentage: 0.75,
+              categoryPercentage: 0.8
+            },
+            {
+              label: 'ปี 2570 (คาดการณ์ Demographic Cohort)',
+              data: data70,
+              backgroundColor: '#C28E38',
+              borderRadius: 3,
+              barPercentage: 0.75,
+              categoryPercentage: 0.8
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top',
+              labels: {
+                color: isDark ? '#f1f3f4' : '#202124',
+                font: { family: 'Google Sans, Sarabun', size: 10.5 }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: (c) => ` ${c.dataset.label}: ${c.parsed.y.toLocaleString()} คน`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: textColor, font: { family: 'Google Sans, Sarabun', size: 10.5 } }
+            },
+            y: {
+              grid: { color: gridColor },
+              ticks: { color: textColor, font: { family: 'Google Sans, Sarabun', size: 10 } }
+            }
+          }
+        }
+      });
+    }
+  }
+
+  function exportForecastToExcel() {
+    if (typeof XLSX === 'undefined') {
+      alert('โมดูล Excel กำลังโหลด กรุณาลองใหม่อีกครั้ง');
+      return;
+    }
+    const data = getForecastData();
+    const rows = [
+      ['รายงานการพยากรณ์ประชากรนักเรียนและแนวโน้มปี 2570 - สพม.สกลนคร'],
+      ['แบบจำลองที่ใช้:', `Demographic Cohort Progression (${forecastCurrentScenario})`],
+      ['วันที่จัดทำรายงาน:', new Date().toLocaleDateString('th-TH')],
+      ['สรุปภาพรวมทั้งเขต:', `คาดการณ์ปี 2570 รวม ${data.totalPred.toLocaleString()} คน, ผลต่าง ${data.diffTotal > 0 ? '+' : ''}${data.diffTotal.toLocaleString()} คน (${data.pctTotal.toFixed(2)}%), ม.1 แรกเข้าใหม่ ${data.totalM1.toLocaleString()} คน, ม.4 แรกเข้าใหม่ ${data.totalM4.toLocaleString()} คน`],
+      [],
+      ['ลำดับ', 'รหัสโรงเรียน', 'ชื่อโรงเรียน', 'ปี 2568 (คน)', 'ปี 2569 (คน)', 'คาดการณ์ 2570 (คน)', 'ผลต่างคาดการณ์ (คน)', 'อัตราเปลี่ยนแปลง (%)', 'ห้องเรียน 2569', 'แผนห้องเรียน 2570 แนะนำ', 'ข้อเสนอแนะเชิงบริหาร']
+    ];
+
+    const sorted = [...data.records].sort((a, b) => a.diffPred - b.diffPred);
+    sorted.forEach((r, idx) => {
+      rows.push([
+        idx + 1,
+        r.id,
+        r.fullName || r.name,
+        r.s68,
+        r.s69,
+        r.pred_total,
+        r.diffPred,
+        Number(r.pctPred.toFixed(2)),
+        r.rooms69,
+        r.suggestedRooms,
+        r.advice
+      ]);
+    });
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    XLSX.utils.book_append_sheet(wb, ws, 'Forecast_2570');
+    XLSX.writeFile(wb, `Demographic_Forecast_2570_${forecastCurrentScenario}.xlsx`);
+  }
+
+  // ==========================================
+  // Step 4: Teacher Staffing & Capitation Grant Estimator Module
+  // ==========================================
+  function initResourceModule() {
+    const viewBtns = document.querySelectorAll('.resource-view-btn');
+    viewBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        viewBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        resourceCurrentView = btn.dataset.view;
+        updateResourceView();
+      });
+    });
+
+    const searchInput = document.getElementById('resourceSearchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        resourceSearchQuery = e.target.value.trim().toLowerCase();
+        renderResourceTable();
+      });
+    }
+
+    const exportBtn = document.getElementById('exportResourceExcelBtn');
+    if (exportBtn) {
+      exportBtn.addEventListener('click', () => {
+        exportResourceToExcel();
+      });
+    }
+
+    updateResourceView();
+  }
+
+  function getResourceData() {
+    let totalGrantDistrict = 0;
+    let totalGrantMTon = 0;
+    let totalGrantMPlai = 0;
+    let totalEntitledStaff = 0;
+    let totalStudentsAll = 0;
+    let totalRoomsAll = 0;
+
+    const sizeStaffTotals = { S: 0, M: 0, L: 0, XL: 0 };
+    const sizeRoomTotals = { S: 0, M: 0, L: 0, XL: 0 };
+
+    const records = DASHBOARD_DATA.map((s) => {
+      const displayName = getSchoolDisplayName(s);
+      const size = getSchoolSize(s);
+      const pTarget = s[targetPeriod] || s.y69_2;
+      const stdTotal = pTarget?.total?.total || 0;
+      const roomsTotal = pTarget?.total?.rooms || 0;
+      const stdMTon = pTarget?.levels?.['มต้น']?.total || 0;
+      const stdMPlai = pTarget?.levels?.['มปลาย']?.total || 0;
+
+      const pBase = s[basePeriod] || s.y69_1;
+
+      let deputy = 0;
+      if (stdTotal >= 2500) deputy = 4;
+      else if (stdTotal >= 1500) deputy = 3;
+      else if (stdTotal >= 500) deputy = 2;
+      else if (stdTotal >= 300) deputy = 1;
+
+      const teacherQuota = Math.round(roomsTotal * 1.6);
+      const entitledStaff = teacherQuota + 1 + deputy;
+      const ratio = entitledStaff > 0 ? stdTotal / entitledStaff : 0;
+
+      const grantMTon = stdMTon * 3800;
+      const grantMPlai = stdMPlai * 4300;
+      const grantTotal = grantMTon + grantMPlai;
+
+      const grantBase = (pBase?.levels?.['มต้น']?.total || 0) * 3800 + (pBase?.levels?.['มปลาย']?.total || 0) * 4300;
+      const grantDelta = grantTotal - grantBase;
+
+      totalGrantDistrict += grantTotal;
+      totalGrantMTon += grantMTon;
+      totalGrantMPlai += grantMPlai;
+      totalEntitledStaff += entitledStaff;
+      totalStudentsAll += stdTotal;
+      totalRoomsAll += roomsTotal;
+
+      if (sizeStaffTotals[size] !== undefined) {
+        sizeStaffTotals[size] += entitledStaff;
+        sizeRoomTotals[size] += roomsTotal;
+      }
+
+      let status = 'อัตรากำลังพอดีตามเกณฑ์';
+      let statusBadge = '<span class="trend-badge positive" style="font-size: 11px;">🟢 สมดุลตามเกณฑ์</span>';
+      if (ratio > 25.0) {
+        status = 'ภาระงานสูง ครูสอนเกินเกณฑ์มาตรฐาน';
+        statusBadge = '<span class="trend-badge negative" style="font-size: 11px; background: rgba(197, 34, 31, 0.12); color: var(--color-error);">🔴 ภาระงานสูง</span>';
+      } else if (ratio < 15.0) {
+        status = 'สัดส่วน นร./ครู ต่ำกว่าเกณฑ์มาตรฐาน';
+        statusBadge = '<span class="trend-badge warning" style="font-size: 11px; background: rgba(194, 142, 56, 0.15); color: var(--color-gold);">🟡 เฝ้าระวังส่วนเกิน</span>';
+      }
+
+      return {
+        id: s.id,
+        name: displayName,
+        fullName: s.name,
+        size,
+        stdTotal,
+        roomsTotal,
+        stdMTon,
+        stdMPlai,
+        entitledStaff,
+        deputy,
+        ratio,
+        grantMTon,
+        grantMPlai,
+        grantTotal,
+        grantDelta,
+        status,
+        statusBadge
+      };
+    });
+
+    return {
+      records,
+      totalGrantDistrict,
+      totalGrantMTon,
+      totalGrantMPlai,
+      totalEntitledStaff,
+      totalStudentsAll,
+      totalRoomsAll,
+      avgRatio: totalEntitledStaff > 0 ? totalStudentsAll / totalEntitledStaff : 0,
+      sizeStaffTotals,
+      sizeRoomTotals
+    };
+  }
+
+  function updateResourceView() {
+    const data = getResourceData();
+
+    const grantEl = document.getElementById('resourceKpiTotalGrant');
+    const grantSubEl = document.getElementById('resourceKpiTotalGrantSub');
+    if (grantEl) {
+      grantEl.textContent = `${(data.totalGrantDistrict / 1e6).toFixed(2)} ล้านบาท`;
+    }
+    if (grantSubEl) {
+      grantSubEl.textContent = `ม.ต้น ${(data.totalGrantMTon / 1e6).toFixed(2)}M บ. | ม.ปลาย ${(data.totalGrantMPlai / 1e6).toFixed(2)}M บ.`;
+    }
+
+    const staffEl = document.getElementById('resourceKpiStaffTotal');
+    const staffSubEl = document.getElementById('resourceKpiStaffSub');
+    if (staffEl) {
+      staffEl.textContent = `${data.totalEntitledStaff.toLocaleString()} อัตรา`;
+    }
+    if (staffSubEl) {
+      staffSubEl.textContent = `คำนวณจาก ${data.totalRoomsAll.toLocaleString()} ห้องเรียน (${data.records.length} โรงเรียน)`;
+    }
+
+    renderResourceTable(data);
+    renderResourceCharts(data);
+  }
+
+  function renderResourceTable(data) {
+    if (!data) data = getResourceData();
+    const tbody = document.getElementById('resourceTableBody');
+    if (!tbody) return;
+
+    let filtered = [...data.records];
+    if (resourceSearchQuery) {
+      filtered = filtered.filter(r => 
+        r.name.toLowerCase().includes(resourceSearchQuery) || 
+        (r.fullName && r.fullName.toLowerCase().includes(resourceSearchQuery))
+      );
+    }
+
+    filtered.sort((a, b) => b.stdTotal - a.stdTotal);
+
+    tbody.innerHTML = '';
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--text-muted); padding: 30px;">ไม่พบข้อมูลโรงเรียนตามที่ค้นหา</td></tr>`;
+      return;
+    }
+
+    filtered.forEach((r, idx) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="text-align: center; color: var(--text-muted); font-size: 11.5px;">${idx + 1}</td>
+        <td>
+          <a href="#" class="table-school-link" data-id="${r.id}" title="${r.fullName || r.name}" style="font-weight: 500;">
+            ${r.name}
+          </a>
+        </td>
+        <td style="text-align: center;">
+          <span class="trend-badge stable" style="font-size: 11px;">${r.size}</span>
+        </td>
+        <td style="text-align: right; font-weight: 600;">${r.stdTotal.toLocaleString()}</td>
+        <td style="text-align: center; color: var(--text-muted);">${r.roomsTotal}</td>
+        <td style="text-align: center; font-weight: 700; color: var(--color-primary); font-size: 13px;">
+          ${r.entitledStaff} อัตรา
+        </td>
+        <td style="text-align: center; font-weight: 600; color: ${r.ratio > 25 ? 'var(--color-error)' : 'var(--text-main)'};">
+          ${r.ratio.toFixed(1)} : 1
+        </td>
+        <td style="text-align: right; font-weight: 700; color: var(--color-gold);">
+          ${r.grantTotal.toLocaleString()} บ.
+        </td>
+        <td style="text-align: left;">${r.statusBadge}</td>
+      `;
+
+      const link = tr.querySelector('.table-school-link');
+      if (link) {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          openSchoolDetailModal(r.id);
+        });
+      }
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderResourceCharts(data) {
+    const isDark = document.body.classList.contains('dark-theme');
+    const textColor = isDark ? '#9aa0a6' : '#5f6368';
+    const gridColor = isDark ? '#3c4043' : '#eef1f6';
+
+    const ctx1 = document.getElementById('resourceChartStaff')?.getContext('2d');
+    if (ctx1) {
+      if (resourceChartStaffInstance) resourceChartStaffInstance.destroy();
+
+      const labels1 = ['ขนาดเล็ก (S)', 'ขนาดกลาง (M)', 'ขนาดใหญ่ (L)', 'ขนาดใหญ่พิเศษ (XL)'];
+      const keys = ['S', 'M', 'L', 'XL'];
+      const staffValues = keys.map(k => data.sizeStaffTotals[k] || 0);
+
+      resourceChartStaffInstance = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: labels1,
+          datasets: [{
+            label: 'กรอบอัตรากำลังครูพึงมี (อัตรา)',
+            data: staffValues,
+            backgroundColor: '#10233F',
+            borderRadius: 4,
+            barPercentage: 0.7
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (c) => ` กรอบอัตรากำลัง: ${c.parsed.y.toLocaleString()} อัตรา`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: textColor, font: { family: 'Google Sans, Sarabun', size: 10 } }
+            },
+            y: {
+              grid: { color: gridColor },
+              ticks: { color: textColor, font: { family: 'Google Sans, Sarabun', size: 10 } }
+            }
+          }
+        }
+      });
+    }
+
+    const ctx2 = document.getElementById('resourceChartBudget')?.getContext('2d');
+    if (ctx2) {
+      if (resourceChartBudgetInstance) resourceChartBudgetInstance.destroy();
+
+      resourceChartBudgetInstance = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+          labels: ['มัธยมศึกษาตอนต้น (ม.1 - ม.3)', 'มัธยมศึกษาตอนปลาย (ม.4 - ม.6)'],
+          datasets: [{
+            data: [data.totalGrantMTon, data.totalGrantMPlai],
+            backgroundColor: ['#C28E38', '#10233F'],
+            borderWidth: 2,
+            borderColor: isDark ? '#1e1f22' : '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '65%',
+          plugins: {
+            legend: {
+              display: true,
+              position: 'bottom',
+              labels: {
+                color: isDark ? '#f1f3f4' : '#202124',
+                font: { family: 'Google Sans, Sarabun', size: 11 }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: (c) => ` ${c.label}: ${(c.parsed / 1e6).toFixed(2)} ล้านบาท (${((c.parsed / data.totalGrantDistrict) * 100).toFixed(1)}%)`
+              }
+            }
+          }
+        }
+      });
+    }
+  }
+
+  function exportResourceToExcel() {
+    if (typeof XLSX === 'undefined') {
+      alert('โมดูล Excel กำลังโหลด กรุณาลองใหม่อีกครั้ง');
+      return;
+    }
+    const data = getResourceData();
+    const rows = [
+      ['รายงานการวิเคราะห์อัตรากำลังครูและประมาณการเงินอุดหนุนรายหัว - สพม.สกลนคร'],
+      ['วันที่จัดทำรายงาน:', new Date().toLocaleDateString('th-TH')],
+      ['สรุปภาพรวมทั้งเขต:', `กรอบครูพึงมีรวม ${data.totalEntitledStaff.toLocaleString()} อัตรา, สัดส่วน นร./ครู ${data.avgRatio.toFixed(1)}:1, งบอุดหนุนรวม ${(data.totalGrantDistrict / 1e6).toFixed(2)} ล้านบาท`],
+      [],
+      ['ลำดับ', 'รหัสโรงเรียน', 'ชื่อโรงเรียน', 'ขนาด', 'นักเรียนรวม (คน)', 'ห้องเรียน', 'กรอบครูพึงมี (อัตรา)', 'สัดส่วน นร./ครู', 'เงินอุดหนุน ม.ต้น (บาท)', 'เงินอุดหนุน ม.ปลาย (บาท)', 'เงินอุดหนุนรวม (บาท)', 'สถานะทรัพยากร']
+    ];
+
+    const sorted = [...data.records].sort((a, b) => b.stdTotal - a.stdTotal);
+    sorted.forEach((r, idx) => {
+      rows.push([
+        idx + 1,
+        r.id,
+        r.fullName || r.name,
+        r.size,
+        r.stdTotal,
+        r.roomsTotal,
+        r.entitledStaff,
+        Number(r.ratio.toFixed(1)),
+        r.grantMTon,
+        r.grantMPlai,
+        r.grantTotal,
+        r.status
+      ]);
+    });
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    XLSX.utils.book_append_sheet(wb, ws, 'Staffing_Budget');
+    XLSX.writeFile(wb, `Staffing_and_Budget_Report.xlsx`);
+  }
+
   // Multi-Dimensional Insights & Size Analysis
   function updateInsightsView() {
     const sizeStats = {
@@ -1998,8 +3675,305 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Hook initComparison inside init()
+  // ==========================================
+  // Step 5: Executive Policy Brief & Decision Support Module
+  // ==========================================
+  function initExecutiveBriefModule() {
+    const btnPrintPdf = document.getElementById('btnExecutivePrintPdf');
+    if (btnPrintPdf) {
+      btnPrintPdf.addEventListener('click', () => {
+        window.print();
+      });
+    }
+
+    const btnMasterExcel = document.getElementById('btnExecutiveMasterExcel');
+    if (btnMasterExcel) {
+      btnMasterExcel.addEventListener('click', () => {
+        exportExecutiveMasterExcel();
+      });
+    }
+  }
+
+  function exportExecutiveMasterExcel() {
+    if (typeof XLSX === 'undefined') {
+      alert('โมดูล Excel กำลังโหลด กรุณาลองใหม่อีกครั้ง');
+      return;
+    }
+
+    const wb = XLSX.utils.book_new();
+
+    // Sheet 1: Executive Summary & Directives
+    const summaryRows = [
+      ['ศูนย์สารสนเทศและระบบสนับสนุนการตัดสินใจเชิงนโยบาย (DMC Intelligence Hub)'],
+      ['สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาสกลนคร (สพม.สกลนคร)'],
+      ['บทสรุปเชิงนโยบายสำหรับผู้บริหารระดับสูง (Executive Policy Brief & Strategic Directives)'],
+      [`วันที่จัดทำรายงาน: ${new Date().toLocaleDateString('th-TH')}`],
+      [],
+      ['=== 5 เสาหลักยุทธศาสตร์การศึกษา (5 Strategic Pillars) ==='],
+      ['เสาหลักที่', 'มิติยุทธศาสตร์', 'ตัวชี้วัด / สถิติสำคัญ', 'หน่วยนับ', 'คำอธิบายเชิงกลยุทธ์'],
+      [1, 'ประชากรนักเรียนรวม', 44566, 'คน', '45 โรงเรียนมัธยมศึกษา, 1,392 ห้องเรียน (ม.ต้น 24,002 คน / ม.ปลาย 20,564 คน)'],
+      [2, 'อัตราคงอยู่ (Zero Dropout)', 99.44, '%', 'ลดลงระหว่างภาคเรียน -252 คน (-0.56%) ดีขึ้นกว่าปี 2568 ที่ลดลง -356 คน'],
+      [3, 'การกระจายตัวเชิงพื้นที่', 34.16, '% (ในเมือง)', 'อำเภอเมือง 15,224 คน (34.2%) : 17 อำเภอรอบนอก 29,342 คน (65.8%)'],
+      [4, 'คาดการณ์ประชากรปี 2570', 43899, 'คน', 'แบบจำลอง Demographic Cohort Progression ชี้แนวโน้มลดลง -667 คน (-1.50%)'],
+      [5, 'งบประมาณอุดหนุนรายหัว', 179632800, 'บาท', 'กรอบอัตรากำลังข้าราชการครูพึงมี (ก.ค.ศ. ว23/2563) รวม 2,348 ตำแหน่ง (สัดส่วน 19.0:1)'],
+      [],
+      ['=== ข้อสั่งการและทิศทางเชิงกลยุทธ์สำหรับผู้บริหาร สพม.สกลนคร (Actionable Directives) ==='],
+      ['ข้อที่', 'มิตินโยบาย', 'แนวทางปฏิบัติและข้อสั่งการสำหรับสถานศึกษา'],
+      [1, 'มาตรการ Zero Dropout เชิงรุก', 'มอบหมายกลุ่มส่งเสริมการจัดการศึกษาและระบบดูแลช่วยเหลือนักเรียน ลงพื้นที่ติดตามช่วยเหลือนักเรียนใน 3 โรงเรียนที่สถิติลดลงสูงสุดระหว่างภาคเรียน ได้แก่ รร.เตรียมอุดมศึกษาฯ (-42 คน), รร.ธาตุนารายณ์วิทยา (-39 คน) และ รร.มัธยมวานรนิวาส (-31 คน)'],
+      [2, 'การวางแผนรับนักเรียน ม.1 / ม.4 ปี 2570', 'กำหนดเป้าหมายรับนักเรียน ม.1 แรกเข้าที่ 7,120 คน (225 ห้อง) และ ม.4 แรกเข้าที่ 7,370 คน (235 ห้อง) ปรับขนาดห้องเรียนให้ได้มาตรฐาน 32-35 คน/ห้อง เพื่อป้องกันห้องเรียนแออัดและห้องเรียนต่ำกว่าเกณฑ์'],
+      [3, 'การเกลี่ยอัตรากำลังครูตามเกณฑ์ ก.ค.ศ.', 'บริหารจัดการอัตรากำลังข้าราชการครู 2,348 ตำแหน่ง โดยพิจารณาเกลี่ยอัตรากำลังจากโรงเรียนที่มีสัดส่วน นร./ครู ต่ำกว่า 15:1 ไปสนับสนุนโรงเรียนที่มีสัดส่วนเกิน 25:1 (เช่น รร.ธาตุนารายณ์วิทยา และ รร.สกลราชวิทยานุกูล)'],
+      [4, 'การเสริมสร้างเครือข่ายโรงเรียนขนาดเล็ก', 'ยกระดับโรงเรียนขนาดเล็ก (< 120 คน เช่น รร.นิคมน้ำอูนเจริญวิทยา และ รร.เทพสวัสดิ์วิทยา) โดยนำโมเดลการใช้ทรัพยากรร่วมกัน (Resource Sharing) ภายในกลุ่มสหวิทยาเขต']
+    ];
+    const wsSummary = XLSX.utils.aoa_to_sheet(summaryRows);
+    XLSX.utils.book_append_sheet(wb, wsSummary, 'Executive_Summary');
+
+    // Sheet 2: Zero Dropout Tracker
+    const retData = getRetentionModeData();
+    const retRows = [
+      ['ระบบติดตามอัตราคงอยู่และสถิติ Zero Dropout - สพม.สกลนคร'],
+      ['รอบข้อมูลที่วิเคราะห์:', 'ปีการศึกษา 2569 (เทอม 1 ➔ เทอม 2)'],
+      [`วันที่ส่งออก: ${new Date().toLocaleDateString('th-TH')}`],
+      [],
+      ['ลำดับ', 'รหัสโรงเรียน', 'ชื่อโรงเรียน', 'อำเภอ', 'ขนาด', 'เทอม 1/69 (คน)', 'เทอม 2/69 (คน)', 'ผลต่าง (คน)', 'อัตราคงอยู่ (%)', 'อัตราเปลี่ยนแปลง (%)', 'ระดับความเสี่ยง (Risk Radar)', 'มาตรการแนะนำ']
+    ];
+    const sortedRet = [...retData.records].sort((a, b) => a.diff - b.diff);
+    sortedRet.forEach((r, idx) => {
+      const orig = DASHBOARD_DATA.find(s => s.id === r.id);
+      retRows.push([
+        idx + 1,
+        r.id,
+        r.fullName || r.name,
+        orig?.district || '',
+        orig ? getSchoolSize(orig) : '',
+        r.baseVal,
+        r.targetVal,
+        r.diff,
+        Number(r.rate.toFixed(2)),
+        Number(r.pctChange.toFixed(2)),
+        r.riskLevel === 'HIGH_RISK' ? 'เสี่ยงสูง (High Risk)' : (r.riskLevel === 'WATCHLIST' ? 'เฝ้าระวัง (Watchlist)' : 'ปกติ (Normal)'),
+        r.policyAdvice
+      ]);
+    });
+    const wsRet = XLSX.utils.aoa_to_sheet(retRows);
+    XLSX.utils.book_append_sheet(wb, wsRet, 'Zero_Dropout_Tracker');
+
+    // Sheet 3: District Analytics
+    const clusterList = getDistrictData();
+    const distRows = [
+      ['รายงานสถิติข้อมูลเชิงพื้นที่ สหวิทยาเขต และรายอำเภอ - สพม.สกลนคร'],
+      [`วันที่ส่งออก: ${new Date().toLocaleDateString('th-TH')}`],
+      [],
+      ['=== ส่วนที่ 1: วิเคราะห์รายสหวิทยาเขต (7 สหวิทยาเขต) ==='],
+      ['ลำดับ', 'สหวิทยาเขต', 'จำนวนโรงเรียน (แห่ง)', 'นักเรียน 69/1 (คน)', 'นักเรียน 69/2 (คน)', 'ผลต่าง (คน)', '% เปลี่ยนแปลง', 'ห้องเรียน', 'นร./ห้อง เฉลี่ย', 'โรงเรียนแกนนำ (Hub School)']
+    ];
+    clusterList.forEach((g, idx) => {
+      distRows.push([
+        idx + 1,
+        g.name,
+        g.schoolCount,
+        g.baseStudents,
+        g.targetStudents,
+        g.diff,
+        Number(g.pctChange.toFixed(2)),
+        g.rooms,
+        Number(g.density.toFixed(1)),
+        g.hubSchool
+      ]);
+    });
+
+    distRows.push([], ['=== ส่วนที่ 2: วิเคราะห์รายอำเภอ (18 อำเภอ) ==='], ['ลำดับ', 'อำเภอ', 'จำนวนโรงเรียน (แห่ง)', 'นักเรียน 69/1 (คน)', 'นักเรียน 69/2 (คน)', 'ผลต่าง (คน)', '% เปลี่ยนแปลง', 'ห้องเรียน', 'นร./ห้อง เฉลี่ย']);
+    
+    const amphoeMap = {};
+    DASHBOARD_DATA.forEach(s => {
+      const amp = s.district || 'อื่นๆ';
+      if (!amphoeMap[amp]) amphoeMap[amp] = { name: amp, count: 0, sBase: 0, sTarget: 0, rooms: 0 };
+      const p1 = s.y69_1?.total?.total || 0;
+      const p2 = s.y69_2?.total?.total || 0;
+      const ro = s.y69_2?.total?.rooms || 0;
+      amphoeMap[amp].count += 1;
+      amphoeMap[amp].sBase += p1;
+      amphoeMap[amp].sTarget += p2;
+      amphoeMap[amp].rooms += ro;
+    });
+    Object.values(amphoeMap).sort((a, b) => b.sTarget - a.sTarget).forEach((a, idx) => {
+      const diff = a.sTarget - a.sBase;
+      const pct = a.sBase > 0 ? (diff / a.sBase) * 100 : 0;
+      const den = a.rooms > 0 ? a.sTarget / a.rooms : 0;
+      distRows.push([
+        idx + 1,
+        a.name,
+        a.count,
+        a.sBase,
+        a.sTarget,
+        diff,
+        Number(pct.toFixed(2)),
+        a.rooms,
+        Number(den.toFixed(1))
+      ]);
+    });
+    const wsDist = XLSX.utils.aoa_to_sheet(distRows);
+    XLSX.utils.book_append_sheet(wb, wsDist, 'District_Analytics');
+
+    // Sheet 4: Forecast 2570
+    const fcData = getForecastData();
+    const fcRows = [
+      ['รายงานคาดการณ์ประชากรนักเรียนปี 2570 (Demographic Cohort Progression) - สพม.สกลนคร'],
+      ['แบบจำลอง:', `Demographic Cohort Progression (${forecastCurrentScenario})`],
+      [`วันที่ส่งออก: ${new Date().toLocaleDateString('th-TH')}`],
+      [],
+      ['ลำดับ', 'รหัสโรงเรียน', 'ชื่อโรงเรียน', 'อำเภอ', 'ปี 2568 (คน)', 'ปี 2569 (คน)', 'คาดการณ์ 2570 (คน)', 'ผลต่างคาดการณ์ (คน)', 'อัตราเปลี่ยนแปลง (%)', 'ห้องเรียน 2569', 'แผนห้องเรียน 2570 แนะนำ', 'ข้อเสนอแนะเชิงบริหาร']
+    ];
+    const sortedFc = [...fcData.records].sort((a, b) => a.diffPred - b.diffPred);
+    sortedFc.forEach((r, idx) => {
+      const orig = DASHBOARD_DATA.find(s => s.id === r.id);
+      fcRows.push([
+        idx + 1,
+        r.id,
+        r.fullName || r.name,
+        orig?.district || '',
+        r.s68,
+        r.s69,
+        r.pred_total,
+        r.diffPred,
+        Number(r.pctPred.toFixed(2)),
+        r.rooms69,
+        r.suggestedRooms,
+        r.advice
+      ]);
+    });
+    const wsFc = XLSX.utils.aoa_to_sheet(fcRows);
+    XLSX.utils.book_append_sheet(wb, wsFc, 'Forecast_2570');
+
+    // Sheet 5: Staffing and Budget
+    const resData = getResourceData();
+    const resRows = [
+      ['รายงานการประมาณการกรอบอัตรากำลังครู (ก.ค.ศ. ว23/2563) และเงินอุดหนุนรายหัว - สพม.สกลนคร'],
+      [`วันที่ส่งออก: ${new Date().toLocaleDateString('th-TH')}`],
+      ['สรุปภาพรวมเขต:', `เงินอุดหนุนรวม ${resData.totalGrantDistrict.toLocaleString()} บาท (ม.ต้น ${resData.totalGrantMTon.toLocaleString()} บาท / ม.ปลาย ${resData.totalGrantMPlai.toLocaleString()} บาท), กรอบครูรวม ${resData.totalEntitledStaff.toLocaleString()} อัตรา, สัดส่วน นร.:ครู เฉลี่ย ${resData.studentToTeacherRatio}:1`],
+      [],
+      ['ลำดับ', 'รหัสโรงเรียน', 'ชื่อโรงเรียน', 'อำเภอ', 'ขนาด', 'ม.ต้น (คน)', 'ม.ปลาย (คน)', 'นักเรียนรวม (คน)', 'ห้องเรียน', 'เงินอุดหนุน ม.ต้น (บาท)', 'เงินอุดหนุน ม.ปลาย (บาท)', 'เงินอุดหนุนรวมต่อปี (บาท)', 'กรอบ ผอ.', 'กรอบ รอง ผอ.', 'กรอบครูผู้สอน', 'รวมกรอบครูพึงมี (อัตรา)', 'อัตราส่วน นร.:ครู', 'สถานะอัตรากำลัง']
+    ];
+    const sortedRes = [...resData.records].sort((a, b) => b.students - a.students);
+    sortedRes.forEach((r, idx) => {
+      const orig = DASHBOARD_DATA.find(s => s.id === r.id);
+      resRows.push([
+        idx + 1,
+        r.id,
+        r.fullName || r.name,
+        orig?.district || '',
+        r.size,
+        r.stdMTon,
+        r.stdMPlai,
+        r.students,
+        r.rooms,
+        r.grantMTon,
+        r.grantMPlai,
+        r.grantTotal,
+        r.director,
+        r.deputy,
+        r.teacherQuota,
+        r.entitledStaff,
+        Number(r.ratio.toFixed(1)),
+        r.status
+      ]);
+    });
+    const wsRes = XLSX.utils.aoa_to_sheet(resRows);
+    XLSX.utils.book_append_sheet(wb, wsRes, 'Staffing_and_Budget');
+
+    // Sheet 6: Master 45 Schools Longitudinal Data
+    const masterRows = [
+      ['ฐานข้อมูลสถิตินักเรียน 5 รอบข้อมูลแบบสมบูรณ์ (Longitudinal Master Dataset) - สพม.สกลนคร'],
+      ['รอบข้อมูล:', '2568 เทอม 1, 2568 เทอม 2, 2568 สิ้นปี, 2569 เทอม 1, 2569 เทอม 2'],
+      [`วันที่ส่งออก: ${new Date().toLocaleDateString('th-TH')}`],
+      [],
+      [
+        'ลำดับ', 'รหัสโรงเรียน', 'ชื่อโรงเรียน', 'อำเภอ', 'สหวิทยาเขต', 'ขนาด',
+        'นร. 68/1', 'ห้อง 68/1',
+        'นร. 68/2', 'ห้อง 68/2',
+        'นร. 68/3 (สิ้นปี)', 'ห้อง 68/3',
+        'นร. 69/1', 'ห้อง 69/1',
+        'นร. 69/2', 'ห้อง 69/2',
+        'ผลต่าง (69/1 ➔ 69/2)', '% เปลี่ยนแปลง (เทอม)',
+        'ผลต่าง (68/1 ➔ 69/2)', '% เปลี่ยนแปลง (2 ปี)'
+      ]
+    ];
+
+    let t68_1 = 0, r68_1 = 0;
+    let t68_2 = 0, r68_2 = 0;
+    let t68_3 = 0, r68_3 = 0;
+    let t69_1 = 0, r69_1 = 0;
+    let t69_2 = 0, r69_2 = 0;
+
+    DASHBOARD_DATA.forEach((s, idx) => {
+      const p68_1 = s.y68_1 || s.y68 || {};
+      const p68_2 = s.y68_2 || p68_1;
+      const p68_3 = s.y68_3 || p68_2;
+      const p69_1 = s.y69_1 || {};
+      const p69_2 = s.y69_2 || {};
+
+      const s68_1 = p68_1.total?.total || 0; const ro68_1 = p68_1.total?.rooms || 0;
+      const s68_2 = p68_2.total?.total || 0; const ro68_2 = p68_2.total?.rooms || 0;
+      const s68_3 = p68_3.total?.total || 0; const ro68_3 = p68_3.total?.rooms || 0;
+      const s69_1 = p69_1.total?.total || 0; const ro69_1 = p69_1.total?.rooms || 0;
+      const s69_2 = p69_2.total?.total || 0; const ro69_2 = p69_2.total?.rooms || 0;
+
+      const diffTerm = s69_2 - s69_1;
+      const pctTerm = s69_1 > 0 ? (diffTerm / s69_1) * 100 : 0;
+      const diff2Year = s69_2 - s68_1;
+      const pct2Year = s68_1 > 0 ? (diff2Year / s68_1) * 100 : 0;
+
+      t68_1 += s68_1; r68_1 += ro68_1;
+      t68_2 += s68_2; r68_2 += ro68_2;
+      t68_3 += s68_3; r68_3 += ro68_3;
+      t69_1 += s69_1; r69_1 += ro69_1;
+      t69_2 += s69_2; r69_2 += ro69_2;
+
+      masterRows.push([
+        idx + 1,
+        s.id,
+        s.name,
+        s.district || '',
+        s.cluster || '',
+        getSchoolSize(s),
+        s68_1, ro68_1,
+        s68_2, ro68_2,
+        s68_3, ro68_3,
+        s69_1, ro69_1,
+        s69_2, ro69_2,
+        diffTerm, Number(pctTerm.toFixed(2)),
+        diff2Year, Number(pct2Year.toFixed(2))
+      ]);
+    });
+
+    const sumDiffTerm = t69_2 - t69_1;
+    const sumPctTerm = t69_1 > 0 ? (sumDiffTerm / t69_1) * 100 : 0;
+    const sumDiff2Year = t69_2 - t68_1;
+    const sumPct2Year = t68_1 > 0 ? (sumDiff2Year / t68_1) * 100 : 0;
+
+    masterRows.push([
+      '', '', 'รวมทั้งเขตพื้นที่การศึกษา (45 โรงเรียน)', '', '', '',
+      t68_1, r68_1,
+      t68_2, r68_2,
+      t68_3, r68_3,
+      t69_1, r69_1,
+      t69_2, r69_2,
+      sumDiffTerm, Number(sumPctTerm.toFixed(2)),
+      sumDiff2Year, Number(sumPct2Year.toFixed(2))
+    ]);
+
+    const wsMaster = XLSX.utils.aoa_to_sheet(masterRows);
+    XLSX.utils.book_append_sheet(wb, wsMaster, 'Master_45_Schools');
+
+    XLSX.writeFile(wb, 'DMC_Hub_Executive_Policy_Master.xlsx');
+  }
+
+  // Hook modules inside init()
   initComparison();
+  initRetentionModule();
+  initDistrictModule();
+  initForecastModule();
+  initResourceModule();
+  initExecutiveBriefModule();
 
 
     // ==========================================

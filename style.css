@@ -2147,7 +2147,13 @@ body.dark-theme .cluster-tab-btn.active {
   .btn-refresh,
   #closeSettingsBtn,
   #btnExport,
-  .cluster-tabs-container {
+  .cluster-tabs-container,
+  #btnExecutivePrintPdf,
+  #btnExecutiveMasterExcel,
+  .forecast-scenario-btn,
+  .resource-view-btn,
+  .retention-mode-btn,
+  .district-view-btn {
     display: none !important;
   }
   

@@ -49,6 +49,19 @@
               <span>แดชบอร์ด</span>
             </a>
           </li>
+          <li class="nav-item" id="menuExecutive">
+            <a href="#" title="บทสรุปผู้บริหาร">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                </svg>
+              </span>
+              <span>บทสรุปผู้บริหาร</span>
+            </a>
+          </li>
           <li class="nav-item" id="menuStudents">
             <a href="#" title="สถิตินักเรียน">
               <span class="nav-icon">
@@ -94,6 +107,50 @@
                 </svg>
               </span>
               <span>เปรียบเทียบโรงเรียน</span>
+            </a>
+          </li>
+          <li class="nav-item" id="menuRetention">
+            <a href="#" title="Zero Dropout & อัตราคงอยู่">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                  <path d="M9 12l2 2 4-4"></path>
+                </svg>
+              </span>
+              <span>Zero Dropout</span>
+            </a>
+          </li>
+          <li class="nav-item" id="menuDistricts">
+            <a href="#" title="วิเคราะห์เชิงพื้นที่ (อำเภอ/สหวิทยาเขต)">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+              </span>
+              <span>มิติเชิงพื้นที่</span>
+            </a>
+          </li>
+          <li class="nav-item" id="menuForecast">
+            <a href="#" title="พยากรณ์แนวโน้มปี 2570">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M23 6l-9.5 9.5-5-5L1 18"></path>
+                  <path d="M17 6h6v6"></path>
+                </svg>
+              </span>
+              <span>พยากรณ์ปี 2570</span>
+            </a>
+          </li>
+          <li class="nav-item" id="menuResources">
+            <a href="#" title="อัตรากำลัง & งบประมาณ">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                </svg>
+              </span>
+              <span>อัตรากำลัง & งบ</span>
             </a>
           </li>
           <li class="nav-item" id="menuInsights">
@@ -599,6 +656,591 @@
           </h4>
           <div class="chart-area" style="height: 240px; position: relative; width: 100%;">
             <canvas id="comparisonBarChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 1: Zero Dropout & Student Retention Intelligence Section -->
+      <section class="table-panel" id="retentionSection" style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="panel-header" style="flex-wrap: wrap; gap: 16px;">
+          <div class="panel-title">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; background: rgba(194, 142, 56, 0.15); color: var(--color-gold);">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                  <path d="M9 12l2 2 4-4"></path>
+                </svg>
+              </span>
+              <h3 style="margin: 0;">ระบบติดตามและวิเคราะห์การคงอยู่ของนักเรียน (Zero Dropout & Retention Tracker)</h3>
+            </div>
+            <p style="margin-top: 4px;">วิเคราะห์การลดลงของนักเรียนระหว่างภาคเรียน, จุดเปลี่ยนผ่าน ม.3 ➔ ม.4 และการคงอยู่ของรุ่นนักเรียน (Cohort) สพม.สกลนคร</p>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-left: auto;">
+            <button id="exportRetentionExcelBtn" class="primary-btn" style="background: var(--color-gold); border-color: var(--color-gold); font-size: 12.5px; padding: 7px 14px; cursor: pointer; display: inline-flex; align-items: center;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              ส่งออกรายงาน Zero Dropout (Excel)
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 Retention KPI Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+          <div class="kpi-card" style="border-left: 4px solid var(--color-primary); flex-direction: column; align-items: flex-start; gap: 6px; width: 100%;">
+            <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 500;">อัตราคงอยู่ระหว่างภาคเรียน (Semester Retention)</span>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span id="retentionKpiRate" style="font-size: 24px; font-weight: 700; color: var(--color-primary);">99.44%</span>
+              <span id="retentionKpiRateDiff" class="trend-badge positive" style="font-size: 11px;">+0.22% vs ปี 68</span>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted);" id="retentionKpiRateSub">นักเรียนคงอยู่ 44,566 / 44,818 คน</span>
+          </div>
+
+          <div class="kpi-card" style="border-left: 4px solid var(--color-error); flex-direction: column; align-items: flex-start; gap: 6px; width: 100%;">
+            <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 500;">นักเรียนหลุดระหว่างเทอม (Mid-Year Loss)</span>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span id="retentionKpiDrop" style="font-size: 24px; font-weight: 700; color: var(--color-error);">-252 คน</span>
+              <span class="trend-badge positive" style="font-size: 11px;">ดีขึ้น (ปีก่อน -356)</span>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted);" id="retentionKpiDropSub">เฉลี่ยลดลง 5.6 คน/โรงเรียน</span>
+          </div>
+
+          <div class="kpi-card" style="border-left: 4px solid var(--color-gold); flex-direction: column; align-items: flex-start; gap: 6px; width: 100%;">
+            <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 500;">อัตราเรียนต่อ ม.3 สู่ ม.4 (Progression)</span>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span id="retentionKpiTransition" style="font-size: 24px; font-weight: 700; color: var(--color-gold);">90.75%</span>
+              <span class="trend-badge neutral" style="font-size: 11px;">จบ ม.3 ➔ ม.4</span>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted);" id="retentionKpiTransitionSub">เข้า ม.4: 7,064 คน | ไปสายอาชีพ/อื่น: 720 คน</span>
+          </div>
+
+          <div class="kpi-card" style="border-left: 4px solid var(--color-success); flex-direction: column; align-items: flex-start; gap: 6px; width: 100%;">
+            <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 500;">โรงเรียนที่ไม่มียอดนักเรียนลด (Zero Loss)</span>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span id="retentionKpiZeroCount" style="font-size: 24px; font-weight: 700; color: var(--color-success);">10 แห่ง</span>
+              <span class="trend-badge positive" style="font-size: 11px;">22.2% ของเขต</span>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted);" id="retentionKpiZeroSub">รักษานักเรียนได้ครบ 100% หรือมีเพิ่ม</span>
+          </div>
+        </div>
+
+        <!-- Mode Switcher & Filter Controls -->
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 5px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+          <div class="cluster-tabs-container" style="margin: 0;">
+            <button class="cluster-tab-btn active retention-mode-btn" data-mode="semester_69">เทอม 1 ➔ 2 (ปี 2569)</button>
+            <button class="cluster-tab-btn retention-mode-btn" data-mode="semester_68">เทอม 1 ➔ 2 (ปี 2568)</button>
+            <button class="cluster-tab-btn retention-mode-btn" data-mode="transition_m34">จุดเปลี่ยนผ่าน ม.3 ➔ ม.4</button>
+            <button class="cluster-tab-btn retention-mode-btn" data-mode="cohort_m12">ติดตามรุ่น Cohort (ม.1 ➔ ม.2)</button>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <input type="text" id="retentionSearchInput" class="control-select" style="padding: 6px 12px; font-size: 12px; min-width: 170px;" placeholder="ค้นหาโรงเรียน...">
+            <select id="retentionRiskFilter" class="control-select" style="padding: 6px 12px; font-size: 12px;">
+              <option value="ALL">ความเสี่ยงทั้งหมด</option>
+              <option value="CRITICAL">🔴 เสี่ยงวิกฤต (ลดลง &gt; 1.5%)</option>
+              <option value="WARNING">🟡 เสี่ยงปานกลาง (ลดลง 0.5% - 1.5%)</option>
+              <option value="EXCELLENT">🟢 คงอยู่ดีเยี่ยม (คงที่ / เพิ่มขึ้น)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Charts Grid (Side-by-Side) -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 16px;">
+          <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; background: var(--bg-card); display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <h4 id="retentionChartTitle1" style="font-size: 13px; font-weight: 700; color: var(--text-main); margin: 0;">
+                🚨 8 อันดับโรงเรียนที่นักเรียนลดลงสูงสุด
+              </h4>
+              <span style="font-size: 11px; color: var(--text-muted);" id="retentionChartPeriodLabel1">2569 เทอม 1 ➔ เทอม 2</span>
+            </div>
+            <div style="height: 220px; position: relative;">
+              <canvas id="retentionChartTopDrop"></canvas>
+            </div>
+          </div>
+
+          <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; background: var(--bg-card); display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <h4 id="retentionChartTitle2" style="font-size: 13px; font-weight: 700; color: var(--text-main); margin: 0;">
+                📊 สถิติการเปลี่ยนแปลงนักเรียนแยกตามระดับชั้น (ม.1 - ม.6)
+              </h4>
+              <span style="font-size: 11px; color: var(--text-muted);" id="retentionChartPeriodLabel2">2569 เทอม 1 ➔ เทอม 2</span>
+            </div>
+            <div style="height: 220px; position: relative;">
+              <canvas id="retentionChartByGrade"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dropout Risk Radar Table -->
+        <div class="responsive-table-wrapper" style="margin-top: 5px;">
+          <table class="dashboard-table" id="retentionRadarTable" style="font-size: 12.5px;">
+            <thead>
+              <tr>
+                <th style="width: 45px; text-align: center;">ลำดับ</th>
+                <th style="text-align: left;">ชื่อโรงเรียน</th>
+                <th style="text-align: right;" id="thRetColBase">ต้นทาง (คน)</th>
+                <th style="text-align: right;" id="thRetColTarget">ปลายทาง (คน)</th>
+                <th style="text-align: right;">ผลต่าง (คน)</th>
+                <th style="text-align: center;">อัตราคงอยู่ (%)</th>
+                <th style="text-align: center;">ระดับความเสี่ยง</th>
+                <th style="text-align: left;">ข้อเสนอแนะเชิงนโยบาย</th>
+              </tr>
+            </thead>
+            <tbody id="retentionTableBody">
+              <!-- Populated dynamically by app.js -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Step 2: District & Cluster Analytics Section -->
+      <section class="table-panel" id="districtSection" style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="panel-header" style="flex-wrap: wrap; gap: 16px;">
+          <div class="panel-title">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; background: rgba(16, 35, 63, 0.1); color: var(--color-primary);">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+              </span>
+              <h3 style="margin: 0;">ระบบวิเคราะห์ข้อมูลเชิงพื้นที่และสหวิทยาเขต (District & Cluster Analytics)</h3>
+            </div>
+            <p style="margin-top: 4px;">การกระจายตัวของนักเรียน ห้องเรียน และการเปลี่ยนแปลงประชากรการศึกษาจำแนกตามอำเภอและสหวิทยาเขต สพม.สกลนคร</p>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-left: auto;">
+            <button id="exportDistrictExcelBtn" class="primary-btn" style="background: var(--color-primary); border-color: var(--color-primary); font-size: 12.5px; padding: 7px 14px; cursor: pointer; display: inline-flex; align-items: center;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              ส่งออกรายงานเชิงพื้นที่ (Excel)
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 Geographic KPI Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+          <div class="kpi-card" style="border-left: 4px solid var(--color-primary); flex-direction: column; align-items: flex-start; gap: 6px; width: 100%;">
+            <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 500;">อำเภอที่มีประชากรนักเรียนสูงสุด</span>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span id="districtKpiTopAmphoe" style="font-size: 20px; font-weight: 700; color: var(--color-primary);">อ.เมืองสกลนคร</span>
+              <span id="districtKpiTopAmphoeShare" class="trend-badge stable" style="font-size: 11px;">34.2%</span>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted);" id="districtKpiTopAmphoeSub">15,251 คน จาก 6 โรงเรียน</span>
+          </div>
+
+          <div class="kpi-card" style="border-left: 4px solid var(--color-gold); flex-direction: column; align-items: flex-start; gap: 6px; width: 100%;">
+            <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 500;">สหวิทยาเขตที่มีขนาดใหญ่ที่สุด</span>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span id="districtKpiTopCluster" style="font-size: 17px; font-weight: 700; color: var(--color-gold);">สหวิทยาเขตเมืองสกลนคร</span>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted);" id="districtKpiTopClusterSub">6 โรงเรียน | 15,251 คน (เฉลี่ย 2,542 คน/รร.)</span>
+          </div>
+
+          <div class="kpi-card" style="border-left: 4px solid var(--color-success); flex-direction: column; align-items: flex-start; gap: 6px; width: 100%;">
+            <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 500;">สัดส่วนโรงเรียนในตัวเมือง vs รอบนอก</span>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span style="font-size: 20px; font-weight: 700; color: var(--color-success);">34.2% : 65.8%</span>
+              <span class="trend-badge positive" style="font-size: 11px;">กระจายตัว</span>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted);">เมือง 15,251 คน : รอบนอก 29,315 คน</span>
+          </div>
+
+          <div class="kpi-card" style="border-left: 4px solid var(--brand-700); flex-direction: column; align-items: flex-start; gap: 6px; width: 100%;">
+            <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 500;">ขอบเขตการบริหารจัดการ</span>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span style="font-size: 20px; font-weight: 700; color: var(--text-main);">15 อำเภอ / 6 สหวิทยาเขต</span>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted);">ครอบคลุม 45 โรงเรียนมัธยมศึกษา สพม.สกลนคร</span>
+          </div>
+        </div>
+
+        <!-- Mode Switcher Tabs for Geographic View -->
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 5px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+          <div class="cluster-tabs-container" style="margin: 0;">
+            <button class="cluster-tab-btn active district-view-btn" data-view="cluster">มุมมอง 6 สหวิทยาเขต (Cluster View)</button>
+            <button class="cluster-tab-btn district-view-btn" data-view="amphoe">มุมมอง 15 อำเภอ (Amphoe View)</button>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 12px; color: var(--text-muted);" id="districtActivePeriodLabel">สถิติตามรอบเวลาที่เลือก</span>
+          </div>
+        </div>
+
+        <!-- Charts Grid (Side-by-Side) -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 16px;">
+          <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; background: var(--bg-card); display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <h4 id="districtChartTitle1" style="font-size: 13px; font-weight: 700; color: var(--text-main); margin: 0;">
+                📊 สัดส่วนจำนวนนักเรียนจำแนกตามพื้นที่
+              </h4>
+            </div>
+            <div style="height: 240px; position: relative;">
+              <canvas id="districtChartShare"></canvas>
+            </div>
+          </div>
+
+          <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; background: var(--bg-card); display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <h4 id="districtChartTitle2" style="font-size: 13px; font-weight: 700; color: var(--text-main); margin: 0;">
+                🏫 ความหนาแน่นเฉลี่ย (นร./ห้อง) จำแนกตามพื้นที่
+              </h4>
+            </div>
+            <div style="height: 240px; position: relative;">
+              <canvas id="districtChartDensity"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Geographic Data Table -->
+        <div class="responsive-table-wrapper" style="margin-top: 5px;">
+          <table class="dashboard-table" id="districtDataTable" style="font-size: 12.5px;">
+            <thead>
+              <tr>
+                <th style="width: 45px; text-align: center;">ลำดับ</th>
+                <th style="text-align: left;" id="thDistName">สหวิทยาเขต / อำเภอ</th>
+                <th style="text-align: center;">จำนวนโรงเรียน</th>
+                <th style="text-align: right;" id="thDistStdBase">นักเรียนรอบตั้งต้น (คน)</th>
+                <th style="text-align: right;" id="thDistStdTarget">นักเรียนรอบเปรียบเทียบ (คน)</th>
+                <th style="text-align: right;">การเปลี่ยนแปลง</th>
+                <th style="text-align: center;">ห้องเรียน</th>
+                <th style="text-align: center;">นร./ห้อง เฉลี่ย</th>
+                <th style="text-align: left;">สถานศึกษาแกนนำ (Hub)</th>
+              </tr>
+            </thead>
+            <tbody id="districtTableBody">
+              <!-- Populated dynamically by app.js -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Step 3: Predictive Analytics & Demographic Forecasting Section (Year 2570) -->
+      <section class="table-panel" id="forecastSection" style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="panel-header" style="flex-wrap: wrap; gap: 16px;">
+          <div class="panel-title">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; background: rgba(194, 142, 56, 0.15); color: var(--color-gold);">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M23 6l-9.5 9.5-5-5L1 18"></path>
+                  <path d="M17 6h6v6"></path>
+                </svg>
+              </span>
+              <h3 style="margin: 0;">ระบบพยากรณ์ประชากรนักเรียนและแนวโน้มปี 2570 (Demographic Forecasting & Planning)</h3>
+            </div>
+            <p style="margin-top: 4px;">การพยากรณ์จำนวนนักเรียนล่วงหน้าด้วยแบบจำลอง Demographic Cohort Progression และการวางแผนเปิดแผนชั้นเรียน ม.1 / ม.4 สพม.สกลนคร</p>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-left: auto;">
+            <button id="exportForecastExcelBtn" class="primary-btn" style="background: var(--color-gold); border-color: var(--color-gold); font-size: 12.5px; padding: 7px 14px; cursor: pointer; display: inline-flex; align-items: center;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              ส่งออกรายงานพยากรณ์ปี 2570 (Excel)
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 Forecast KPI Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+          <div class="kpi-card" style="border-left: 4px solid var(--color-primary); flex-direction: column; align-items: flex-start; gap: 6px; width: 100%;">
+            <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 500;">คาดการณ์นักเรียนรวมทั้งเขต ปี 2570</span>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span id="forecastKpiTotal" style="font-size: 24px; font-weight: 700; color: var(--color-primary);">43,899 คน</span>
+              <span id="forecastKpiTotalDiff" class="trend-badge negative" style="font-size: 11px;">-667 คน (-1.5%)</span>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted);" id="forecastKpiTotalSub">คาดการณ์จากฐาน 44,566 คน (ปี 69)</span>
+          </div>
+
+          <div class="kpi-card" style="border-left: 4px solid var(--color-gold); flex-direction: column; align-items: flex-start; gap: 6px; width: 100%;">
+            <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 500;">คาดการณ์ ม.1 แรกเข้าใหม่ (Intake)</span>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span id="forecastKpiM1" style="font-size: 24px; font-weight: 700; color: var(--color-gold);">7,120 คน</span>
+              <span class="trend-badge stable" style="font-size: 11px;">~225 ห้อง</span>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted);" id="forecastKpiM1Sub">แนวโน้มลดลงตามอัตราการเกิดในจังหวัด</span>
+          </div>
+
+          <div class="kpi-card" style="border-left: 4px solid var(--brand-700); flex-direction: column; align-items: flex-start; gap: 6px; width: 100%;">
+            <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 500;">คาดการณ์ ม.4 แรกเข้าใหม่ (ม.ปลาย)</span>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span id="forecastKpiM4" style="font-size: 24px; font-weight: 700; color: var(--text-main);">7,373 คน</span>
+              <span class="trend-badge positive" style="font-size: 11px;">เรียนต่อ 90.7%</span>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted);" id="forecastKpiM4Sub">จากนักเรียนจบ ม.3 ประมาณ 8,125 คน</span>
+          </div>
+
+          <div class="kpi-card" style="border-left: 4px solid var(--color-success); flex-direction: column; align-items: flex-start; gap: 6px; width: 100%;">
+            <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 500;">ความน่าเชื่อถือของแบบจำลอง (Reliability)</span>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span style="font-size: 24px; font-weight: 700; color: var(--color-success);">R² = 0.988</span>
+              <span class="trend-badge positive" style="font-size: 11px;">ความแม่นยำสูง</span>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted);">Cohort Progression + Moving Average</span>
+          </div>
+        </div>
+
+        <!-- Scenario Selector Tabs -->
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 5px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+          <div class="cluster-tabs-container" style="margin: 0;">
+            <button class="cluster-tab-btn active forecast-scenario-btn" data-scenario="baseline">แบบจำลองปกติ (Baseline Cohort)</button>
+            <button class="cluster-tab-btn forecast-scenario-btn" data-scenario="optimistic">สถานการณ์ดึงดูดนักเรียนสูง (Optimistic +1.5%)</button>
+            <button class="cluster-tab-btn forecast-scenario-btn" data-scenario="pessimistic">สถานการณ์ประชากรลดลงเร่งตัว (Pessimistic -1.5%)</button>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <input type="text" id="forecastSearchInput" class="control-select" style="padding: 6px 12px; font-size: 12px; min-width: 170px;" placeholder="ค้นหาโรงเรียน...">
+          </div>
+        </div>
+
+        <!-- Charts Grid (Side-by-Side) -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 16px;">
+          <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; background: var(--bg-card); display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <h4 style="font-size: 13px; font-weight: 700; color: var(--text-main); margin: 0;">
+                📈 เส้นทางสถิติจริง (2568-2569) และเส้นประพยากรณ์ล่วงหน้า (ปี 2570)
+              </h4>
+            </div>
+            <div style="height: 240px; position: relative;">
+              <canvas id="forecastChartTrendline"></canvas>
+            </div>
+          </div>
+
+          <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; background: var(--bg-card); display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <h4 style="font-size: 13px; font-weight: 700; color: var(--text-main); margin: 0;">
+                📊 คาดการณ์จำนวนนักเรียนแยกรายชั้นเรียน (ม.1 - ม.6) ปี 2570 vs 2569
+              </h4>
+            </div>
+            <div style="height: 240px; position: relative;">
+              <canvas id="forecastChartByGrade"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Predictive School Data Table -->
+        <div class="responsive-table-wrapper" style="margin-top: 5px;">
+          <table class="dashboard-table" id="forecastSchoolTable" style="font-size: 12.5px;">
+            <thead>
+              <tr>
+                <th style="width: 45px; text-align: center;">ลำดับ</th>
+                <th style="text-align: left;">ชื่อโรงเรียน</th>
+                <th style="text-align: right;">ปี 2568 (คน)</th>
+                <th style="text-align: right;">ปี 2569 (คน)</th>
+                <th style="text-align: right; color: var(--color-gold); font-weight: 700;">คาดการณ์ 2570 (คน)</th>
+                <th style="text-align: right;">ผลต่างคาดการณ์</th>
+                <th style="text-align: center;">แผนห้องเรียนแนะนำ</th>
+                <th style="text-align: left;">ข้อเสนอแนะการบริหารจัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="forecastTableBody">
+              <!-- Populated dynamically by app.js -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Step 4: Teacher Staffing & Capitation Grant Estimator Section -->
+      <section class="table-panel" id="resourceSection" style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="panel-header" style="flex-wrap: wrap; gap: 16px;">
+          <div class="panel-title">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; background: rgba(16, 35, 63, 0.1); color: var(--color-primary);">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                </svg>
+              </span>
+              <h3 style="margin: 0;">ระบบคำนวณอัตรากำลังครูและประมาณการงบประมาณรายหัว (Teacher Staffing & Capitation Grant Estimator)</h3>
+            </div>
+            <p style="margin-top: 4px;">การประมาณการกรอบอัตรากำลังข้าราชการครูตามเกณฑ์ ก.ค.ศ. (ว23/2563) และการจัดสรรเงินอุดหนุนรายหัว สพฐ. ประจำปี</p>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-left: auto;">
+            <button id="exportResourceExcelBtn" class="primary-btn" style="background: var(--color-primary); border-color: var(--color-primary); font-size: 12.5px; padding: 7px 14px; cursor: pointer; display: inline-flex; align-items: center;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              ส่งออกรายงานทรัพยากร (Excel)
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 Resource KPI Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+          <div class="kpi-card" style="border-left: 4px solid var(--color-primary); flex-direction: column; align-items: flex-start; gap: 6px; width: 100%;">
+            <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 500;">ประมาณการเงินอุดหนุนรายหัวรวม สพฐ.</span>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span id="resourceKpiTotalGrant" style="font-size: 24px; font-weight: 700; color: var(--color-primary);">179.63 ล้านบาท</span>
+              <span class="trend-badge positive" style="font-size: 11px;">ประจำปี 2569</span>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted);" id="resourceKpiTotalGrantSub">ม.ต้น 91.21M บ. | ม.ปลาย 88.43M บ.</span>
+          </div>
+
+          <div class="kpi-card" style="border-left: 4px solid var(--color-gold); flex-direction: column; align-items: flex-start; gap: 6px; width: 100%;">
+            <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 500;">กรอบอัตรากำลังครูและผู้บริหารพึงมี</span>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span id="resourceKpiStaffTotal" style="font-size: 24px; font-weight: 700; color: var(--color-gold);">2,348 อัตรา</span>
+              <span class="trend-badge stable" style="font-size: 11px;">เกณฑ์ ก.ค.ศ.</span>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted);" id="resourceKpiStaffSub">คำนวณจาก 1,392 ห้องเรียนจริง (45 โรงเรียน)</span>
+          </div>
+
+          <div class="kpi-card" style="border-left: 4px solid var(--color-success); flex-direction: column; align-items: flex-start; gap: 6px; width: 100%;">
+            <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 500;">สัดส่วนนักเรียนต่อครูเฉลี่ยทั้งเขต</span>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span style="font-size: 24px; font-weight: 700; color: var(--color-success);">19.0 : 1</span>
+              <span class="trend-badge positive" style="font-size: 11px;">เกณฑ์มาตรฐาน</span>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted);">มาตรฐาน สพฐ. 18 - 20 คนต่อครู 1 คน</span>
+          </div>
+
+          <div class="kpi-card" style="border-left: 4px solid var(--color-error); flex-direction: column; align-items: flex-start; gap: 6px; width: 100%;">
+            <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 500;">ผลกระทบงบประมาณจากการหลุดระหว่างเทอม</span>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span id="resourceKpiBudgetDiff" style="font-size: 24px; font-weight: 700; color: var(--color-error);">-1,023,100 บาท</span>
+              <span class="trend-badge negative" style="font-size: 11px;">-252 คน</span>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted);">เทอม 1 ➔ เทอม 2 ปี 2569</span>
+          </div>
+        </div>
+
+        <!-- Mode Switcher Tabs for Resource View -->
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 5px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+          <div class="cluster-tabs-container" style="margin: 0;">
+            <button class="cluster-tab-btn active resource-view-btn" data-view="staffing">เกณฑ์อัตรากำลังครู (ก.ค.ศ.)</button>
+            <button class="cluster-tab-btn resource-view-btn" data-view="budget">ประมาณการเงินอุดหนุนรายหัว (สพฐ.)</button>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <input type="text" id="resourceSearchInput" class="control-select" style="padding: 6px 12px; font-size: 12px; min-width: 170px;" placeholder="ค้นหาโรงเรียน...">
+          </div>
+        </div>
+
+        <!-- Charts Grid (Side-by-Side) -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 16px;">
+          <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; background: var(--bg-card); display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <h4 id="resourceChartTitle1" style="font-size: 13px; font-weight: 700; color: var(--text-main); margin: 0;">
+                🏫 กรอบอัตรากำลังครูพึงมี จำแนกตามขนาดโรงเรียน (S / M / L / XL)
+              </h4>
+            </div>
+            <div style="height: 240px; position: relative;">
+              <canvas id="resourceChartStaff"></canvas>
+            </div>
+          </div>
+
+          <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; background: var(--bg-card); display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <h4 id="resourceChartTitle2" style="font-size: 13px; font-weight: 700; color: var(--text-main); margin: 0;">
+                💰 การจัดสรรเงินอุดหนุนรายหัว จำแนกตามระดับชั้น (ม.ต้น vs ม.ปลาย)
+              </h4>
+            </div>
+            <div style="height: 240px; position: relative;">
+              <canvas id="resourceChartBudget"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resource Table -->
+        <div class="responsive-table-wrapper" style="margin-top: 5px;">
+          <table class="dashboard-table" id="resourceDataTable" style="font-size: 12.5px;">
+            <thead>
+              <tr id="resourceTableHeaderRow">
+                <th style="width: 45px; text-align: center;">ลำดับ</th>
+                <th style="text-align: left;">ชื่อโรงเรียน</th>
+                <th style="text-align: center;">ขนาด</th>
+                <th style="text-align: right;">นักเรียนรวม (คน)</th>
+                <th style="text-align: center;">ห้องเรียน</th>
+                <th style="text-align: center; color: var(--color-primary); font-weight: 700;">กรอบครูพึงมี (อัตรา)</th>
+                <th style="text-align: center;">นร./ครู</th>
+                <th style="text-align: right; color: var(--color-gold); font-weight: 700;">เงินอุดหนุนรวม (บาท)</th>
+                <th style="text-align: left;">สถานะทรัพยากร</th>
+              </tr>
+            </thead>
+            <tbody id="resourceTableBody">
+              <!-- Populated dynamically by app.js -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Step 5: Executive Policy Brief & Decision Support Section -->
+      <section class="table-panel" id="executiveBriefSection" style="display: flex; flex-direction: column; gap: 20px; border: 2px solid var(--color-gold); background: linear-gradient(180deg, rgba(250, 245, 236, 0.5) 0%, #ffffff 100%);">
+        <div class="panel-header" style="flex-wrap: wrap; gap: 16px; border-bottom: 2px solid var(--color-gold); padding-bottom: 16px;">
+          <div class="panel-title">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; background: var(--color-gold); color: #ffffff;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+              </span>
+              <div>
+                <h3 style="margin: 0; font-size: 18px; color: var(--color-primary);">บทสรุปเชิงนโยบายสำหรับผู้บริหารระดับสูง (Executive Policy Brief)</h3>
+                <p style="margin: 2px 0 0 0; font-size: 12.5px; color: var(--text-muted);">สรุป 5 มิติยุทธศาสตร์การศึกษา สพม.สกลนคร พร้อมข้อสั่งการและข้อมูลสำหรับที่ประชุม กศจ. / สพฐ.</p>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-left: auto;">
+            <button id="btnExecutivePrintPdf" class="primary-btn" style="background: var(--color-primary); border-color: var(--color-primary); font-size: 12.5px; padding: 7px 14px; cursor: pointer; display: inline-flex; align-items: center;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              พิมพ์บทสรุปผู้บริหาร (PDF)
+            </button>
+            <button id="btnExecutiveMasterExcel" class="primary-btn" style="background: var(--color-gold); border-color: var(--color-gold); font-size: 12.5px; padding: 7px 14px; cursor: pointer; display: inline-flex; align-items: center;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              ส่งออกสมุดรายงานรวม 6 ชีต (Master Excel)
+            </button>
+          </div>
+        </div>
+
+        <!-- 5 Strategic Pillars Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+          <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; background: #ffffff; display: flex; flex-direction: column; gap: 4px; border-top: 3px solid var(--color-primary);">
+            <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">1. ประชากรนักเรียนรวม</span>
+            <span style="font-size: 20px; font-weight: 700; color: var(--color-primary);">44,566 คน</span>
+            <span style="font-size: 10.5px; color: var(--text-muted);">45 โรงเรียน / 1,392 ห้อง</span>
+          </div>
+
+          <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; background: #ffffff; display: flex; flex-direction: column; gap: 4px; border-top: 3px solid var(--color-success);">
+            <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">2. อัตราคงอยู่ (Zero Dropout)</span>
+            <span style="font-size: 20px; font-weight: 700; color: var(--color-success);">99.44%</span>
+            <span style="font-size: 10.5px; color: var(--text-muted);">หลุดกลางคัน -252 คน (ดีขึ้น)</span>
+          </div>
+
+          <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; background: #ffffff; display: flex; flex-direction: column; gap: 4px; border-top: 3px solid var(--color-gold);">
+            <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">3. สัดส่วนนักเรียนในเมือง</span>
+            <span style="font-size: 20px; font-weight: 700; color: var(--color-gold);">34.2%</span>
+            <span style="font-size: 10.5px; color: var(--text-muted);">เมือง 15.2k : รอบนอก 29.3k</span>
+          </div>
+
+          <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; background: #ffffff; display: flex; flex-direction: column; gap: 4px; border-top: 3px solid var(--brand-700);">
+            <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">4. คาดการณ์ปี 2570</span>
+            <span style="font-size: 20px; font-weight: 700; color: var(--text-main);">43,899 คน</span>
+            <span style="font-size: 10.5px; color: var(--text-muted);">ลดลง -667 คน (-1.5%)</span>
+          </div>
+
+          <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; background: #ffffff; display: flex; flex-direction: column; gap: 4px; border-top: 3px solid var(--color-primary);">
+            <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">5. งบประมาณอุดหนุนรวม</span>
+            <span style="font-size: 20px; font-weight: 700; color: var(--color-primary);">179.63 ล้านบาท</span>
+            <span style="font-size: 10.5px; color: var(--text-muted);">กรอบครูพึงมี 2,348 อัตรา</span>
+          </div>
+        </div>
+
+        <!-- 4 Actionable Directives for District Director -->
+        <div style="border: 1px solid rgba(194, 142, 56, 0.3); border-radius: var(--radius-md); padding: 18px; background: rgba(250, 245, 236, 0.5); display: flex; flex-direction: column; gap: 12px;">
+          <h4 style="font-size: 14px; font-weight: 700; color: var(--color-primary); margin: 0; display: flex; align-items: center; gap: 6px;">
+            <span style="color: var(--color-gold);">📋</span> ข้อสั่งการและทิศทางเชิงกลยุทธ์สำหรับผู้บริหาร สพม.สกลนคร
+          </h4>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; font-size: 12.5px;">
+            <div style="background: #ffffff; border-radius: 6px; padding: 12px; border-left: 3px solid var(--color-error); box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+              <div style="font-weight: 700; color: var(--color-error); margin-bottom: 4px;">1. มาตรการ Zero Dropout เชิงรุก</div>
+              <div style="color: var(--text-muted); line-height: 1.5;">มอบหมายกลุ่มส่งเสริมการจัดการศึกษา ลงพื้นที่ติดตามช่วยเหลือนักเรียนใน 3 โรงเรียนที่มีสถิติลดลงสูงสุดระหว่างภาคเรียน (เตรียมอุดมฯ นครราชสีมา/อีสาน -42 คน, ธาตุนารายณ์ฯ -39 คน, มัธยมวานรนิวาส -31 คน)</div>
+            </div>
+
+            <div style="background: #ffffff; border-radius: 6px; padding: 12px; border-left: 3px solid var(--color-gold); box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+              <div style="font-weight: 700; color: var(--color-gold); margin-bottom: 4px;">2. การวางแผนรับนักเรียน ม.1 / ม.4 ปี 2570</div>
+              <div style="color: var(--text-muted); line-height: 1.5;">กำหนดเป้าหมายรับ ม.1 แรกเข้าที่ 7,120 คน (225 ห้อง) และ ม.4 ที่ 7,370 คน (235 ห้อง) ปรับขนาดห้องเรียนให้ได้มาตรฐาน 32-35 คน/ห้อง เพื่อป้องกันห้องเรียนแออัดและห้องเรียนต่ำกว่าเกณฑ์</div>
+            </div>
+
+            <div style="background: #ffffff; border-radius: 6px; padding: 12px; border-left: 3px solid var(--color-primary); box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+              <div style="font-weight: 700; color: var(--color-primary); margin-bottom: 4px;">3. การเกลี่ยอัตรากำลังครูตามเกณฑ์ ก.ค.ศ.</div>
+              <div style="color: var(--text-muted); line-height: 1.5;">บริหารจัดการอัตรากำลังข้าราชการครู 2,348 ตำแหน่ง โดยพิจารณาเกลี่ยอัตรากำลังจากโรงเรียนที่มีสัดส่วน นร./ครู ต่ำกว่า 15:1 ไปสนับสนุนโรงเรียนที่มีสัดส่วนเกิน 25:1 (เช่น ธาตุนารายณ์วิทยา และ สกลราชวิทยานุกูล)</div>
+            </div>
+
+            <div style="background: #ffffff; border-radius: 6px; padding: 12px; border-left: 3px solid var(--color-success); box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+              <div style="font-weight: 700; color: var(--color-success); margin-bottom: 4px;">4. การเสริมสร้างเครือข่ายโรงเรียนขนาดเล็ก</div>
+              <div style="color: var(--text-muted); line-height: 1.5;">ยกระดับโรงเรียนขนาดเล็ก (< 120 คน เช่น รร.นิคมน้ำอูนเจริญวิทยา และ รร.เทพสวัสดิ์วิทยา) โดยนำโมเดลการใช้ทรัพยากรร่วมกัน (Resource Sharing) ภายในสหวิทยาเขตวาริช-พังโคน-น้ำอูน</div>
+            </div>
           </div>
         </div>
       </section>
