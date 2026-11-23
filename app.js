@@ -41,9 +41,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Helper for human-readable period labels
   function getPeriodLabel(pKey) {
-    if (pKey === 'y68') return 'ปี 2568';
+    if (pKey === 'y68' || pKey === 'y68_1') return '2568 เทอม 1';
+    if (pKey === 'y68_2') return '2568 เทอม 2';
+    if (pKey === 'y68_3') return '2568 สิ้นปี';
     if (pKey === 'y69_1') return '2569 เทอม 1';
     if (pKey === 'y69_2') return '2569 เทอม 2';
+    return pKey;
+  }
+
+  function getPeriodFullLabel(pKey) {
+    if (pKey === 'y68' || pKey === 'y68_1') return 'ปี 2568 เทอม 1 (10 มิ.ย. 68)';
+    if (pKey === 'y68_2') return 'ปี 2568 เทอม 2 (10 พ.ย. 68)';
+    if (pKey === 'y68_3') return 'ปี 2568 สิ้นปี (30 เม.ย. 69)';
+    if (pKey === 'y69_1') return 'ปี 2569 เทอม 1 (10 มิ.ย. 69)';
+    if (pKey === 'y69_2') return 'ปี 2569 เทอม 2 (10 พ.ย. 69)';
     return pKey;
   }
   let currentSortKey = 'change';
@@ -630,17 +641,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const initStat = () => ({
       students: 0, rooms: 0, male: 0, female: 0,
-      grades: { ม1: 0, ม2: 0, ม3: 0, ม4: 0, ม5: 0, ม6: 0 },
-      roomsGrades: { ม1: 0, ม2: 0, ม3: 0, ม4: 0, ม5: 0, ม6: 0 }
+      grades: {
+        ม1: { m: 0, f: 0, total: 0, rooms: 0 },
+        ม2: { m: 0, f: 0, total: 0, rooms: 0 },
+        ม3: { m: 0, f: 0, total: 0, rooms: 0 },
+        ม4: { m: 0, f: 0, total: 0, rooms: 0 },
+        ม5: { m: 0, f: 0, total: 0, rooms: 0 },
+        ม6: { m: 0, f: 0, total: 0, rooms: 0 }
+      },
+      levels: {
+        มต้น: { m: 0, f: 0, total: 0, rooms: 0 },
+        มปลาย: { m: 0, f: 0, total: 0, rooms: 0 }
+      }
     });
 
     let stats = {
       y68: initStat(),
+      y68_1: initStat(),
+      y68_2: initStat(),
+      y68_3: initStat(),
       y69_1: initStat(),
-      y69_2: initStat(),
-      68: null,
-      '69_1': null,
-      '69_2': null
+      y69_2: initStat()
     };
 
     const accumulate = (target, pData) => {
@@ -658,18 +679,41 @@ document.addEventListener('DOMContentLoaded', () => {
         target.female += lvlData.f;
       }
       for (let i = 1; i <= 6; i++) {
-        target.grades[`ม${i}`] += pData.grades[`ม${i}`].total;
-        target.roomsGrades[`ม${i}`] += pData.grades[`ม${i}`].rooms;
+        const gKey = `ม${i}`;
+        if (pData.grades && pData.grades[gKey]) {
+          target.grades[gKey].m += pData.grades[gKey].m;
+          target.grades[gKey].f += pData.grades[gKey].f;
+          target.grades[gKey].total += pData.grades[gKey].total;
+          target.grades[gKey].rooms += pData.grades[gKey].rooms;
+        }
+      }
+      if (pData.levels?.มต้น) {
+        target.levels.มต้น.m += pData.levels.มต้น.m;
+        target.levels.มต้น.f += pData.levels.มต้น.f;
+        target.levels.มต้น.total += pData.levels.มต้น.total;
+        target.levels.มต้น.rooms += pData.levels.มต้น.rooms;
+      }
+      if (pData.levels?.มปลาย) {
+        target.levels.มปลาย.m += pData.levels.มปลาย.m;
+        target.levels.มปลาย.f += pData.levels.มปลาย.f;
+        target.levels.มปลาย.total += pData.levels.มปลาย.total;
+        target.levels.มปลาย.rooms += pData.levels.มปลาย.rooms;
       }
     };
 
     filteredSchools.forEach(sch => {
-      accumulate(stats.y68, sch.y68);
+      accumulate(stats.y68, sch.y68 || sch.y68_1);
+      accumulate(stats.y68_1, sch.y68_1 || sch.y68);
+      accumulate(stats.y68_2, sch.y68_2);
+      accumulate(stats.y68_3, sch.y68_3);
       accumulate(stats.y69_1, sch.y69_1);
       accumulate(stats.y69_2, sch.y69_2);
     });
 
-    stats[68] = stats.y68;
+    stats[68] = stats.y68_1;
+    stats['68_1'] = stats.y68_1;
+    stats['68_2'] = stats.y68_2;
+    stats['68_3'] = stats.y68_3;
     stats['69_1'] = stats.y69_1;
     stats['69_2'] = stats.y69_2;
     stats[69] = stats[targetPeriod] || stats.y69_2;
@@ -781,25 +825,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const getGradeArray = (pKey) => {
       const g = (stats[pKey] || stats.y68).grades;
-      if (selectedLevel === 'ALL') return [g.ม1, g.ม2, g.ม3, g.ม4, g.ม5, g.ม6];
-      if (selectedLevel === 'มต้น') return [g.ม1, g.ม2, g.ม3];
-      return [g.ม4, g.ม5, g.ม6];
+      if (selectedLevel === 'ALL') return [g.ม1.total, g.ม2.total, g.ม3.total, g.ม4.total, g.ม5.total, g.ม6.total];
+      if (selectedLevel === 'มต้น') return [g.ม1.total, g.ม2.total, g.ม3.total];
+      return [g.ม4.total, g.ม5.total, g.ม6.total];
     };
 
     const getRoomsArray = (pKey) => {
-      const r = (stats[pKey] || stats.y68).roomsGrades;
-      if (selectedLevel === 'ALL') return [r.ม1, r.ม2, r.ม3, r.ม4, r.ม5, r.ม6];
-      if (selectedLevel === 'มต้น') return [r.ม1, r.ม2, r.ม3];
-      return [r.ม4, r.ม5, r.ม6];
+      const g = (stats[pKey] || stats.y68).grades;
+      if (selectedLevel === 'ALL') return [g.ม1.rooms, g.ม2.rooms, g.ม3.rooms, g.ม4.rooms, g.ม5.rooms, g.ม6.rooms];
+      if (selectedLevel === 'มต้น') return [g.ม1.rooms, g.ม2.rooms, g.ม3.rooms];
+      return [g.ม4.rooms, g.ม5.rooms, g.ม6.rooms];
     };
 
     const getDensityArray = (pKey) => {
       const getRatio = (std, rms) => rms > 0 ? Number((std / rms).toFixed(1)) : 0;
       const g = (stats[pKey] || stats.y68).grades;
-      const r = (stats[pKey] || stats.y68).roomsGrades;
-      if (selectedLevel === 'ALL') return [getRatio(g.ม1, r.ม1), getRatio(g.ม2, r.ม2), getRatio(g.ม3, r.ม3), getRatio(g.ม4, r.ม4), getRatio(g.ม5, r.ม5), getRatio(g.ม6, r.ม6)];
-      if (selectedLevel === 'มต้น') return [getRatio(g.ม1, r.ม1), getRatio(g.ม2, r.ม2), getRatio(g.ม3, r.ม3)];
-      return [getRatio(g.ม4, r.ม4), getRatio(g.ม5, r.ม5), getRatio(g.ม6, r.ม6)];
+      if (selectedLevel === 'ALL') return [
+        getRatio(g.ม1.total, g.ม1.rooms),
+        getRatio(g.ม2.total, g.ม2.rooms),
+        getRatio(g.ม3.total, g.ม3.rooms),
+        getRatio(g.ม4.total, g.ม4.rooms),
+        getRatio(g.ม5.total, g.ม5.rooms),
+        getRatio(g.ม6.total, g.ม6.rooms)
+      ];
+      if (selectedLevel === 'มต้น') return [
+        getRatio(g.ม1.total, g.ม1.rooms),
+        getRatio(g.ม2.total, g.ม2.rooms),
+        getRatio(g.ม3.total, g.ม3.rooms)
+      ];
+      return [
+        getRatio(g.ม4.total, g.ม4.rooms),
+        getRatio(g.ม5.total, g.ม5.rooms),
+        getRatio(g.ม6.total, g.ม6.rooms)
+      ];
     };
 
     if (selectedLevel === 'ALL') {
@@ -928,15 +986,90 @@ document.addEventListener('DOMContentLoaded', () => {
               color: gridColor,
               drawBorder: false
             },
+            grace: '8%',
             ticks: {
               color: textColor,
               font: { family: 'Google Sans, Sarabun', size: 11 },
-              callback: (val) => val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val
+              callback: (val) => val.toLocaleString()
             }
           }
         }
       }
     });
+
+    // Dynamic calculations for Executive Summary Ribbon under Chart
+    const bObj = stats[basePeriod] || stats.y68;
+    const tObj = stats[targetPeriod] || stats.y69_2;
+
+    const mtonBase = (bObj.grades?.ม1?.total || 0) + (bObj.grades?.ม2?.total || 0) + (bObj.grades?.ม3?.total || 0);
+    const mtonTarget = (tObj.grades?.ม1?.total || 0) + (tObj.grades?.ม2?.total || 0) + (tObj.grades?.ม3?.total || 0);
+    const mtonDiff = mtonTarget - mtonBase;
+    const mtonPct = mtonBase > 0 ? (mtonDiff / mtonBase) * 100 : 0;
+
+    const mplaiBase = (bObj.grades?.ม4?.total || 0) + (bObj.grades?.ม5?.total || 0) + (bObj.grades?.ม6?.total || 0);
+    const mplaiTarget = (tObj.grades?.ม4?.total || 0) + (tObj.grades?.ม5?.total || 0) + (tObj.grades?.ม6?.total || 0);
+    const mplaiDiff = mplaiTarget - mplaiBase;
+    const mplaiPct = mplaiBase > 0 ? (mplaiDiff / mplaiBase) * 100 : 0;
+
+    // Peak Grade in target period
+    const tGrades = tObj.grades || {};
+    let peakGradeName = 'ม.1';
+    let peakGradeVal = 0;
+    ['ม1', 'ม2', 'ม3', 'ม4', 'ม5', 'ม6'].forEach(g => {
+      const val = tGrades[g]?.total || 0;
+      if (val > peakGradeVal) {
+        peakGradeVal = val;
+        peakGradeName = g.replace('ม', 'ม.');
+      }
+    });
+    const totalStdTarget = tObj.students || (mtonTarget + mplaiTarget) || 1;
+    const peakPct = (peakGradeVal / totalStdTarget) * 100;
+
+    // Gender breakdown in target period
+    const mTotal = tObj.male || 0;
+    const fTotal = tObj.female || 0;
+    const sumGender = (mTotal + fTotal) || totalStdTarget;
+    const mPct = (mTotal / sumGender) * 100;
+    const fPct = (fTotal / sumGender) * 100;
+
+    const elMtonVal = document.getElementById('summaryMtonVal');
+    const elMtonSub = document.getElementById('summaryMtonSub');
+    const elMplaiVal = document.getElementById('summaryMplaiVal');
+    const elMplaiSub = document.getElementById('summaryMplaiSub');
+    const elPeakVal = document.getElementById('summaryPeakGradeVal');
+    const elPeakSub = document.getElementById('summaryPeakGradeSub');
+    const elGenderVal = document.getElementById('summaryGenderRatioVal');
+    const elGenderSub = document.getElementById('summaryGenderRatioSub');
+
+    if (elMtonVal) elMtonVal.textContent = `${mtonTarget.toLocaleString()} คน`;
+    if (elMtonSub) {
+      if (basePeriod !== targetPeriod) {
+        const sign = mtonDiff >= 0 ? '+' : '';
+        elMtonSub.textContent = `${sign}${mtonDiff.toLocaleString()} คน (${sign}${mtonPct.toFixed(1)}%)`;
+        elMtonSub.style.color = mtonDiff < 0 ? 'var(--color-error)' : (mtonDiff > 0 ? 'var(--color-success)' : 'var(--text-muted)');
+      } else {
+        elMtonSub.textContent = 'รอบฐานเปรียบเทียบ';
+        elMtonSub.style.color = 'var(--text-muted)';
+      }
+    }
+
+    if (elMplaiVal) elMplaiVal.textContent = `${mplaiTarget.toLocaleString()} คน`;
+    if (elMplaiSub) {
+      if (basePeriod !== targetPeriod) {
+        const sign = mplaiDiff >= 0 ? '+' : '';
+        elMplaiSub.textContent = `${sign}${mplaiDiff.toLocaleString()} คน (${sign}${mplaiPct.toFixed(1)}%)`;
+        elMplaiSub.style.color = mplaiDiff < 0 ? 'var(--color-error)' : (mplaiDiff > 0 ? 'var(--color-success)' : 'var(--text-muted)');
+      } else {
+        elMplaiSub.textContent = 'รอบฐานเปรียบเทียบ';
+        elMplaiSub.style.color = 'var(--text-muted)';
+      }
+    }
+
+    if (elPeakVal) elPeakVal.textContent = `${peakGradeName} (${peakGradeVal.toLocaleString()} คน)`;
+    if (elPeakSub) elPeakSub.textContent = `สัดส่วน ${peakPct.toFixed(1)}% ของทั้งหมด`;
+
+    if (elGenderVal) elGenderVal.textContent = `ชาย ${mPct.toFixed(0)}% : หญิง ${fPct.toFixed(0)}%`;
+    if (elGenderSub) elGenderSub.textContent = `ชาย ${mTotal.toLocaleString()} / หญิง ${fTotal.toLocaleString()} คน`;
   }
 
   // Render Top 5 Schools progress bars (Asset list style)
@@ -1385,9 +1518,17 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const gradesCtx = document.getElementById('modalGradesChart').getContext('2d');
     const grades = ['ม1', 'ม2', 'ม3', 'ม4', 'ม5', 'ม6'];
-    const data68 = grades.map(g => school.y68.grades[g] ? school.y68.grades[g].total : 0);
-    const data69_1 = grades.map(g => school.y69_1.grades[g] ? school.y69_1.grades[g].total : 0);
-    const data69_2 = grades.map(g => school.y69_2.grades[g] ? school.y69_2.grades[g].total : 0);
+    const p68_1 = school.y68_1 || school.y68;
+    const p68_2 = school.y68_2 || p68_1;
+    const p68_3 = school.y68_3 || p68_2;
+    const p69_1 = school.y69_1;
+    const p69_2 = school.y69_2;
+
+    const data68_1 = grades.map(g => p68_1.grades[g] ? p68_1.grades[g].total : 0);
+    const data68_2 = grades.map(g => p68_2.grades[g] ? p68_2.grades[g].total : 0);
+    const data68_3 = grades.map(g => p68_3.grades[g] ? p68_3.grades[g].total : 0);
+    const data69_1 = grades.map(g => p69_1.grades[g] ? p69_1.grades[g].total : 0);
+    const data69_2 = grades.map(g => p69_2.grades[g] ? p69_2.grades[g].total : 0);
 
     modalGradesChart = new Chart(gradesCtx, {
       type: 'bar',
@@ -1395,22 +1536,34 @@ document.addEventListener('DOMContentLoaded', () => {
         labels: ['ม.1', 'ม.2', 'ม.3', 'ม.4', 'ม.5', 'ม.6'],
         datasets: [
           {
-            label: 'ปี 2568',
-            data: data68,
-            backgroundColor: '#98989d',
-            borderRadius: 4
+            label: '68/1 (10 มิ.ย. 68)',
+            data: data68_1,
+            backgroundColor: '#E2BA6E',
+            borderRadius: 3
           },
           {
-            label: '2569 เทอม 1',
+            label: '68/2 (10 พ.ย. 68)',
+            data: data68_2,
+            backgroundColor: '#C28E38',
+            borderRadius: 3
+          },
+          {
+            label: '68/3 สิ้นปี (30 เม.ย. 69)',
+            data: data68_3,
+            backgroundColor: '#94651E',
+            borderRadius: 3
+          },
+          {
+            label: '69/1 (10 มิ.ย. 69)',
             data: data69_1,
-            backgroundColor: '#0284c7',
-            borderRadius: 4
+            backgroundColor: '#2563EB',
+            borderRadius: 3
           },
           {
-            label: '2569 เทอม 2',
+            label: '69/2 (10 พ.ย. 69)',
             data: data69_2,
             backgroundColor: currentPrimaryColor,
-            borderRadius: 4
+            borderRadius: 3
           }
         ]
       },
@@ -1830,7 +1983,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnExportExcel = document.getElementById('btnExportExcel');
     const excelDropdownMenu = document.getElementById('excelDropdownMenu');
     const exportActiveViewBtn = document.getElementById('exportActiveViewBtn');
-    const exportY68Btn = document.getElementById('exportY68Btn');
+    const exportY68_1Btn = document.getElementById('exportY68_1Btn');
+    const exportY68_2Btn = document.getElementById('exportY68_2Btn');
+    const exportY68_3Btn = document.getElementById('exportY68_3Btn');
     const exportY69_1Btn = document.getElementById('exportY69_1Btn');
     const exportY69_2Btn = document.getElementById('exportY69_2Btn');
     const exportAllPeriodsBtn = document.getElementById('exportAllPeriodsBtn');
@@ -2052,82 +2207,102 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const wb = XLSX.utils.book_new();
 
-      // 1. Overview Comparison Sheet
+      // 1. Overview Comparison Sheet with 5 Periods
       const overviewRows = [
         ['ศูนย์สารสนเทศและระบบวิเคราะห์เปรียบเทียบสถิตินักเรียน สพม.สกลนคร (DMC Hub)'],
-        ['รายงานสรุปเปรียบเทียบสถิตินักเรียน 3 รอบข้อมูล (ปี 2568, 2569 เทอม 1, 2569 เทอม 2)'],
+        ['รายงานสรุปเปรียบเทียบสถิตินักเรียนครบทุก 5 รอบข้อมูล (ปี 2568/1, 2568/2, 2568/3 สิ้นปี, 2569/1, 2569/2)'],
         [`วันที่ส่งออกข้อมูล: ${new Date().toLocaleDateString('th-TH')}`],
         [],
         [
           'ลำดับ', 'ชื่อโรงเรียน', 'อำเภอ', 'ขนาด',
-          'นักเรียน 2568', 'ห้อง 2568',
-          '2569 เทอม 1', 'ห้อง 69/1',
-          '2569 เทอม 2', 'ห้อง 69/2',
-          'ผลต่าง (69/1 ➔ 69/2)', '% เปลี่ยนแปลง',
-          'ผลต่าง (68 ➔ 69/2)', '% เปลี่ยนแปลง'
+          'นร. 68/1', 'ห้อง 68/1',
+          'นร. 68/2', 'ห้อง 68/2',
+          'นร. 68/3 (สิ้นปี)', 'ห้อง 68/3',
+          'นร. 69/1', 'ห้อง 69/1',
+          'นร. 69/2', 'ห้อง 69/2',
+          'ผลต่าง (69/1 ➔ 69/2)', '% เปลี่ยนแปลง (เทอม)',
+          'ผลต่าง (68/1 ➔ 69/2)', '% เปลี่ยนแปลง (2 ปี)'
         ]
       ];
 
-      let t68 = 0, r68 = 0, t69_1 = 0, r69_1 = 0, t69_2 = 0, r69_2 = 0;
+      let t68_1 = 0, r68_1 = 0;
+      let t68_2 = 0, r68_2 = 0;
+      let t68_3 = 0, r68_3 = 0;
+      let t69_1 = 0, r69_1 = 0;
+      let t69_2 = 0, r69_2 = 0;
 
       DASHBOARD_DATA.forEach((s, idx) => {
-        const s68 = s.y68?.total?.total || 0;
-        const ro68 = s.y68?.total?.rooms || 0;
-        const s69_1 = s.y69_1?.total?.total || 0;
-        const ro69_1 = s.y69_1?.total?.rooms || 0;
-        const s69_2 = s.y69_2?.total?.total || 0;
-        const ro69_2 = s.y69_2?.total?.rooms || 0;
+        const p68_1 = s.y68_1 || s.y68 || {};
+        const p68_2 = s.y68_2 || p68_1;
+        const p68_3 = s.y68_3 || p68_2;
+        const p69_1 = s.y69_1 || {};
+        const p69_2 = s.y69_2 || {};
+
+        const s68_1 = p68_1.total?.total || 0; const ro68_1 = p68_1.total?.rooms || 0;
+        const s68_2 = p68_2.total?.total || 0; const ro68_2 = p68_2.total?.rooms || 0;
+        const s68_3 = p68_3.total?.total || 0; const ro68_3 = p68_3.total?.rooms || 0;
+        const s69_1 = p69_1.total?.total || 0; const ro69_1 = p69_1.total?.rooms || 0;
+        const s69_2 = p69_2.total?.total || 0; const ro69_2 = p69_2.total?.rooms || 0;
 
         const diffTerm = s69_2 - s69_1;
         const pctTerm = s69_1 > 0 ? (diffTerm / s69_1) * 100 : 0;
-        const diffYear = s69_2 - s68;
-        const pctYear = s68 > 0 ? (diffYear / s68) * 100 : 0;
+        const diff2Year = s69_2 - s68_1;
+        const pct2Year = s68_1 > 0 ? (diff2Year / s68_1) * 100 : 0;
 
-        t68 += s68; r68 += ro68;
+        t68_1 += s68_1; r68_1 += ro68_1;
+        t68_2 += s68_2; r68_2 += ro68_2;
+        t68_3 += s68_3; r68_3 += ro68_3;
         t69_1 += s69_1; r69_1 += ro69_1;
         t69_2 += s69_2; r69_2 += ro69_2;
 
         overviewRows.push([
-          idx + 1, s.name, s.district || '', s.size || '',
-          s68, ro68,
+          idx + 1, s.name, s.district || '', getSchoolSize(s),
+          s68_1, ro68_1,
+          s68_2, ro68_2,
+          s68_3, ro68_3,
           s69_1, ro69_1,
           s69_2, ro69_2,
           diffTerm, Number(pctTerm.toFixed(2)),
-          diffYear, Number(pctYear.toFixed(2))
+          diff2Year, Number(pct2Year.toFixed(2))
         ]);
       });
 
       const sumDiffTerm = t69_2 - t69_1;
       const sumPctTerm = t69_1 > 0 ? (sumDiffTerm / t69_1) * 100 : 0;
-      const sumDiffYear = t69_2 - t68;
-      const sumPctYear = t68 > 0 ? (sumDiffYear / t68) * 100 : 0;
+      const sumDiff2Year = t69_2 - t68_1;
+      const sumPct2Year = t68_1 > 0 ? (sumDiff2Year / t68_1) * 100 : 0;
 
       overviewRows.push([
-        '', 'รวมทั้งเขต (45 โรงเรียน)', '', '',
-        t68, r68,
+        '', 'รวมทั้งเขตพื้นที่การศึกษา (45 โรงเรียน)', '', '',
+        t68_1, r68_1,
+        t68_2, r68_2,
+        t68_3, r68_3,
         t69_1, r69_1,
         t69_2, r69_2,
         sumDiffTerm, Number(sumPctTerm.toFixed(2)),
-        sumDiffYear, Number(sumPctYear.toFixed(2))
+        sumDiff2Year, Number(sumPct2Year.toFixed(2))
       ]);
 
       const wsOverview = XLSX.utils.aoa_to_sheet(overviewRows);
       XLSX.utils.book_append_sheet(wb, wsOverview, 'สรุปเปรียบเทียบทุกรอบ');
 
-      // 2. Individual Period Sheets
+      // 2. Individual Period Sheets (5 Periods)
       const periods = [
-        { key: 'y68', name: 'ปี 2568' },
-        { key: 'y69_1', name: '2569 เทอม 1' },
-        { key: 'y69_2', name: '2569 เทอม 2' }
+        { key: 'y68_1', name: '2568 เทอม 1 (10 มิ.ย. 68)' },
+        { key: 'y68_2', name: '2568 เทอม 2 (10 พ.ย. 68)' },
+        { key: 'y68_3', name: '2568 สิ้นปี (30 เม.ย. 69)' },
+        { key: 'y69_1', name: '2569 เทอม 1 (10 มิ.ย. 69)' },
+        { key: 'y69_2', name: '2569 เทอม 2 (10 พ.ย. 69)' }
       ];
 
       periods.forEach(p => {
         const rows = getPeriodSheetRows(p.key, p.name);
         const ws = XLSX.utils.aoa_to_sheet(rows);
-        XLSX.utils.book_append_sheet(wb, ws, p.name);
+        const sheetName = p.name.replace(/[\/\*\[\]\?:]/g, '_').substring(0, 31);
+        XLSX.utils.book_append_sheet(wb, ws, sheetName);
       });
 
-      XLSX.writeFile(wb, 'DMC_Hub_SakonNakhon_Master_2568_2569.xlsx');
+      XLSX.writeFile(wb, 'DMC_Hub_SakonNakhon_Master_5Periods.xlsx');
       if (excelDropdownMenu) excelDropdownMenu.classList.remove('show');
     }
 
@@ -2135,14 +2310,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (exportActiveViewBtn) {
       exportActiveViewBtn.addEventListener('click', () => exportActiveComparisonExcel());
     }
-    if (exportY68Btn) {
-      exportY68Btn.addEventListener('click', () => exportSpecificPeriodExcel('y68', 'ปีการศึกษา 2568', 'DMC_Hub_Year2568_Full.xlsx'));
+    if (exportY68_1Btn) {
+      exportY68_1Btn.addEventListener('click', () => exportSpecificPeriodExcel('y68_1', 'ปี 2568 เทอม 1 (10 มิ.ย. 68)', 'DMC_Hub_Year2568_Term1_Full.xlsx'));
+    }
+    if (exportY68_2Btn) {
+      exportY68_2Btn.addEventListener('click', () => exportSpecificPeriodExcel('y68_2', 'ปี 2568 เทอม 2 (10 พ.ย. 68)', 'DMC_Hub_Year2568_Term2_Full.xlsx'));
+    }
+    if (exportY68_3Btn) {
+      exportY68_3Btn.addEventListener('click', () => exportSpecificPeriodExcel('y68_3', 'ปี 2568 สิ้นปี (30 เม.ย. 69)', 'DMC_Hub_Year2568_EndYear_Full.xlsx'));
     }
     if (exportY69_1Btn) {
-      exportY69_1Btn.addEventListener('click', () => exportSpecificPeriodExcel('y69_1', 'ปี 2569 เทอม 1', 'DMC_Hub_Year2569_Term1_Full.xlsx'));
+      exportY69_1Btn.addEventListener('click', () => exportSpecificPeriodExcel('y69_1', 'ปี 2569 เทอม 1 (10 มิ.ย. 69)', 'DMC_Hub_Year2569_Term1_Full.xlsx'));
     }
     if (exportY69_2Btn) {
-      exportY69_2Btn.addEventListener('click', () => exportSpecificPeriodExcel('y69_2', 'ปี 2569 เทอม 2', 'DMC_Hub_Year2569_Term2_Full.xlsx'));
+      exportY69_2Btn.addEventListener('click', () => exportSpecificPeriodExcel('y69_2', 'ปี 2569 เทอม 2 (10 พ.ย. 69)', 'DMC_Hub_Year2569_Term2_Full.xlsx'));
     }
     if (exportAllPeriodsBtn) {
       exportAllPeriodsBtn.addEventListener('click', () => exportAllPeriodsMasterExcel());

@@ -198,24 +198,38 @@
                     <small id="exportActiveLabel">รอบตั้งต้น ➔ รอบเปรียบเทียบ (45 โรงเรียน)</small>
                   </div>
                 </button>
-                <button class="dropdown-item" id="exportY68Btn">
+                <button class="dropdown-item" id="exportY68_1Btn">
                   <span class="dropdown-icon">📗</span>
                   <div class="dropdown-text">
-                    <strong>ข้อมูลปีการศึกษา 2568 (เต็มรูปแบบ)</strong>
+                    <strong>2568 เทอม 1 (10 มิ.ย. 68)</strong>
+                    <small>แจกแจง ม.1 - ม.6 (ชาย/หญิง/ห้องเรียน)</small>
+                  </div>
+                </button>
+                <button class="dropdown-item" id="exportY68_2Btn">
+                  <span class="dropdown-icon">📗</span>
+                  <div class="dropdown-text">
+                    <strong>2568 เทอม 2 (10 พ.ย. 68)</strong>
+                    <small>แจกแจง ม.1 - ม.6 (ชาย/หญิง/ห้องเรียน)</small>
+                  </div>
+                </button>
+                <button class="dropdown-item" id="exportY68_3Btn">
+                  <span class="dropdown-icon">📙</span>
+                  <div class="dropdown-text">
+                    <strong>2568 สิ้นปีการศึกษา (30 เม.ย. 69)</strong>
                     <small>แจกแจง ม.1 - ม.6 (ชาย/หญิง/ห้องเรียน)</small>
                   </div>
                 </button>
                 <button class="dropdown-item" id="exportY69_1Btn">
                   <span class="dropdown-icon">📘</span>
                   <div class="dropdown-text">
-                    <strong>ข้อมูลปี 2569 เทอม 1 (10 มิ.ย. 69)</strong>
+                    <strong>2569 เทอม 1 (10 มิ.ย. 69)</strong>
                     <small>แจกแจง ม.1 - ม.6 (ชาย/หญิง/ห้องเรียน)</small>
                   </div>
                 </button>
                 <button class="dropdown-item" id="exportY69_2Btn">
-                  <span class="dropdown-icon">📙</span>
+                  <span class="dropdown-icon">📘</span>
                   <div class="dropdown-text">
-                    <strong>ข้อมูลปี 2569 เทอม 2 (10 พ.ย. 69)</strong>
+                    <strong>2569 เทอม 2 (10 พ.ย. 69)</strong>
                     <small>แจกแจง ม.1 - ม.6 (ชาย/หญิง/ห้องเรียน)</small>
                   </div>
                 </button>
@@ -223,8 +237,8 @@
                 <button class="dropdown-item highlight" id="exportAllPeriodsBtn">
                   <span class="dropdown-icon">📑</span>
                   <div class="dropdown-text">
-                    <strong>ส่งออกรวมทุกรอบ (Master Workbook)</strong>
-                    <small>แยกหลาย Sheet (เปรียบเทียบ, 2568, 69/1, 69/2)</small>
+                    <strong>ส่งออกรวมครบทุก 5 รอบ (Master Workbook)</strong>
+                    <small>แยก 6 Sheet (สรุปเปรียบเทียบ, 68/1, 68/2, 68/3, 69/1, 69/2)</small>
                   </div>
                 </button>
               </div>
@@ -261,9 +275,11 @@
             <div class="pairwise-select-wrapper">
               <span class="pairwise-label">รอบตั้งต้น:</span>
               <select id="basePeriodSelect" class="pairwise-select" title="เลือกรอบฐานเปรียบเทียบ">
-                <option value="y68">ปี 2568</option>
-                <option value="y69_1" selected>2569 เทอม 1</option>
-                <option value="y69_2">2569 เทอม 2</option>
+                <option value="y68_1">2568 เทอม 1 (10 มิ.ย. 68)</option>
+                <option value="y68_2">2568 เทอม 2 (10 พ.ย. 68)</option>
+                <option value="y68_3">2568 สิ้นปี (30 เม.ย. 69)</option>
+                <option value="y69_1" selected>2569 เทอม 1 (10 มิ.ย. 69)</option>
+                <option value="y69_2">2569 เทอม 2 (10 พ.ย. 69)</option>
               </select>
             </div>
             
@@ -277,17 +293,22 @@
             <div class="pairwise-select-wrapper">
               <span class="pairwise-label">รอบเปรียบเทียบ:</span>
               <select id="targetPeriodSelect" class="pairwise-select" title="เลือกรอบเปรียบเทียบ">
-                <option value="y68">ปี 2568</option>
-                <option value="y69_1">2569 เทอม 1</option>
-                <option value="y69_2" selected>2569 เทอม 2</option>
+                <option value="y68_1">2568 เทอม 1 (10 มิ.ย. 68)</option>
+                <option value="y68_2">2568 เทอม 2 (10 พ.ย. 68)</option>
+                <option value="y68_3">2568 สิ้นปี (30 เม.ย. 69)</option>
+                <option value="y69_1">2569 เทอม 1 (10 มิ.ย. 69)</option>
+                <option value="y69_2" selected>2569 เทอม 2 (10 พ.ย. 69)</option>
               </select>
             </div>
 
             <!-- Quick Comparison Presets -->
             <div class="tab-group" id="quickComparePresets">
-              <button class="tab-control-btn preset-btn active" data-base="y69_1" data-target="y69_2" title="เปรียบเทียบการเปลี่ยนแปลงระหว่างเทอม 1 และ เทอม 2 ของปี 2569">🔄 เทียบเทอม (69/1 ➔ 69/2)</button>
-              <button class="tab-control-btn preset-btn" data-base="y68" data-target="y69_2" title="เปรียบเทียบการเปลี่ยนแปลงข้ามปีจากปี 2568 สู่ 2569 เทอม 2">📈 เทียบปี (68 ➔ 69/2)</button>
-              <button class="tab-control-btn preset-btn" data-base="y68" data-target="y69_1" title="เปรียบเทียบปี 2568 กับ 2569 เทอม 1">📊 เทียบปี (68 ➔ 69/1)</button>
+              <button class="tab-control-btn preset-btn active" data-base="y69_1" data-target="y69_2" title="เทียบการเปลี่ยนแปลงระหว่างเทอม 1 และ เทอม 2 ของปี 2569">🔄 เทียบเทอม (69/1 ➔ 69/2)</button>
+              <button class="tab-control-btn preset-btn" data-base="y68_1" data-target="y68_2" title="เทียบการเปลี่ยนแปลงระหว่างเทอม 1 และ เทอม 2 ของปี 2568">🔄 เทียบเทอม (68/1 ➔ 68/2)</button>
+              <button class="tab-control-btn preset-btn" data-base="y68_2" data-target="y68_3" title="เทียบการเปลี่ยนแปลงสู่สิ้นปีการศึกษา 2568">📉 สิ้นปี 68 (68/2 ➔ 68/3)</button>
+              <button class="tab-control-btn preset-btn" data-base="y68_1" data-target="y69_1" title="เทียบปีการศึกษาข้ามปี เทอม 1 (68/1 ➔ 69/1)">📊 ข้ามปี เทอม 1 (68/1 ➔ 69/1)</button>
+              <button class="tab-control-btn preset-btn" data-base="y68_2" data-target="y69_2" title="เทียบปีการศึกษาข้ามปี เทอม 2 (68/2 ➔ 69/2)">📈 ข้ามปี เทอม 2 (68/2 ➔ 69/2)</button>
+              <button class="tab-control-btn preset-btn" data-base="y68_1" data-target="y69_2" title="เทียบข้าม 2 ปีเต็ม (2568 เทอม 1 ➔ 2569 เทอม 2)">🏆 เทียบ 2 ปี (68/1 ➔ 69/2)</button>
             </div>
           </div>
 
@@ -412,6 +433,30 @@
           </div>
           <div class="chart-area">
             <canvas id="mainLineChart"></canvas>
+          </div>
+
+          <!-- Executive Summary Ribbon below Chart -->
+          <div class="chart-summary-ribbon" id="chartSummaryRibbon">
+            <div class="summary-metric-card">
+              <span class="metric-label">ม.ต้น (ม.1 - ม.3)</span>
+              <span class="metric-value" id="summaryMtonVal">0 คน</span>
+              <span class="metric-sub" id="summaryMtonSub">-</span>
+            </div>
+            <div class="summary-metric-card">
+              <span class="metric-label">ม.ปลาย (ม.4 - ม.6)</span>
+              <span class="metric-value" id="summaryMplaiVal">0 คน</span>
+              <span class="metric-sub" id="summaryMplaiSub">-</span>
+            </div>
+            <div class="summary-metric-card">
+              <span class="metric-label">ระดับชั้นที่มี นร. สูงสุด</span>
+              <span class="metric-value" id="summaryPeakGradeVal">-</span>
+              <span class="metric-sub" id="summaryPeakGradeSub">-</span>
+            </div>
+            <div class="summary-metric-card">
+              <span class="metric-label">สัดส่วนเพศ (ชาย : หญิง)</span>
+              <span class="metric-value" id="summaryGenderRatioVal">-</span>
+              <span class="metric-sub" id="summaryGenderRatioSub">-</span>
+            </div>
           </div>
         </div>
 
