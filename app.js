@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let thresholdDensity = 37.0; // average ratio
   let selectedSchoolSizes = ['S', 'M', 'L', 'XL'];
   let isDarkMode = false;
-  let currentPrimaryColor = '#1a73e8';
+  let currentPrimaryColor = '#1A365D'; // Sakon Indigo ครามสกลนคร
 
   // State variables for Pairwise School Comparison
   let comparisonSchoolA = '';
@@ -398,11 +398,19 @@ document.addEventListener('DOMContentLoaded', () => {
         e.target.classList.add('active');
         
         const color = e.target.dataset.color;
-        let primaryColor = '#1a73e8'; // default blue
-        let primaryHover = '#1557b0';
-        let primaryLight = '#e8f0fe';
+        let primaryColor = '#1A365D'; // default Sakon Indigo
+        let primaryHover = '#10243E';
+        let primaryLight = '#EBF1FA';
 
-        if (color === 'green') {
+        if (color === 'sakon') {
+          primaryColor = '#1A365D';
+          primaryHover = '#10243E';
+          primaryLight = '#EBF1FA';
+        } else if (color === 'blue') {
+          primaryColor = '#1a73e8';
+          primaryHover = '#1557b0';
+          primaryLight = '#e8f0fe';
+        } else if (color === 'green') {
           primaryColor = '#137333';
           primaryHover = '#0f5b28';
           primaryLight = '#e6f4ea';
@@ -411,9 +419,9 @@ document.addEventListener('DOMContentLoaded', () => {
           primaryHover = '#a11b19';
           primaryLight = '#fce8e6';
         } else if (color === 'orange') {
-          primaryColor = '#b06000';
-          primaryHover = '#8a4b00';
-          primaryLight = '#fef7e0';
+          primaryColor = '#C59B27';
+          primaryHover = '#A67E16';
+          primaryLight = '#FEF9E7';
         } else if (color === 'purple') {
           primaryColor = '#7627cf';
           primaryHover = '#5c1ea3';
@@ -531,31 +539,61 @@ document.addEventListener('DOMContentLoaded', () => {
     // Default sorting column
     document.querySelector('th[data-sort="change"]').classList.add('sorted-desc');
 
-    // Responsive Mobile Sidebar Toggle
+    // Sidebar Collapsible & Mobile Drawer Toggle (Desktop & Mobile)
     const menuToggleBtn = document.getElementById('menuToggleBtn');
+    const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
     const sidebar = document.querySelector('.sidebar');
     const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+    const appContainer = document.querySelector('.app-container') || document.body;
 
-    if (menuToggleBtn && sidebar && sidebarBackdrop) {
-      menuToggleBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        sidebar.classList.toggle('open');
-        sidebarBackdrop.classList.toggle('active');
-      });
+    function handleSidebarToggle(e) {
+      if (e) e.preventDefault();
+      if (window.innerWidth > 992) {
+        // Desktop: Toggle collapsed state (72px vs 250px)
+        appContainer.classList.toggle('sidebar-collapsed');
+        const isCollapsed = appContainer.classList.contains('sidebar-collapsed');
+        localStorage.setItem('dmc_sidebar_collapsed', isCollapsed ? 'true' : 'false');
+        
+        // Trigger chart redraw to fit new width
+        setTimeout(() => {
+          window.dispatchEvent(new Event('resize'));
+        }, 260);
+      } else {
+        // Mobile: Toggle slide-out drawer
+        if (sidebar) sidebar.classList.toggle('open');
+        if (sidebarBackdrop) sidebarBackdrop.classList.toggle('active');
+      }
+    }
 
+    if (menuToggleBtn) {
+      menuToggleBtn.addEventListener('click', handleSidebarToggle);
+    }
+
+    if (sidebarCollapseBtn) {
+      sidebarCollapseBtn.addEventListener('click', handleSidebarToggle);
+    }
+
+    if (sidebarBackdrop) {
       sidebarBackdrop.addEventListener('click', () => {
-        sidebar.classList.remove('open');
+        if (sidebar) sidebar.classList.remove('open');
         sidebarBackdrop.classList.remove('active');
       });
+    }
 
-      // Close sidebar drawer after navigating on mobile
-      const navLinks = document.querySelectorAll('.nav-menu a');
-      navLinks.forEach(link => {
-        link.addEventListener('click', () => {
+    // Close sidebar drawer after navigating on mobile
+    const navLinks = document.querySelectorAll('.nav-menu a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 992 && sidebar) {
           sidebar.classList.remove('open');
-          sidebarBackdrop.classList.remove('active');
-        });
+          if (sidebarBackdrop) sidebarBackdrop.classList.remove('active');
+        }
       });
+    });
+
+    // Restore saved collapse state on desktop load
+    if (window.innerWidth > 992 && localStorage.getItem('dmc_sidebar_collapsed') === 'true') {
+      appContainer.classList.add('sidebar-collapsed');
     }
 
     updateDashboard();
@@ -796,14 +834,14 @@ document.addEventListener('DOMContentLoaded', () => {
       {
         label: `รอบตั้งต้น (${baseLabel})`,
         data: dataBase,
-        borderColor: '#98989d',
+        borderColor: '#C59B27', // Sakon Gold ทองสกลนคร
         borderWidth: 2.2,
         borderDash: [5, 5],
         backgroundColor: 'transparent',
         fill: false,
         tension: 0.35,
         pointRadius: 4,
-        pointBackgroundColor: '#98989d'
+        pointBackgroundColor: '#C59B27'
       },
       {
         label: `รอบเปรียบเทียบ (${targetLabel})`,
