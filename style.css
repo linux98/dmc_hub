@@ -1,40 +1,51 @@
 :root {
-  --bg-app: #f4f6fa;
-  --bg-sidebar: #ffffff;
+  /* DocumantStudio Design Tokens (Sakon Nakhon Navy & Royal Gold) */
+  --brand-900: #10233F;     /* 16 35 63 — Dark Navy Sidebar, Primary BG */
+  --brand-800: #152E52;     /* 21 46 82 — Active menu, inner border */
+  --brand-700: #1D3C64;     /* 29 60 100 — Hover state, subtle edges */
+  --brand-100: #DDE8F4;     /* 221 232 244 — Selected tint, highlight text */
+  --brand-50:  #F0F5FA;     /* 240 245 250 — Section BG, card tint */
+
+  --gold-600:  #A8792C;     /* 168 121 44 — Gold dark, borders */
+  --gold-500:  #C28E38;     /* 194 142 56 — Gold main, logo, badges */
+  --gold-100:  #F5EBD9;     /* 245 235 217 — Gold tint, warm BG */
+  --gold-50:   #FAF5EC;     /* 250 245 236 — Faintest gold, hover tint */
+
+  --bg-app: #F6F7F9;
+  --bg-sidebar: var(--brand-900);
   --bg-card: #ffffff;
-  --border-color: #dadce0;
+  --border-color: #E2E8F0;
   
-  --text-main: #1e293b;      /* Slate dark text */
-  --text-muted: #64748b;     /* Slate muted text */
+  --text-main: #172033;
+  --text-muted: #64748B;
   
-  /* เอกลักษณ์สกลนคร: คราม (Sakon Indigo) - ทอง (Sakon Gold) - เหลืองดอกคูน (Yellow) */
-  --color-primary: #1A365D;  /* Sakon Indigo ครามสกลนคร */
-  --color-primary-hover: #10243E; /* Deep Midnight Indigo */
-  --color-primary-light: #EBF1FA; /* Soft Indigo Tint */
+  --color-primary: #10233F;
+  --color-primary-hover: #152E52;
+  --color-primary-light: #F0F5FA;
   
-  --color-gold: #C59B27;     /* Sakon Gold ทองสกลนคร */
-  --color-gold-hover: #A67E16;
-  --color-gold-light: #FEF9E7; /* Soft Gold Tint */
-  --color-yellow: #EAB308;   /* ดอกคูน / เทียนพรรษาสกลนคร */
+  --color-gold: #C28E38;
+  --color-gold-hover: #A8792C;
+  --color-gold-light: #F5EBD9;
+  --color-yellow: #EAB308;
   
-  --color-success: #137333;   /* Green */
-  --color-success-bg: #e6f4ea;
-  --color-error: #c5221f;     /* Red */
-  --color-error-bg: #fce8e6;
-  --color-warning: #C59B27;   /* Gold/Amber */
-  --color-warning-bg: #fef7e0;
+  --color-success: #137333;
+  --color-success-bg: #E6F4EA;
+  --color-error: #C5221F;
+  --color-error-bg: #FCE8E6;
+  --color-warning: #C28E38;
+  --color-warning-bg: #FAF5EC;
   
-  --color-68: #C59B27;       /* สีทองสกลนครสำหรับรอบตั้งต้น */
-  --color-69: #1A365D;       /* สีครามสกลนครสำหรับรอบเปรียบเทียบ */
+  --color-68: #C28E38;       /* Gold-500 */
+  --color-69: #10233F;       /* Brand-900 */
   
-  --font-stack: "Google Sans", "Sarabun", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-stack: "Google Sans", "Google Sans Flex", "Sarabun", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   
   --radius-lg: 12px;
   --radius-md: 8px;
   --radius-sm: 6px;
   
-  --shadow-sm: 0 1px 2px 0 rgba(26, 54, 93, 0.08), 0 1px 3px 1px rgba(26, 54, 93, 0.05);
-  --shadow-md: 0 2px 6px 0 rgba(26, 54, 93, 0.12), 0 1px 3px 0 rgba(26, 54, 93, 0.08);
+  --shadow-sm: 0 1px 3px 0 rgba(16, 35, 63, 0.08), 0 1px 2px -1px rgba(16, 35, 63, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(16, 35, 63, 0.1), 0 2px 4px -2px rgba(16, 35, 63, 0.06);
   --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -50,6 +61,8 @@
 body {
   background-color: var(--bg-app);
   color: var(--text-main);
+  line-height: 1.5;
+  overflow-x: hidden;
   min-height: 100vh;
   display: flex;
 }
@@ -61,12 +74,12 @@ body {
   min-height: 100vh;
 }
 
-/* Left Sidebar (Sakon Nakhon Identity with Collapsible Support) */
+/* Left Sidebar (DocumantStudio Dark Navy & Gold Style) */
 .sidebar {
   width: 250px;
-  background-color: var(--bg-sidebar);
-  border-right: 1px solid var(--border-color);
-  padding: 20px 14px;
+  background-color: var(--brand-900); /* #10233F */
+  border-right: 1px solid var(--brand-800); /* #152E52 */
+  padding: 20px 12px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -75,35 +88,38 @@ body {
   left: 0;
   top: 0;
   z-index: 100;
+  color: #ffffff;
+  box-shadow: 4px 0 20px rgba(16, 35, 63, 0.12);
   transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), padding 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-top {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 18px;
 }
 
-/* Brand logo with Sakon Nakhon Indigo & Royal Gold */
+/* Brand logo with DocumantStudio Dark Navy & Gold */
 .brand {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding-left: 4px;
+  padding: 0 4px 14px;
+  border-bottom: 1px solid var(--brand-800);
   position: relative;
 }
 
 .brand-icon {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, #0F2440 0%, #1A365D 100%);
+  background: linear-gradient(135deg, var(--gold-500) 0%, var(--brand-700) 100%);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #D4AF37; /* Sakon Royal Gold */
-  box-shadow: 0 2px 8px rgba(26, 54, 93, 0.35);
-  border: 1px solid rgba(212, 175, 55, 0.4);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(168, 121, 44, 0.4);
   flex-shrink: 0;
 }
 
@@ -113,39 +129,43 @@ body {
 }
 
 .brand-name h2 {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
-  color: #1A365D; /* Sakon Indigo */
+  color: #ffffff;
   line-height: 1.2;
 }
 
 .brand-name p {
   font-size: 11px;
-  color: #C59B27; /* Sakon Gold */
-  font-weight: 600;
+  color: var(--gold-100);
+  font-weight: 500;
+  opacity: 0.9;
 }
 
 /* Sidebar Collapse Toggle Button */
 .sidebar-collapse-btn {
-  background: none;
-  border: 1px solid transparent;
+  background: rgba(21, 46, 82, 0.6);
+  border: 1px solid var(--brand-800);
   width: 28px;
   height: 28px;
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-muted);
+  color: var(--brand-100);
   cursor: pointer;
   margin-left: auto;
   transition: var(--transition-fast);
   flex-shrink: 0;
 }
 
+.sidebar-collapse-btn svg {
+  transition: transform 0.25s ease;
+}
+
 .sidebar-collapse-btn:hover {
-  background-color: var(--color-primary-light);
-  color: var(--color-primary);
-  border-color: rgba(26, 54, 93, 0.15);
+  background-color: var(--brand-700);
+  color: #ffffff;
 }
 
 /* Nav Menu Items */
@@ -161,7 +181,7 @@ body {
   align-items: center;
   gap: 12px;
   padding: 10px 14px;
-  color: var(--text-main);
+  color: rgba(221, 232, 244, 0.85); /* var(--brand-100) */
   text-decoration: none;
   font-size: 13.5px;
   font-weight: 500;
@@ -171,31 +191,45 @@ body {
 }
 
 .nav-item a:hover {
-  background-color: var(--color-primary-light);
-  color: var(--color-primary);
+  background-color: var(--brand-700);
+  color: #ffffff;
 }
 
 .nav-item.active a {
-  background: linear-gradient(135deg, #1A365D 0%, #224474 100%);
+  background-color: var(--brand-800);
   color: #ffffff;
   font-weight: 700;
-  box-shadow: 0 2px 6px rgba(26, 54, 93, 0.25);
-  border-left: 3.5px solid #D4AF37; /* Sakon Gold Accent Edge */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  border-left: 3.5px solid var(--gold-500);
 }
 
 .nav-item.active a .nav-icon {
-  color: #F59E0B; /* Golden Yellow Icon */
+  color: var(--gold-500);
+}
+
+.nav-icon {
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-100);
+  flex-shrink: 0;
 }
 
 /* Collapsed Sidebar State (Desktop & Large Screens) */
 .sidebar-collapsed .sidebar {
   width: 72px;
-  padding: 20px 8px;
+  padding: 18px 8px;
 }
 
 .sidebar-collapsed .brand {
-  padding-left: 0;
+  padding: 0 0 12px;
   justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 8px;
+  border-bottom: 1px solid var(--brand-800);
+  cursor: pointer;
 }
 
 .sidebar-collapsed .brand-name {
@@ -203,7 +237,14 @@ body {
 }
 
 .sidebar-collapsed .sidebar-collapse-btn {
-  display: none;
+  display: flex;
+  margin: 0 auto;
+  width: 24px;
+  height: 24px;
+}
+
+.sidebar-collapsed .sidebar-collapse-btn svg {
+  transform: rotate(180deg);
 }
 
 .sidebar-collapsed .nav-item a {
@@ -234,48 +275,40 @@ body {
   margin-left: 72px;
   max-width: calc(100vw - 72px);
 }
-  font-weight: 700;
-}
 
-.nav-icon {
-  font-size: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Bottom Profile Card (Mission BOSS style) */
+/* Bottom Profile Card in DocumantStudio Navy */
 .profile-card {
   display: flex;
   align-items: center;
   gap: 10px;
-  background-color: #f1f3f4;
+  background-color: rgba(21, 46, 82, 0.5);
   padding: 10px 12px;
   border-radius: var(--radius-md);
-  border: 1px solid rgba(0, 0, 0, 0.03);
+  border: 1px solid var(--brand-800);
 }
 
 .profile-avatar {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background-color: #ffffff;
+  background-color: var(--brand-800);
+  border: 1px solid rgba(194, 142, 56, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-muted);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  color: var(--gold-100);
 }
 
 .profile-info h4 {
   font-size: 12.5px;
   font-weight: 700;
-  color: var(--text-main);
+  color: #ffffff;
 }
 
 .profile-info p {
   font-size: 10.5px;
-  color: var(--text-muted);
+  color: var(--brand-100);
+  opacity: 0.8;
   font-weight: 500;
   display: flex;
   align-items: center;
@@ -338,30 +371,31 @@ body {
 .system-title {
   font-size: 20px;
   font-weight: 700;
-  color: var(--text-main);
+  color: var(--brand-900);
   line-height: 1.2;
   margin: 0;
   letter-spacing: -0.3px;
 }
 
 .system-badge {
-  background: linear-gradient(135deg, rgba(26, 54, 93, 0.08) 0%, rgba(212, 175, 55, 0.12) 100%);
-  color: #1A365D;
+  background-color: var(--gold-100);
+  color: var(--gold-600);
   font-size: 11.5px;
   font-weight: 700;
   padding: 2px 10px;
   border-radius: 12px;
-  border: 1px solid rgba(212, 175, 55, 0.45);
+  border: 1px solid rgba(194, 142, 56, 0.4);
 }
 
 .status-pill {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background-color: #f1f3f4;
-  color: var(--text-muted);
+  background-color: var(--brand-50);
+  color: var(--brand-700);
+  border: 1px solid var(--brand-100);
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   padding: 2px 8px;
   border-radius: 12px;
 }
@@ -696,10 +730,11 @@ body {
 }
 
 .tab-control-btn.active {
-  background: linear-gradient(135deg, #1A365D 0%, #20406F 100%);
+  background: linear-gradient(135deg, var(--brand-900) 0%, var(--brand-800) 100%);
   color: #ffffff;
   font-weight: 700;
-  box-shadow: 0 1px 3px rgba(26, 54, 93, 0.25);
+  border: 1px solid rgba(194, 142, 56, 0.35);
+  box-shadow: 0 1px 3px rgba(16, 35, 63, 0.25);
 }
 
 /* Custom Pairwise Period Bar */

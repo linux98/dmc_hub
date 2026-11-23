@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let thresholdDensity = 37.0; // average ratio
   let selectedSchoolSizes = ['S', 'M', 'L', 'XL'];
   let isDarkMode = false;
-  let currentPrimaryColor = '#1A365D'; // Sakon Indigo ครามสกลนคร
+  let currentPrimaryColor = '#10233F'; // DocumantStudio Dark Navy (--brand-900)
 
   // State variables for Pairwise School Comparison
   let comparisonSchoolA = '';
@@ -570,7 +570,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (sidebarCollapseBtn) {
-      sidebarCollapseBtn.addEventListener('click', handleSidebarToggle);
+      sidebarCollapseBtn.addEventListener('click', (e) => {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        handleSidebarToggle(e);
+      });
+    }
+
+    const brandArea = document.querySelector('.brand');
+    if (brandArea) {
+      brandArea.addEventListener('click', (e) => {
+        if (appContainer.classList.contains('sidebar-collapsed')) {
+          handleSidebarToggle(e);
+        }
+      });
     }
 
     if (sidebarBackdrop) {
@@ -834,14 +849,14 @@ document.addEventListener('DOMContentLoaded', () => {
       {
         label: `รอบตั้งต้น (${baseLabel})`,
         data: dataBase,
-        borderColor: '#C59B27', // Sakon Gold ทองสกลนคร
+        borderColor: '#C28E38', // DocumantStudio Gold Main (--gold-500)
         borderWidth: 2.2,
         borderDash: [5, 5],
         backgroundColor: 'transparent',
         fill: false,
         tension: 0.35,
         pointRadius: 4,
-        pointBackgroundColor: '#C59B27'
+        pointBackgroundColor: '#C28E38'
       },
       {
         label: `รอบเปรียบเทียบ (${targetLabel})`,
