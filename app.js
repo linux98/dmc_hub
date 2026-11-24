@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function getSchoolSize(school) {
     const pData = school[targetPeriod] || school[selectedPeriod] || school.y69_2 || school.y69;
     const totalStudents = pData.total.total;
-    if (totalStudents < 120) return 'S';
+    if (totalStudents <= 120) return 'S';
     if (totalStudents < 500) return 'M';
     if (totalStudents < 1500) return 'L';
     return 'XL';
@@ -1674,7 +1674,8 @@ document.addEventListener('DOMContentLoaded', () => {
         modalTitleEl.textContent = school.name;
       }
     }
-    document.getElementById('modalSchoolDistrict').textContent = school.districtName || 'สังกัด สพม.สกลนคร';
+    const geoInfo = [school.cluster, school.amphoe ? `อ.${school.amphoe}` : '', school.districtName || 'สพม.สกลนคร'].filter(Boolean).join(' • ');
+    document.getElementById('modalSchoolDistrict').textContent = geoInfo;
     
     // Set KPI summary cards
     if (document.getElementById('modalKpiStd68')) {
@@ -3630,10 +3631,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const sizeLabels = {
-      S: 'ขนาดเล็ก (< 120)',
-      M: 'ขนาดกลาง (120 - 499)',
-      L: 'ขนาดใหญ่ (500 - 1499)',
-      XL: 'ขนาดใหญ่พิเศษ (>= 1500)'
+      S: 'ขนาดเล็ก (≤ 120)',
+      M: 'ขนาดกลาง (121 - 499)',
+      L: 'ขนาดใหญ่ (500 - 1,499)',
+      XL: 'ขนาดใหญ่พิเศษ (≥ 1,500)'
     };
 
     const sizeStatsTableBody = document.getElementById('sizeStatsTableBody');
@@ -3805,7 +3806,7 @@ document.addEventListener('DOMContentLoaded', () => {
         idx + 1,
         r.id,
         r.fullName || r.name,
-        orig?.district || '',
+        orig?.amphoe || orig?.district || '',
         orig ? getSchoolSize(orig) : '',
         r.baseVal,
         r.targetVal,
@@ -3847,7 +3848,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const amphoeMap = {};
     DASHBOARD_DATA.forEach(s => {
-      const amp = s.district || 'อื่นๆ';
+      const amp = s.amphoe || s.district || 'ไม่ระบุ';
       if (!amphoeMap[amp]) amphoeMap[amp] = { name: amp, count: 0, sBase: 0, sTarget: 0, rooms: 0 };
       const p1 = s.y69_1?.total?.total || 0;
       const p2 = s.y69_2?.total?.total || 0;
@@ -3892,7 +3893,7 @@ document.addEventListener('DOMContentLoaded', () => {
         idx + 1,
         r.id,
         r.fullName || r.name,
-        orig?.district || '',
+        orig?.amphoe || orig?.district || '',
         r.s68,
         r.s69,
         r.pred_total,
@@ -3922,7 +3923,7 @@ document.addEventListener('DOMContentLoaded', () => {
         idx + 1,
         r.id,
         r.fullName || r.name,
-        orig?.district || '',
+        orig?.amphoe || orig?.district || '',
         r.size,
         r.stdMTon,
         r.stdMPlai,
@@ -3994,7 +3995,7 @@ document.addEventListener('DOMContentLoaded', () => {
         idx + 1,
         s.id,
         s.name,
-        s.district || '',
+        s.amphoe || s.district || '',
         s.cluster || '',
         getSchoolSize(s),
         s68_1, ro68_1,
@@ -4154,7 +4155,7 @@ document.addEventListener('DOMContentLoaded', () => {
         rows.push([
           idx + 1,
           s.name,
-          s.district || '',
+          s.amphoe || s.district || '',
           s.size || '',
           m1_s, m1_r,
           m2_s, m2_r,
@@ -4228,7 +4229,7 @@ document.addEventListener('DOMContentLoaded', () => {
         rows.push([
           idx + 1,
           s.name,
-          s.district || '',
+          s.amphoe || s.district || '',
           stats.sizeText,
           stats.std1,
           stats.std2,
@@ -4317,7 +4318,7 @@ document.addEventListener('DOMContentLoaded', () => {
         t69_2 += s69_2; r69_2 += ro69_2;
 
         overviewRows.push([
-          idx + 1, s.name, s.district || '', getSchoolSize(s),
+          idx + 1, s.name, s.amphoe || s.district || '', getSchoolSize(s),
           s68_1, ro68_1,
           s68_2, ro68_2,
           s68_3, ro68_3,
