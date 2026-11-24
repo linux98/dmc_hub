@@ -872,6 +872,71 @@ body.dark-theme .filter-toolbar-ribbon {
   box-shadow: 0 2px 6px rgba(26, 54, 93, 0.35);
 }
 
+/* --- High-Contrast Action Buttons (.primary-btn) --- */
+.primary-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  color: #ffffff !important;
+  font-family: var(--font-stack) !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  padding: 7px 15px !important;
+  border-radius: var(--radius-sm) !important;
+  border: 1px solid transparent !important;
+  cursor: pointer !important;
+  transition: var(--transition-fast) !important;
+  box-shadow: 0 2px 4px rgba(16, 35, 63, 0.25) !important;
+  text-decoration: none !important;
+  line-height: 1.4 !important;
+}
+
+.primary-btn svg {
+  stroke: #ffffff !important;
+  fill: none !important;
+  flex-shrink: 0 !important;
+}
+
+.primary-btn:hover {
+  filter: brightness(1.15) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 10px rgba(16, 35, 63, 0.35) !important;
+}
+
+.primary-btn:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 1px 3px rgba(16, 35, 63, 0.2) !important;
+}
+
+/* Ensure all buttons with dark navy/indigo or gold background have crisp white text */
+button[style*="var(--color-primary)"],
+button[style*="var(--brand-900)"],
+button[style*="#10233F"],
+button[style*="#0D1F3C"],
+button[style*="#1A365D"] {
+  color: #ffffff !important;
+}
+
+button[style*="var(--color-primary)"] svg,
+button[style*="var(--brand-900)"] svg,
+button[style*="#10233F"] svg,
+button[style*="#0D1F3C"] svg,
+button[style*="#1A365D"] svg {
+  stroke: #ffffff !important;
+}
+
+button[style*="var(--color-gold)"],
+button[style*="#C28E38"] {
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+}
+
+button[style*="var(--color-gold)"] svg,
+button[style*="#C28E38"] svg {
+  stroke: #ffffff !important;
+}
+
 /* Active Period Indicator & Quick Timeline Bar */
 .active-period-banner {
   background: linear-gradient(135deg, rgba(16, 35, 63, 0.04) 0%, rgba(194, 142, 56, 0.08) 100%);
