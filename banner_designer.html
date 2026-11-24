@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>DMC Hub Web Banners - สพม.สกลนคร</title>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #f0f2f5;
+      font-family: 'Google Sans', 'Sarabun', sans-serif;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 50px;
+      align-items: center;
+    }
+
+    .banner-preview-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .banner-info {
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ========================================================
+       BANNER 1: Standard e-Service Banner (800 x 250 px) - Most Popular for Gov Webs
+       ======================================================== */
+    .banner-800x250 {
+      width: 800px;
+      height: 250px;
+      background: linear-gradient(135deg, #091322 0%, #10233F 55%, #18355D 100%);
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      padding: 24px 32px;
+      color: #ffffff;
+      box-shadow: 0 12px 32px rgba(16, 35, 63, 0.35), 0 2px 6px rgba(0,0,0,0.2);
+      border: 1.5px solid rgba(194, 142, 56, 0.4);
+    }
+
+    /* Background glow & decorative circuits */
+    .banner-800x250::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      right: 180px;
+      width: 260px;
+      height: 260px;
+      background: radial-gradient(circle, rgba(194, 142, 56, 0.22) 0%, rgba(16, 35, 63, 0) 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .banner-800x250::after {
+      content: '';
+      position: absolute;
+      bottom: -80px;
+      left: -40px;
+      width: 240px;
+      height: 240px;
+      background: radial-gradient(circle, rgba(26, 115, 232, 0.2) 0%, rgba(16, 35, 63, 0) 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .b800-content {
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      max-width: 500px;
+    }
+
+    .b800-top {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .b800-badge-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .b-badge-gold {
+      background: rgba(194, 142, 56, 0.2);
+      color: #E5B25D;
+      border: 1px solid rgba(194, 142, 56, 0.45);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      letter-spacing: 0.3px;
+    }
+
+    .b-badge-blue {
+      background: rgba(26, 115, 232, 0.2);
+      color: #8ab4f8;
+      border: 1px solid rgba(26, 115, 232, 0.35);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .b800-title-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 2px;
+    }
+
+    .b-logo-box {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #C28E38 0%, #E5B25D 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(194, 142, 56, 0.4);
+      flex-shrink: 0;
+    }
+
+    .b800-title-text h2 {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      line-height: 1.1;
+      background: linear-gradient(90deg, #FFFFFF 0%, #F5E6CC 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .b800-title-text p {
+      font-size: 12.5px;
+      color: rgba(255, 255, 255, 0.85);
+      font-weight: 500;
+      margin-top: 3px;
+    }
+
+    .b800-features {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 6px;
+    }
+
+    .b800-feature-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11.5px;
+      color: #E2E8F0;
+    }
+
+    .b800-feature-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #C28E38;
+    }
+
+    .b800-bottom {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 10px;
+    }
+
+    .b-btn-cta {
+      background: linear-gradient(135deg, #C28E38 0%, #D8A24A 100%);
+      color: #0F1F38;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 8px 18px;
+      border-radius: 30px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(194, 142, 56, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      transition: all 0.2s;
+    }
+
+    .b800-url-text {
+      font-size: 11.5px;
+      color: rgba(255, 255, 255, 0.6);
+      font-family: monospace;
+    }
+
+    /* Right Visual preview card */
+    .b800-visual {
+      position: relative;
+      z-index: 2;
+      width: 250px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-end;
+    }
+
+    .b-glass-card {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      padding: 14px;
+      width: 230px;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .b-metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .b-metric-label {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .b-metric-val {
+      font-size: 14px;
+      font-weight: 700;
+      color: #E5B25D;
+    }
+
+    .b-mini-chart-svg {
+      width: 100%;
+      height: 48px;
+      margin-top: 2px;
+    }
+
+    /* ========================================================
+       BANNER 2: Large Hero Carousel Banner (1200 x 400 px) - Slider on Homepage
+       ======================================================== */
+    .banner-1200x400 {
+      width: 1200px;
+      height: 400px;
+      background: radial-gradient(circle at 75% 30%, #173863 0%, #0A1628 65%, #050B14 100%);
+      border-radius: 20px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      padding: 40px 60px;
+      color: #ffffff;
+      box-shadow: 0 20px 48px rgba(10, 22, 40, 0.45);
+      border: 2px solid rgba(194, 142, 56, 0.45);
+    }
+
+    .banner-1200x400::before {
+      content: '';
+      position: absolute;
+      top: -100px;
+      left: 300px;
+      width: 450px;
+      height: 450px;
+      background: radial-gradient(circle, rgba(194, 142, 56, 0.15) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .b1200-left {
+      flex: 1.2;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .b1200-tag-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .b1200-title {
+      font-size: 42px;
+      font-weight: 800;
+      line-height: 1.15;
+      background: linear-gradient(90deg, #FFFFFF 0%, #F8E7CD 60%, #E5B25D 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 0.5px;
+    }
+
+    .b1200-subtitle {
+      font-size: 18px;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    .b1200-desc {
+      font-size: 13.5px;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.6;
+      max-width: 580px;
+    }
+
+    .b1200-pills-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      max-width: 560px;
+      margin-top: 4px;
+    }
+
+    .b1200-pill {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      padding: 7px 12px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      color: #E2E8F0;
+    }
+
+    .b1200-cta-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-top: 10px;
+    }
+
+    .b1200-right {
+      flex: 0.8;
+      z-index: 2;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .b1200-dashboard-preview {
+      width: 380px;
+      background: rgba(16, 35, 63, 0.7);
+      backdrop-filter: blur(16px);
+      border: 1.5px solid rgba(194, 142, 56, 0.4);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      padding-bottom: 10px;
+    }
+
+    .preview-stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .preview-stat-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* ========================================================
+       BANNER 3: Sidebar Mini Banner / Button (400 x 150 px) - Sidebar Widget
+       ======================================================== */
+    .banner-400x150 {
+      width: 400px;
+      height: 150px;
+      background: linear-gradient(135deg, #091322 0%, #10233F 70%, #C28E38 160%);
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 18px 20px;
+      color: #ffffff;
+      box-shadow: 0 8px 20px rgba(16, 35, 63, 0.28);
+      border: 1.5px solid rgba(194, 142, 56, 0.4);
+    }
+
+    .b400-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .b400-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .b400-brand h3 {
+      font-size: 20px;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.1;
+    }
+
+    .b400-brand p {
+      font-size: 11px;
+      color: #E5B25D;
+      font-weight: 600;
+    }
+
+    .b400-body {
+      font-size: 11.5px;
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+
+    .b400-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 6px;
+    }
+
+    .b400-cta {
+      font-size: 11px;
+      font-weight: 700;
+      color: #0F1F38;
+      background: #E5B25D;
+      padding: 5px 12px;
+      border-radius: 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 2px 6px rgba(194, 142, 56, 0.4);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BANNER 1: Standard Service Link Banner (800 x 250 px) -->
+  <div class="banner-preview-wrapper">
+    <div class="banner-info">
+      <span>⭐ แบบที่ 1: แบนเนอร์ลิงก์ระบบงานทางการ (Standard e-Service Banner)</span>
+      <span style="color: #6B7280; font-weight: normal;">ขนาด 800 x 250 px (สัดส่วน 3.2 : 1 นิยมสูงสุดสำหรับหน้าเว็บเขต)</span>
+    </div>
+    <div class="banner-800x250" id="banner800">
+      <div class="b800-content">
+        <div class="b800-top">
+          <div class="b800-badge-row">
+            <span class="b-badge-gold">👑 สพม.สกลนคร</span>
+            <span class="b-badge-blue">5 รอบข้อมูล (ปี 68 - 69)</span>
+          </div>
+
+          <div class="b800-title-row">
+            <div class="b-logo-box">
+              <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#0F1F38" stroke-width="2.5">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+              </svg>
+            </div>
+            <div class="b800-title-text">
+              <h2>DMC Hub สพม.สกลนคร</h2>
+              <p>ศูนย์สารสนเทศและระบบวิเคราะห์เปรียบเทียบสถิตินักเรียน</p>
+            </div>
+          </div>
+
+          <div class="b800-features">
+            <div class="b800-feature-item"><span class="b800-feature-dot"></span> 45 โรงเรียนมัธยม</div>
+            <div class="b800-feature-item"><span class="b800-feature-dot"></span> 8 สหวิทยาเขต / 18 อำเภอ</div>
+            <div class="b800-feature-item"><span class="b800-feature-dot"></span> Zero Dropout & ก.ค.ศ.</div>
+          </div>
+        </div>
+
+        <div class="b800-bottom">
+          <a href="https://linux98.github.io/dmc_hub/" class="b-btn-cta">
+            <span>เข้าสู่ระบบ DMC Hub</span>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <span class="b800-url-text">linux98.github.io/dmc_hub</span>
+        </div>
+      </div>
+
+      <div class="b800-visual">
+        <div class="b-glass-card">
+          <div class="b-metric-row">
+            <span class="b-metric-label">นักเรียนรวม (ล่าสุด)</span>
+            <span class="b-metric-val">44,566 คน</span>
+          </div>
+          <div class="b-metric-row">
+            <span class="b-metric-label">ห้องเรียนทั้งหมด</span>
+            <span class="b-metric-val">1,392 ห้อง</span>
+          </div>
+          <div class="b-metric-row" style="border: none; padding-bottom: 0;">
+            <span class="b-metric-label">อัตราคงอยู่ (Zero Dropout)</span>
+            <span class="b-metric-val" style="color: #4ade80;">99.44%</span>
+          </div>
+          <svg class="b-mini-chart-svg" viewBox="0 0 200 48" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#C28E38" stop-opacity="0.4"/>
+                <stop offset="100%" stop-color="#C28E38" stop-opacity="0.0"/>
+              </linearGradient>
+            </defs>
+            <path d="M0,35 Q40,15 80,18 T160,25 T200,30 L200,48 L0,48 Z" fill="url(#chartGrad)" />
+            <path d="M0,35 Q40,15 80,18 T160,25 T200,30" fill="none" stroke="#E5B25D" stroke-width="2.5" />
+            <circle cx="80" cy="18" r="3.5" fill="#FFFFFF" stroke="#C28E38" stroke-width="2" />
+            <circle cx="160" cy="25" r="3.5" fill="#FFFFFF" stroke="#C28E38" stroke-width="2" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- BANNER 2: Large Hero Carousel Slider (1200 x 400 px) -->
+  <div class="banner-preview-wrapper">
+    <div class="banner-info">
+      <span>🖼️ แบบที่ 2: แบนเนอร์สไลเดอร์หน้าแรกขนาดใหญ่ (Hero Carousel Slider)</span>
+      <span style="color: #6B7280; font-weight: normal;">ขนาด 1200 x 400 px (สำหรับป้ายสไลด์หัวเว็บหลัก)</span>
+    </div>
+    <div class="banner-1200x400" id="banner1200">
+      <div class="b1200-left">
+        <div class="b1200-tag-row">
+          <span class="b-badge-gold" style="font-size: 12px; padding: 4px 12px;">🏛️ สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาสกลนคร</span>
+          <span class="b-badge-blue" style="font-size: 12px; padding: 4px 12px;">5 Longitudinal Datasets (2568 - 2569)</span>
+        </div>
+
+        <h1 class="b1200-title">DMC Hub สพม.สกลนคร</h1>
+        <p class="b1200-subtitle">ศูนย์สารสนเทศและระบบสนับสนุนการตัดสินใจเชิงนโยบายการศึกษา</p>
+        <p class="b1200-desc">ยกระดับการบริหารจัดการศึกษาด้วยข้อมูลสถิตินักเรียน 5 รอบข้อมูลแบบบูรณาการ ค้นหาข้อมูลเชิงลึก 45 โรงเรียนมัธยมศึกษา พร้อมระบบวิเคราะห์ความเสี่ยง Zero Dropout และการพยากรณ์ประชากรนักเรียนล่วงหน้า</p>
+
+        <div class="b1200-pills-grid">
+          <div class="b1200-pill">🛡️ Zero Dropout Intelligence</div>
+          <div class="b1200-pill">📍 8 สหวิทยาเขต / 18 อำเภอ</div>
+          <div class="b1200-pill">📈 คาดการณ์ปี 2570</div>
+          <div class="b1200-pill">💼 กรอบอัตรากำลังครู ก.ค.ศ.</div>
+          <div class="b1200-pill">💰 งบประมาณอุดหนุน 179.6M</div>
+          <div class="b1200-pill">📑 รายงานผู้บริหาร Master Excel</div>
+        </div>
+
+        <div class="b1200-cta-row">
+          <a href="https://linux98.github.io/dmc_hub/" class="b-btn-cta" style="font-size: 15px; padding: 11px 26px;">
+            <span>เปิดใช้งานระบบ DMC Hub</span>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <span style="font-size: 13px; color: rgba(255,255,255,0.7); font-family: monospace;">https://linux98.github.io/dmc_hub/</span>
+        </div>
+      </div>
+
+      <div class="b1200-right">
+        <div class="b1200-dashboard-preview">
+          <div class="preview-header">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="width: 10px; height: 10px; border-radius: 50%; background: #C28E38;"></span>
+              <strong style="font-size: 13px; color: #FFFFFF;">DMC Intelligence Summary</strong>
+            </div>
+            <span style="font-size: 11px; color: #8ab4f8; background: rgba(26,115,232,0.2); padding: 2px 8px; border-radius: 12px;">Active</span>
+          </div>
+
+          <div class="preview-stats-grid">
+            <div class="preview-stat-card">
+              <span style="font-size: 10.5px; color: rgba(255,255,255,0.6);">นักเรียนรวมทั้งเขต</span>
+              <div style="font-size: 18px; font-weight: 700; color: #FFFFFF; margin-top: 2px;">44,566 <span style="font-size: 10px; color: #E5B25D;">คน</span></div>
+            </div>
+            <div class="preview-stat-card">
+              <span style="font-size: 10.5px; color: rgba(255,255,255,0.6);">ห้องเรียนทั้งหมด</span>
+              <div style="font-size: 18px; font-weight: 700; color: #FFFFFF; margin-top: 2px;">1,392 <span style="font-size: 10px; color: #E5B25D;">ห้อง</span></div>
+            </div>
+            <div class="preview-stat-card">
+              <span style="font-size: 10.5px; color: rgba(255,255,255,0.6);">อัตราคงอยู่ (Retention)</span>
+              <div style="font-size: 18px; font-weight: 700; color: #4ade80; margin-top: 2px;">99.44%</div>
+            </div>
+            <div class="preview-stat-card">
+              <span style="font-size: 10.5px; color: rgba(255,255,255,0.6);">กรอบครูพึงมี ก.ค.ศ.</span>
+              <div style="font-size: 18px; font-weight: 700; color: #E5B25D; margin-top: 2px;">2,348 <span style="font-size: 10px;">อัตรา</span></div>
+            </div>
+          </div>
+
+          <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px;">
+            <span style="font-size: 10.5px; color: rgba(255,255,255,0.6);">แนวโน้มประชากรนักเรียน 2568 ➔ 2569 ➔ 2570</span>
+            <svg style="width: 100%; height: 60px; margin-top: 6px;" viewBox="0 0 320 60" preserveAspectRatio="none">
+              <path d="M0,45 Q80,20 160,25 T240,32 T320,38 L320,60 L0,60 Z" fill="url(#chartGrad)" />
+              <path d="M0,45 Q80,20 160,25 T240,32 T320,38" fill="none" stroke="#E5B25D" stroke-width="3" />
+              <circle cx="80" cy="20" r="4" fill="#FFFFFF" stroke="#C28E38" stroke-width="2.5" />
+              <circle cx="160" cy="25" r="4" fill="#FFFFFF" stroke="#C28E38" stroke-width="2.5" />
+              <circle cx="240" cy="32" r="4" fill="#FFFFFF" stroke="#C28E38" stroke-width="2.5" />
+              <circle cx="320" cy="38" r="4" fill="#E5B25D" stroke="#FFFFFF" stroke-width="2" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- BANNER 3: Sidebar Mini Banner / Button (400 x 150 px) -->
+  <div class="banner-preview-wrapper">
+    <div class="banner-info">
+      <span>📱 แบบที่ 3: แบนเนอร์ปุ่มเมนูด้านข้าง (Sidebar Widget / Quick Link)</span>
+      <span style="color: #6B7280; font-weight: normal;">ขนาด 400 x 150 px (สำหรับกล่องแถบด้านข้าง / ลิงก์ด่วน)</span>
+    </div>
+    <div class="banner-400x150" id="banner400">
+      <div class="b400-top">
+        <div class="b400-brand">
+          <div class="b-logo-box" style="width: 36px; height: 36px; border-radius: 8px;">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#0F1F38" stroke-width="2.5">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+            </svg>
+          </div>
+          <div>
+            <h3>DMC Hub</h3>
+            <p>สพม.สกลนคร</p>
+          </div>
+        </div>
+        <span class="b-badge-gold" style="font-size: 10px; padding: 2px 8px;">5 รอบข้อมูล</span>
+      </div>
+
+      <div class="b400-body">
+        ศูนย์สารสนเทศและระบบวิเคราะห์สถิตินักเรียน 45 โรงเรียนมัธยมศึกษา สพม.สกลนคร
+      </div>
+
+      <div class="b400-footer">
+        <span style="font-size: 10.5px; color: rgba(255,255,255,0.6); font-family: monospace;">linux98.github.io/dmc_hub</span>
+        <div class="b400-cta">
+          <span>เข้าสู่ระบบ</span>
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
