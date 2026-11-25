@@ -79,10 +79,9 @@ body {
   width: 250px;
   background-color: var(--brand-900); /* #10233F */
   border-right: 1px solid var(--brand-800); /* #152E52 */
-  padding: 20px 12px;
+  padding: 16px 10px 12px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   position: fixed;
   height: 100vh;
   left: 0;
@@ -91,12 +90,17 @@ body {
   color: #ffffff;
   box-shadow: 4px 0 20px rgba(16, 35, 63, 0.12);
   transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), padding 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .sidebar-top {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 10px;
+  flex: 1;
+  min-height: 0; /* CRITICAL: Enables flex child scrolling */
+  overflow: hidden;
 }
 
 /* Brand logo with DocumantStudio Dark Navy & Gold */
@@ -104,9 +108,10 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 0 4px 14px;
+  padding: 0 4px 12px;
   border-bottom: 1px solid var(--brand-800);
   position: relative;
+  flex-shrink: 0;
 }
 
 .brand-icon {
@@ -172,18 +177,41 @@ body {
 .nav-menu {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   list-style: none;
+  flex: 1;
+  min-height: 0; /* CRITICAL: Enables scrolling */
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+  margin: 0;
+  padding-left: 0;
+}
+
+/* Custom Sleek Scrollbar for Sidebar Nav */
+.nav-menu::-webkit-scrollbar {
+  width: 5px;
+}
+.nav-menu::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 4px;
+}
+.nav-menu::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+.nav-menu::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-500, #d97706);
 }
 
 .nav-item a {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
+  gap: 10px;
+  padding: 7.5px 12px;
   color: rgba(221, 232, 244, 0.85); /* var(--brand-100) */
   text-decoration: none;
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 500;
   border-radius: var(--radius-md);
   transition: var(--transition-fast);
@@ -2772,4 +2800,27 @@ body.dark-theme .cluster-tab-btn.active {
   margin: 16px 20px;
   font-size: 15px;
   white-space: pre-line;
+}
+
+.sidebar-bottom {
+  flex-shrink: 0;
+  padding-top: 10px;
+  margin-top: 6px;
+  border-top: 1px solid var(--brand-800);
+}
+
+/* Nav Section Header Category Dividers */
+.nav-section-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(148, 163, 184, 0.65);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 8px 10px 2px;
+  list-style: none;
+  pointer-events: none;
+  user-select: none;
+}
+.sidebar-collapsed .nav-section-title {
+  display: none;
 }
