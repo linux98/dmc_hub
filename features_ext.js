@@ -58,7 +58,11 @@
       attribution: '&copy; OpenStreetMap contributors | สพม.สกลนคร DMC Hub'
     }).addTo(gisMap);
 
+    window.gisMap = gisMap;
+
     renderGisMarkers();
+    window.schoolMarkers = schoolMarkers;
+    window.getSchoolMarkers = () => schoolMarkers;
     setupGisEvents();
   }
 

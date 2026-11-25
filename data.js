@@ -4434,7 +4434,7 @@ const DASHBOARD_DATA = [
     "shortName": "คำเพิ่มพิทยา",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
-    "amphoe": "โคกศรีสุพรรณ",
+    "amphoe": "ภูพาน",
     "cluster": "สหวิทยาเขตสกลราช",
     "y68": {
       "grades": {
