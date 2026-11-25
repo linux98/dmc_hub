@@ -399,6 +399,17 @@
               </div>
             </div>
 
+            <!-- A4 Executive Policy One-Pager Button -->
+            <button class="btn-primary btn-sm" id="btnOpenOnePager" style="background: linear-gradient(135deg, #1e3a8a, #0f172a); border: 1px solid #3b82f6; gap: 6px; cursor: pointer;" title="พิมพ์เอกสารสรุปเชิงนโยบายหน้าเดียว (A4 One-Pager)">
+              <span style="font-size: 13px;">📄</span>
+              <span class="action-btn-text">สรุปหน้าเดียว A4</span>
+            </button>
+
+            <!-- Command Palette Shortcut Button -->
+            <button class="top-icon-btn" id="btnOpenCmdPalette" title="ค้นหาด่วนความเร็วแสง (Ctrl + K)" style="font-size: 13px; font-weight: bold; padding: 0 8px; width: auto; height: 32px; border-radius: 8px;">
+              🔍 <span style="font-size: 11px; opacity: 0.8; margin-left: 2px;">Ctrl+K</span>
+            </button>
+
             <!-- PDF Export Button -->
             <button class="btn-primary btn-sm" id="btnExport" title="พิมพ์หรือส่งออกรายงาน PDF">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
@@ -1043,6 +1054,10 @@
             </p>
           </div>
           <div style="display: flex; gap: 8px; align-items: center;">
+            <button id="btnToggleSynergyNetwork" class="btn btn-secondary" style="font-size: 13px; padding: 6px 14px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; font-weight: 600;" title="เปิด/ปิดเส้นโครงข่ายโรงเรียนพี่เลี้ยงคู่พัฒนา">
+              <span>🔗</span>
+              <span>โครงข่ายโรงเรียนคู่พัฒนา (Synergy Network)</span>
+            </button>
             <button id="btnResetMapView" class="btn btn-secondary" style="font-size: 13px; padding: 6px 12px; border-radius: 8px; cursor: pointer;">
               🔄 รีเซ็ตมุมมอง
             </button>
@@ -2182,6 +2197,242 @@
         navigator.serviceWorker.register('./sw.js')
           .then(reg => console.log('DMC Hub ServiceWorker registered:', reg.scope))
           .catch(err => console.log('ServiceWorker registration failed:', err));
+      });
+    }
+  </script>
+
+  <!-- Universal Command Palette Modal (Ctrl + K) -->
+  <div id="commandPaletteModal" class="cmd-palette-overlay" style="display: none;">
+    <div class="cmd-palette-card">
+      <div class="cmd-palette-header">
+        <span class="cmd-search-icon">🔍</span>
+        <input type="text" id="cmdPaletteInput" class="cmd-palette-input" placeholder="พิมพ์ชื่อโรงเรียน, สหวิทยาเขต, อำเภอ, หรือโมดูล..." autocomplete="off">
+        <span class="cmd-palette-badge">ESC เพื่อปิด</span>
+      </div>
+      <div class="cmd-palette-body" id="cmdPaletteResults">
+        <!-- Dynamically populated results -->
+      </div>
+      <div class="cmd-palette-footer">
+        <span>💡 นำทางด้วยลูกศร ↑ ↓ และกด Enter เพื่อไปยังเป้าหมาย</span>
+        <span>สพม.สกลนคร DMC Hub</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- A4 Executive Policy One-Pager Modal & Print Layout -->
+  <div id="executiveOnePagerModal" class="modal-overlay" style="display: none;">
+    <div class="one-pager-modal-card">
+      <div class="one-pager-header-bar no-print">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 20px;">📄</span>
+          <div>
+            <h4 style="margin: 0; font-size: 15px; color: #1e3a8a;">เอกสารสรุปเชิงนโยบายหน้าเดียว (Executive Policy One-Pager A4)</h4>
+            <span style="font-size: 12px; color: #64748b;">จัดรูปแบบ A4 มาตรฐาน สั่งพิมพ์ (Print to PDF) ได้ ๑ หน้าพอดีเป๊ะ</span>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button id="btnPrintOnePager" class="primary-btn" style="background: #1e3a8a; padding: 8px 18px; font-size: 13px;">
+            🖨️ สั่งพิมพ์เอกสาร A4 (Print / PDF)
+          </button>
+          <button id="btnCloseOnePager" class="modal-close-btn" style="font-size: 22px;">&times;</button>
+        </div>
+      </div>
+
+      <!-- Printable A4 Container -->
+      <div class="a4-sheet-container" id="printableOnePagerContent">
+        <!-- Top Institutional Header -->
+        <div class="a4-gov-header">
+          <img src="garuda.png" alt="ตราครุฑ" class="a4-garuda">
+          <div class="a4-gov-titles">
+            <h2 class="a4-title">เอกสารสรุปเชิงนโยบายการบริหารจัดการศึกษา (Executive Policy Brief)</h2>
+            <h3 class="a4-subtitle">สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาสกลนคร (สพม.สกลนคร)</h3>
+            <p class="a4-meta">ฐานข้อมูลสารสนเทศนักเรียน DMC ภาคเรียนที่ ๒/๒๕๖๙ (ข้อมูล ๕ รอบเวลาต่อเนื่อง ๒๕๖๘ – ๒๕๖๙)</p>
+          </div>
+        </div>
+
+        <!-- Section 1: 5 Strategic Pillars Grid -->
+        <div class="a4-box">
+          <div class="a4-box-title">🏛️ ๑. เสาหลักยุทธศาสตร์และข้อมูลสารสนเทศภาพรวมทั้งเขต</div>
+          <div class="a4-grid-5">
+            <div class="a4-kpi-item">
+              <span class="a4-kpi-lbl">ประชากรนักเรียนรวม</span>
+              <strong class="a4-kpi-val">๔๔,๕๖๖ คน</strong>
+              <small class="a4-kpi-sub">๔๕ รร. • ๑,๓๙๒ ห้อง</small>
+            </div>
+            <div class="a4-kpi-item">
+              <span class="a4-kpi-lbl">อัตราคงอยู่ (Zero Dropout)</span>
+              <strong class="a4-kpi-val text-green">๙๙.๔๔%</strong>
+              <small class="a4-kpi-sub">หลุดระหว่างเทอม -๒๕๒ คน</small>
+            </div>
+            <div class="a4-kpi-item">
+              <span class="a4-kpi-lbl">ความหนาแน่นเฉลี่ย</span>
+              <strong class="a4-kpi-val text-blue">๓๒.๐ คน/ห้อง</strong>
+              <small class="a4-kpi-sub">ได้มาตรฐาน สพฐ.</small>
+            </div>
+            <div class="a4-kpi-item">
+              <span class="a4-kpi-lbl">ประมาณการงบรายหัว</span>
+              <strong class="a4-kpi-val text-gold">๑๗๙.๖๓ ล้านบาท</strong>
+              <small class="a4-kpi-sub">เฉลี่ย ๔,๐๓๑ บาท/คน</small>
+            </div>
+            <div class="a4-kpi-item">
+              <span class="a4-kpi-lbl">คาดการณ์ประชากร ๒๕๗๐</span>
+              <strong class="a4-kpi-val text-red">๔๓,๘๙๙ คน</strong>
+              <small class="a4-kpi-sub">แนวโน้มลดลง -๑.๕๐%</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Longitudinal & Cohort Highlights -->
+        <div class="a4-two-col">
+          <div class="a4-box">
+            <div class="a4-box-title">📈 ๒. ไทม์ไลน์ ๕ จุดเวลา & การติดตามรุ่น (Cohort Flow)</div>
+            <table class="a4-compact-table">
+              <thead>
+                <tr>
+                  <th>รอบข้อมูล DMC</th>
+                  <th style="text-align: right;">นักเรียน (คน)</th>
+                  <th style="text-align: right;">ห้องเรียน</th>
+                  <th style="text-align: right;">ผลต่าง</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>๑. ๒๕๖๘ เทอม ๑ (๑๐ มิ.ย. ๖๘)</td><td style="text-align: right;">๔๕,๔๐๓</td><td style="text-align: right;">๑,๓๘๒</td><td style="text-align: right;">ฐานเดิม</td></tr>
+                <tr><td>๒. ๒๕๖๘ เทอม ๒ (๑๐ พ.ย. ๖๘)</td><td style="text-align: right;">๔๕,๐๔๗</td><td style="text-align: right;">๑,๓๘๒</td><td style="text-align: right; color: #b91c1c;">-๓๕๖</td></tr>
+                <tr><td>๓. ๒๕๖๘ สิ้นปี (๓๐ เม.ย. ๖๙)</td><td style="text-align: right;">๔๔,๘๐๘</td><td style="text-align: right;">๑,๓๘๒</td><td style="text-align: right; color: #b91c1c;">-๒๓๙</td></tr>
+                <tr><td>๔. ๒๕๖๙ เทอม ๑ (๑๐ มิ.ย. ๖๙)</td><td style="text-align: right;">๔๔,๘๑๘</td><td style="text-align: right;">๑,๓๙๖</td><td style="text-align: right; color: #16a34a;">+๑๐</td></tr>
+                <tr><td>๕. ๒๕๖๙ เทอม ๒ (๑๐ พ.ย. ๖๙)</td><td style="text-align: right;"><strong>๔๔,๕๖๖</strong></td><td style="text-align: right;"><strong>๑,๓๙๒</strong></td><td style="text-align: right; color: #b91c1c;">-๒๕๒</td></tr>
+              </tbody>
+            </table>
+            <div style="font-size: 11px; color: #475569; margin-top: 6px; line-height: 1.4;">
+              * ข้อค้นพบสำคัญ: อัตราคงอยู่ข้ามรุ่น ม.๑➔ม.๒ สูงถึง <strong>๙๙.๗๘%</strong> และ ม.๒➔ม.๓ สูงถึง <strong>๑๐๐.๓๙%</strong> โดยมีอัตราศึกษาต่อ ม.ปลาย ในสังกัดที่ <strong>๘๙.๒๔%</strong>
+            </div>
+          </div>
+
+          <div class="a4-box">
+            <div class="a4-box-title">🏫 ๓. ขนาดสถานศึกษา สพฐ. ๒๕๖๙ & สุขภาวะ ๔๕ รร.</div>
+            <table class="a4-compact-table">
+              <thead>
+                <tr>
+                  <th>กลุ่มขนาดสถานศึกษา</th>
+                  <th style="text-align: center;">จำนวน รร.</th>
+                  <th style="text-align: right;">นักเรียนรวม</th>
+                  <th style="text-align: center;">นร./ห้อง</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>ขนาดเล็ก (≤ ๑๑๙ คน)</td><td style="text-align: center;">๐</td><td style="text-align: right;">๐</td><td style="text-align: center;">-</td></tr>
+                <tr><td>ขนาดกลาง (๑๒๐ - ๗๑๙ คน)</td><td style="text-align: center;">๒๖</td><td style="text-align: right;">๙,๓๒๐</td><td style="text-align: center;">๒๗.๒</td></tr>
+                <tr><td>ขนาดใหญ่ (๗๒๐ - ๑,๖๗๙ คน)</td><td style="text-align: center;">๑๐</td><td style="text-align: right;">๑๑,๙๖๔</td><td style="text-align: center;">๓๒.๒</td></tr>
+                <tr><td>ขนาดใหญ่พิเศษ (≥ ๑,๖๘๐ คน)</td><td style="text-align: center;">๙</td><td style="text-align: right;">๒๓,๒๘๒</td><td style="text-align: center;">๓๔.๔</td></tr>
+              </tbody>
+            </table>
+            <div style="display: flex; gap: 6px; margin-top: 6px; justify-content: space-between;">
+              <span class="a4-badge bg-green">เกรด AAA: ๘ รร.</span>
+              <span class="a4-badge bg-blue">เกรด AA: ๒๐ รร.</span>
+              <span class="a4-badge bg-yellow">เกรด A: ๑๒ รร.</span>
+              <span class="a4-badge bg-orange">เฝ้าระวัง: ๕ รร.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: 4 Immediate Action Directives -->
+        <div class="a4-box">
+          <div class="a4-box-title">🎯 ๔. ข้อสั่งการและทิศทางเชิงนโยบายเร่งด่วนสำหรับผู้บริหาร (Executive Directives)</div>
+          <div class="a4-directives-list">
+            <div class="a4-directive-row">
+              <span class="a4-num">๑</span>
+              <div><strong>มาตรการ Zero Dropout เชิงรุก:</strong> มอบกลุ่มส่งเสริมการจัดการศึกษา ลงพื้นที่ติดตามช่วยเหลือนักเรียนในโรงเรียนที่มียอดลดลงสูงสุด ได้แก่ รร.เตรียมอุดมฯ ภาคตะวันออกเฉียงเหนือ (-๔๒ คน), รร.ธาตุนารายณ์วิทยา (-๓๙ คน), รร.มัธยมวานรนิวาส (-๓๑ คน)</div>
+            </div>
+            <div class="a4-directive-row">
+              <span class="a4-num">๒</span>
+              <div><strong>การวางแผนรับนักเรียน ม.๑ / ม.๔ ปี ๒๕๗๐:</strong> กำหนดเป้าหมายรับ ม.๑ ที่ ๗,๑๒๐ คน (๒๒๕ ห้อง) และ ม.๔ ที่ ๗,๓๗๐ คน (๒๓๕ ห้อง) คุมความหนาแน่นเฉลี่ย ๓๒-๓๕ คน/ห้อง เพื่อป้องกันห้องเรียนแออัด</div>
+            </div>
+            <div class="a4-directive-row">
+              <span class="a4-num">๓</span>
+              <div><strong>การบริหารอัตรากำลังครูและงบประมาณ:</strong> มอบกลุ่มบริหารงานบุคคลและกลุ่มนโยบายและแผน นำข้อมูลนักเรียน ๔๔,๕๖๖ คน เป็นฐานคำนวณภาระงานครู ก.ค.ศ. และการจัดสรรงบประมาณให้โปร่งใสและเป็นธรรม</div>
+            </div>
+            <div class="a4-directive-row">
+              <span class="a4-num">๔</span>
+              <div><strong>โรงเรียนคุณภาพคู่พัฒนา (School Clustering Synergy):</strong> ขับเคลื่อนโมเดลโรงเรียนพี่เลี้ยงจับคู่ รร. กลุ่มเปราะบาง (เช่น รร.ลำปลาหางวิทยา ๑๒๐ คน, รร.เทพสวัสดิ์วิทยา ๑๒๔ คน) เพื่อใช้ทรัพยากรห้องแล็บและครูผู้สอนร่วมกันในสหวิทยาเขต</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Institutional Footer Sign-off -->
+        <div class="a4-signoff">
+          <div>
+            <span>ผู้จัดทำข้อมูล: กลุ่มส่งเสริมการศึกษาทางไกล เทคโนโลยีสารสนเทศและการสื่อสาร (DLICT)</span><br>
+            <span>แหล่งข้อมูล: ระบบจัดเก็บข้อมูลนักเรียนรายบุคคล (DMC) สำนักงานคณะกรรมการการศึกษาขั้นพื้นฐาน</span>
+          </div>
+          <div style="text-align: right;">
+            <span>ผู้อนุมัติรายงาน: ผู้อำนวยการสำนักงานเขตพื้นที่การศึกษามัธยมศึกษาสกลนคร</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Copilot Button -->
+  <button id="btnOpenCopilot" class="floating-copilot-btn" title="AI Executive Policy Copilot (ผู้ช่วยนโยบาย ผอ.เขต)">
+    <span class="copilot-icon">🤖</span>
+    <span class="copilot-btn-text">AI Copilot ผอ.เขต</span>
+    <span class="copilot-pulse"></span>
+  </button>
+
+  <!-- AI Executive Copilot Drawer Modal -->
+  <div id="copilotModal" class="copilot-drawer-overlay" style="display: none;">
+    <div class="copilot-drawer">
+      <div class="copilot-drawer-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div class="copilot-avatar">🤖</div>
+          <div>
+            <h4 style="margin: 0; font-size: 14.5px; color: #ffffff;">AI Executive Policy Copilot</h4>
+            <span style="font-size: 11px; color: #93c5fd;">ผู้ช่วยอัจฉริยะ ผอ.สพม.สกลนคร • DMC 5-Wave Engine</span>
+          </div>
+        </div>
+        <button id="btnCloseCopilot" class="copilot-close-btn">&times;</button>
+      </div>
+
+      <!-- Quick Suggestion Chips -->
+      <div class="copilot-chips-bar" id="copilotChipsBar">
+        <button class="copilot-chip" data-prompt="สรุปภาพรวม 5 เสาหลักยุทธศาสตร์">📊 5 เสาหลักยุทธศาสตร์</button>
+        <button class="copilot-chip" data-prompt="โรงเรียนไหนเสี่ยงเด็กหลุดสูงสุด">🚨 รร. เสี่ยงเด็กหลุดสูงสุด</button>
+        <button class="copilot-chip" data-prompt="5 โรงเรียนสุขภาวะยอดเยี่ยม AAA">🏆 5 รร. สุขภาวะยอดเยี่ยม</button>
+        <button class="copilot-chip" data-prompt="โรงเรียนขนาดกลางและเปราะบางมีที่ไหนบ้าง">🏫 รร. ขนาดกลางและเปราะบาง</button>
+        <button class="copilot-chip" data-prompt="สรุปข้อมูล รร. สกลราชวิทยานุกูล">🏛️ วิเคราะห์ รร.สกลราชฯ</button>
+        <button class="copilot-chip" data-prompt="สรุปแนวโน้มไทม์ไลน์ 5 รอบเวลา">📈 แนวโน้มไทม์ไลน์ 5 รอบ</button>
+        <button class="copilot-chip" data-prompt="ประมาณการงบประมาณเงินอุดหนุนปีนี้">💰 ประมาณการงบรายหัว</button>
+      </div>
+
+      <!-- Chat Messages Container -->
+      <div class="copilot-messages" id="copilotMessages">
+        <div class="copilot-msg bot">
+          <div class="msg-bubble">
+            สวัสดีครับท่านผู้อำนวยการและคณะทำงาน สพม.สกลนคร! 🙏 ผมคือ <strong>AI Executive Policy Copilot</strong> ผู้ช่วยสังเคราะห์ข้อมูลสารสนเทศทางการศึกษา<br><br>
+            ท่านสามารถพิมพ์คำถามหรือคลิกเลือกหัวข้อด้านบน เพื่อให้ผมวิเคราะห์ข้อมูลจากฐาน DMC ๕ รอบเวลา (๒๕๖๘ – ๒๕๖๙) ของทั้ง ๔๕ โรงเรียนได้ทันทีครับ
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Input Form -->
+      <form class="copilot-input-form" id="copilotForm">
+        <input type="text" id="copilotInput" class="copilot-input" placeholder="พิมพ์คำถามเชิงนโยบาย เช่น 'รร. ไหนนักเรียนลดสูงสุด'..." autocomplete="off">
+        <button type="submit" class="copilot-send-btn">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- PWA Service Worker Registration Script -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then(reg => {
+          console.log('[PWA] Service Worker registered successfully with scope:', reg.scope);
+        }).catch(err => {
+          console.log('[PWA] Service Worker registration failed:', err);
+        });
       });
     }
   </script>

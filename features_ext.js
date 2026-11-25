@@ -20,6 +20,10 @@
     initLongitudinalModule();
     initCohortModule();
     initHealthIndexModule();
+    initCommandPaletteModule();
+    initOnePagerModule();
+    initGisSynergyModule();
+    initAiCopilotModule();
     initSidebarNavigation();
   });
 
@@ -1211,6 +1215,490 @@
       searchInput.addEventListener('input', (e) => {
         renderHealthTable(e.target.value);
       });
+    }
+  }
+
+
+  /* ==========================================================================
+     MODULE 9: UNIVERSAL COMMAND PALETTE (CTRL + K)
+     ========================================================================== */
+  function initCommandPaletteModule() {
+    const modal = document.getElementById('commandPaletteModal');
+    const input = document.getElementById('cmdPaletteInput');
+    const resultsBox = document.getElementById('cmdPaletteResults');
+    const btnOpen = document.getElementById('btnOpenCmdPalette');
+    if (!modal || !input || !resultsBox) return;
+
+    // Build Search Index
+    const searchIndex = [
+      // Modules
+      { title: 'แดชบอร์ดภาพรวม', desc: 'หน้าแรกและสรุปตัวชี้วัดสำคัญ', tag: 'โมดูล', targetId: 'topSection' },
+      { title: 'บทสรุปผู้บริหาร', desc: '5 เสาหลักยุทธศาสตร์และข้อสั่งการ', tag: 'โมดูล', targetId: 'executiveSection' },
+      { title: 'สถิตินักเรียน 45 โรงเรียน', desc: 'ตารางสถิตินักเรียน ม.1 - ม.6 ชาย/หญิง', tag: 'โมดูล', targetId: 'tableSection' },
+      { title: 'สถิติห้องเรียน & ความหนาแน่น', desc: 'ความจุและความหนาแน่นต่อห้อง', tag: 'โมดูล', targetId: 'tableSection' },
+      { title: 'เปรียบเทียบโรงเรียน', desc: 'วิเคราะห์ประกบคู่ 2 สถานศึกษา', tag: 'โมดูล', targetId: 'tableSection' },
+      { title: 'Zero Dropout & อัตราคงอยู่', desc: 'การติดตามนักเรียนหลุดระหว่างเทอม', tag: 'โมดูล', targetId: 'retentionSection' },
+      { title: 'แผนที่ GIS 45 ร.ร.', desc: 'รัศมีบริการ 5 กม. / 10 กม. และพิกัด', tag: 'โมดูล', targetId: 'gisMapSection' },
+      { title: 'พยากรณ์ประชากรปี 2570', desc: 'Demographic Cohort Forecasting', tag: 'โมดูล', targetId: 'forecastSection' },
+      { title: 'งบประมาณเงินอุดหนุนรายหัว', desc: 'คำนวณเงินอุดหนุน สพฐ. 179.63 ล้านบาท', tag: 'โมดูล', targetId: 'resourceSection' },
+      { title: 'จำลองนโยบาย (Policy Sandbox)', desc: 'What-If Simulation สไลเดอร์ปรับค่า', tag: 'โมดูล', targetId: 'policySandboxSection' },
+      { title: 'เรดาร์เตือนภัย 4 มิติ (4D Radar)', desc: 'คัดกรองความเสี่ยง 4 มิติสถานศึกษา', tag: 'โมดูล', targetId: 'earlyWarningSection' },
+      { title: 'ไทม์ไลน์ 5 รอบเวลา (Big Data)', desc: 'กราฟคลื่นความเคลื่อนไหว 5 จุดเวลา', tag: 'โมดูล', targetId: 'longitudinalSection' },
+      { title: 'ติดตามรุ่นนักเรียน (Cohort Tracking)', desc: 'การเลื่อนชั้น ม.1 สู่ ม.6 ข้ามปี', tag: 'โมดูล', targetId: 'cohortSection' },
+      { title: 'ดัชนีสุขภาวะ 45 ร.ร. (Health Index)', desc: 'เรดาร์ชาร์ต 100 คะแนนเต็ม 5 มิติ', tag: 'โมดูล', targetId: 'healthIndexSection' },
+      { title: 'สคริปต์รายงาน ผอ.เขต 🔒', desc: 'เครื่องมือสร้างสุนทรพจน์ทางการ กศจ./สพฐ.', tag: 'เครื่องมือ', targetId: 'openExecutiveSpeechBtn', isButton: true },
+      { title: 'เอกสารสรุปหน้าเดียว A4 (One-Pager)', desc: 'พรีวิวและพิมพ์สรุปนโยบายหน้าเดียว A4', tag: 'เอกสาร', targetId: 'btnOpenOnePager', isButton: true }
+    ];
+
+    // Add 8 Clusters
+    if (typeof CLUSTER_METADATA !== 'undefined') {
+      Object.keys(CLUSTER_METADATA).forEach(cName => {
+        searchIndex.push({
+          title: cName,
+          desc: 'สหวิทยาเขตในสังกัด สพม.สกลนคร',
+          tag: 'สหวิทยาเขต',
+          targetId: 'gisMapSection',
+          action: () => {
+            const select = document.getElementById('gisClusterSelect');
+            if (select) {
+              select.value = cName;
+              select.dispatchEvent(new Event('change'));
+            }
+          }
+        });
+      });
+    }
+
+    // Add 45 Schools
+    if (typeof DASHBOARD_DATA !== 'undefined') {
+      DASHBOARD_DATA.forEach(s => {
+        searchIndex.push({
+          title: s.name,
+          desc: `${s.cluster || ''} • นักเรียน ${s.y69_2?.total?.total || 0} คน`,
+          tag: 'โรงเรียน',
+          targetId: 'tableSection',
+          action: () => {
+            const searchBox = document.getElementById('tableSearchInput');
+            if (searchBox) {
+              searchBox.value = s.shortName || s.name;
+              searchBox.dispatchEvent(new Event('input'));
+            }
+          }
+        });
+      });
+    }
+
+    function openPalette() {
+      modal.style.display = 'flex';
+      input.value = '';
+      renderResults('');
+      setTimeout(() => input.focus(), 80);
+    }
+
+    function closePalette() {
+      modal.style.display = 'none';
+    }
+
+    function renderResults(q) {
+      resultsBox.innerHTML = '';
+      const query = q.trim().toLowerCase();
+      const filtered = searchIndex.filter(item => 
+        !query || item.title.toLowerCase().includes(query) || item.desc.toLowerCase().includes(query) || item.tag.toLowerCase().includes(query)
+      ).slice(0, 8);
+
+      if (filtered.length === 0) {
+        resultsBox.innerHTML = '<div style="padding: 20px; text-align: center; color: #64748b; font-size: 13px;">ไม่พบข้อมูลที่ตรงกับคำค้นหา</div>';
+        return;
+      }
+
+      filtered.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = `cmd-item ${idx === 0 ? 'active' : ''}`;
+        div.innerHTML = `
+          <div class="cmd-item-left">
+            <span>${item.tag === 'โรงเรียน' ? '🏫' : (item.tag === 'สหวิทยาเขต' ? '📍' : (item.tag === 'เอกสาร' ? '📄' : '⚡'))}</span>
+            <div>
+              <div class="cmd-item-title">${item.title}</div>
+              <div class="cmd-item-desc">${item.desc}</div>
+            </div>
+          </div>
+          <span class="cmd-item-tag">${item.tag}</span>
+        `;
+
+        div.addEventListener('click', () => {
+          closePalette();
+          if (item.action) {
+            item.action();
+          }
+          if (item.isButton) {
+            const btn = document.getElementById(item.targetId);
+            if (btn) btn.click();
+          } else if (item.targetId) {
+            const el = document.getElementById(item.targetId);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
+
+        resultsBox.appendChild(div);
+      });
+    }
+
+    input.addEventListener('input', (e) => renderResults(e.target.value));
+
+    // Global Keydown Shortcut (Ctrl + K or Cmd + K)
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        if (modal.style.display === 'flex') closePalette();
+        else openPalette();
+      } else if (e.key === 'Escape' && modal.style.display === 'flex') {
+        closePalette();
+      }
+    });
+
+    if (btnOpen) btnOpen.addEventListener('click', openPalette);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closePalette();
+    });
+  }
+
+  /* ==========================================================================
+     MODULE 10: A4 EXECUTIVE POLICY ONE-PAGER
+     ========================================================================== */
+  function initOnePagerModule() {
+    const modal = document.getElementById('executiveOnePagerModal');
+    const btnOpen = document.getElementById('btnOpenOnePager');
+    const btnClose = document.getElementById('btnCloseOnePager');
+    const btnPrint = document.getElementById('btnPrintOnePager');
+
+    if (btnOpen && modal) {
+      btnOpen.addEventListener('click', () => {
+        modal.style.display = 'flex';
+      });
+    }
+
+    if (btnClose && modal) {
+      btnClose.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+    }
+
+    if (btnPrint) {
+      btnPrint.addEventListener('click', () => {
+        window.print();
+      });
+    }
+
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.style.display = 'none';
+      });
+    }
+  }
+
+  /* ==========================================================================
+     MODULE 11: GIS SCHOOL CLUSTERING SYNERGY NETWORK
+     ========================================================================== */
+  let synergyLayers = [];
+  let isSynergyNetworkVisible = false;
+
+  function initGisSynergyModule() {
+    const btnToggle = document.getElementById('btnToggleSynergyNetwork');
+    if (!btnToggle) return;
+
+    btnToggle.addEventListener('click', () => {
+      if (!gisMap) return;
+      isSynergyNetworkVisible = !isSynergyNetworkVisible;
+
+      if (isSynergyNetworkVisible) {
+        btnToggle.style.background = '#16a34a';
+        btnToggle.style.color = '#ffffff';
+        btnToggle.style.borderColor = '#15803d';
+        drawSynergyNetwork();
+      } else {
+        btnToggle.style.background = '#f0fdf4';
+        btnToggle.style.color = '#166534';
+        btnToggle.style.borderColor = '#bbf7d0';
+        clearSynergyNetwork();
+      }
+    });
+  }
+
+  function clearSynergyNetwork() {
+    if (!gisMap) return;
+    synergyLayers.forEach(l => gisMap.removeLayer(l));
+    synergyLayers = [];
+  }
+
+  function drawSynergyNetwork() {
+    clearSynergyNetwork();
+    if (!gisMap || typeof SCHOOL_COORDINATES === 'undefined') return;
+
+    // Mentor Pairings (Major School -> Partner Vulnerable / Small Schools)
+    const synergyPairs = [
+      {
+        mentorName: 'สกลราชวิทยานุกูล',
+        partnerName: 'ท่าแร่ศึกษา',
+        focus: 'แลกเปลี่ยนสื่อดิจิทัลและห้องปฏิบัติการวิทยาศาสตร์ (Digital Lab Sharing)'
+      },
+      {
+        mentorName: 'สกลราชวิทยานุกูล',
+        partnerName: 'ท่านผู้หญิงจันทิมาพึ่งบารมี',
+        focus: 'หนุนเสริมการจัดการเรียนการสอนพื้นที่สูงและเทือกเขา'
+      },
+      {
+        mentorName: 'ธาตุนารายณ์วิทยา',
+        partnerName: 'ด่านม่วงคำพิทยาคม',
+        focus: 'แชร์ครูผู้สอนภาษาต่างประเทศและแนะแนวการศึกษาต่อ'
+      },
+      {
+        mentorName: 'สว่างแดนดิน',
+        partnerName: 'ลำปลาหางวิทยา',
+        focus: 'โรงเรียนพี่เลี้ยงคู่พัฒนา (Mentorship Partner) ใช้ทรัพยากรร่วม (120 คน)'
+      },
+      {
+        mentorName: 'สว่างแดนดิน',
+        partnerName: 'บงเหนือวิทยาคม',
+        focus: 'หนุนเสริมหลักสูตรทวิศึกษาและส่งต่อสายอาชีพ'
+      },
+      {
+        mentorName: 'พังโคนวิทยาคม',
+        partnerName: 'เทพสวัสดิ์วิทยา',
+        focus: 'เกลี่ยอัตรากำลังครูหมุนเวียนและสื่อ OBEC Center (124 คน)'
+      },
+      {
+        mentorName: 'พังโคนวิทยาคม',
+        partnerName: 'ช้างมิ่งพิทยานุกูล',
+        focus: 'เครือข่ายห้องเรียนสะเต็มศึกษา (STEM Synergy)'
+      },
+      {
+        mentorName: 'มัธยมวานรนิวาส',
+        partnerName: 'ท่าสงครามวิทยา',
+        focus: 'พัฒนาคุณภาพการศึกษาคู่ขนานลุ่มน้ำอูน (146 คน)'
+      },
+      {
+        mentorName: 'อากาศอำนวยศึกษา',
+        partnerName: 'โพนงามศึกษา',
+        focus: 'แลกเปลี่ยนครูวิชาเอกคณิตศาสตร์และวิทยาศาสตร์'
+      }
+    ];
+
+    synergyPairs.forEach(pair => {
+      const c1 = SCHOOL_COORDINATES[pair.mentorName];
+      const c2 = SCHOOL_COORDINATES[pair.partnerName];
+      if (c1 && c2) {
+        const latlng1 = [c1.lat, c1.lng];
+        const latlng2 = [c2.lat, c2.lng];
+        // Draw dashed synergy line
+        const polyline = L.polyline([latlng1, latlng2], {
+          color: '#c28e38',
+          weight: 3.5,
+          opacity: 0.85,
+          dashArray: '8, 8',
+          lineCap: 'round'
+        }).addTo(gisMap);
+
+        const mSch = DASHBOARD_DATA.find(s => s.name === pair.mentorName);
+        const pSch = DASHBOARD_DATA.find(s => s.name === pair.partnerName);
+
+        const distKm = (gisMap.distance(latlng1, latlng2) / 1000).toFixed(1);
+
+        polyline.bindPopup(`
+          <div style="font-family: 'Sarabun'; padding: 6px; min-width: 220px;">
+            <div style="font-size: 13px; font-weight: 700; color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 6px;">
+              🔗 พันธมิตรโรงเรียนคุณภาพคู่พัฒนา (Synergy)
+            </div>
+            <div style="font-size: 12px; margin-bottom: 3px;">
+              🏛️ <strong>รร. พี่เลี้ยง:</strong> ${pair.mentorName} (${mSch && mSch.y69_2 ? mSch.y69_2.total.total.toLocaleString() : '-'} คน)
+            </div>
+            <div style="font-size: 12px; margin-bottom: 3px;">
+              🤝 <strong>รร. คู่พัฒนา:</strong> ${pair.partnerName} (${pSch && pSch.y69_2 ? pSch.y69_2.total.total.toLocaleString() : '-'} คน)
+            </div>
+            <div style="font-size: 11.5px; color: #64748b; margin-bottom: 4px;">
+              📏 <strong>ระยะทางห่างกัน:</strong> ${distKm} กิโลเมตร
+            </div>
+            <div style="font-size: 11.5px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 6px; border-radius: 4px; color: #334155;">
+              🎯 <strong>จุดเน้นความร่วมมือ:</strong> ${pair.focus}
+            </div>
+          </div>
+        `);
+
+        synergyLayers.push(polyline);
+      }
+    });
+  }
+
+  /* ==========================================================================
+     MODULE 12: AI EXECUTIVE POLICY COPILOT
+     ========================================================================== */
+  function initAiCopilotModule() {
+    const btnOpen = document.getElementById('btnOpenCopilot');
+    const modal = document.getElementById('copilotModal');
+    const btnClose = document.getElementById('btnCloseCopilot');
+    const form = document.getElementById('copilotForm');
+    const input = document.getElementById('copilotInput');
+    const msgBox = document.getElementById('copilotMessages');
+    const chips = document.querySelectorAll('#copilotChipsBar .copilot-chip');
+
+    if (!btnOpen || !modal || !form || !input || !msgBox) return;
+
+    btnOpen.addEventListener('click', () => {
+      modal.style.display = 'flex';
+      setTimeout(() => input.focus(), 150);
+    });
+
+    btnClose.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.style.display = 'none';
+    });
+
+    chips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        const prompt = chip.getAttribute('data-prompt');
+        if (prompt) {
+          handleUserQuery(prompt);
+        }
+      });
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      handleUserQuery(text);
+    });
+
+    function addMessage(sender, text) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `copilot-msg ${sender}`;
+      msgDiv.innerHTML = `<div class="msg-bubble">${text}</div>`;
+      msgBox.appendChild(msgDiv);
+      msgBox.scrollTop = msgBox.scrollHeight;
+    }
+
+    function handleUserQuery(query) {
+      addMessage('user', query);
+
+      // Typing simulation
+      setTimeout(() => {
+        const response = generateExecutiveAnswer(query);
+        addMessage('bot', response);
+      }, 350);
+    }
+
+    function generateExecutiveAnswer(q) {
+      const lower = q.toLowerCase();
+
+      // Check for specific school query
+      if (typeof DASHBOARD_DATA !== 'undefined') {
+        const matchedSchool = DASHBOARD_DATA.find(s => 
+          lower.includes(s.name.toLowerCase()) || lower.includes((s.shortName || '').toLowerCase())
+        );
+
+        if (matchedSchool) {
+          const s = matchedSchool;
+          const std = s.y69_2?.total?.total || 0;
+          const rooms = s.y69_2?.total?.rooms || 0;
+          const ratio = rooms > 0 ? (std / rooms).toFixed(1) : 0;
+          const drop = (s.y69_2?.total?.total || 0) - (s.y69_1?.total?.total || 0);
+
+          return `
+            📌 <strong>บทวิเคราะห์สารสนเทศ: ${s.name}</strong><br>
+            • <strong>สังกัด:</strong> ${s.cluster || 'ทั่วไป'} (อ.${s.amphoe || ''})<br>
+            • <strong>จำนวนนักเรียนล่าสุด (2/2569):</strong> ${std.toLocaleString()} คน (${rooms} ห้องเรียน)<br>
+            • <strong>ความหนาแน่นเฉลี่ย:</strong> ${ratio} คน/ห้อง ${ratio > 36 ? '⚠️ (ค่อนข้างแออัด)' : '✅ (ได้มาตรฐาน)'}<br>
+            • <strong>อัตราเปลี่ยนแปลงระหว่างเทอม:</strong> ${drop >= 0 ? '+' : ''}${drop} คน (${drop < 0 ? 'เฝ้าระวัง Zero Dropout' : 'ยอดคงที่/เพิ่มขึ้น'})<br>
+            💡 <strong>ข้อเสนอแนะเชิงนโยบาย:</strong> ${
+              ratio > 36 ? 'ควรพิจารณาปรับแผนรับนักเรียน ม.1/ม.4 ปี 2570 เพื่อลดความแออัดของห้องเรียนให้อยู่ในเกณฑ์ 32-35 คน/ห้อง' :
+              std < 150 ? 'จัดเป็นสถานศึกษาเปราะบาง ควรนำโมเดลโรงเรียนคุณภาพคู่พัฒนา (Mentorship) เข้ามาร่วมแชร์ทรัพยากร' :
+              'ผลการดำเนินงานอยู่ในเกณฑ์มาตรฐาน รักษาเสถียรภาพและคุณภาพการเรียนรู้ต่อเนื่อง'
+            }
+          `;
+        }
+      }
+
+      // Topic: 5 เสาหลัก / ภาพรวม
+      if (lower.includes('5 เสาหลัก') || lower.includes('ภาพรวม') || lower.includes('สรุป')) {
+        return `
+          🏛️ <strong>สรุปสาระสำคัญ 5 เสาหลักยุทธศาสตร์การศึกษา สพม.สกลนคร:</strong><br>
+          1. <strong>ประชากรนักเรียนรวม:</strong> 44,566 คน (45 โรงเรียน, 1,392 ห้องเรียน)<br>
+          2. <strong>อัตราคงอยู่ (Zero Dropout):</strong> 99.44% (ลดลงระหว่างเทอม -252 คน ดีขึ้นกว่าปี 68 ที่ลด -356 คน)<br>
+          3. <strong>การกระจายตัวเชิงพื้นที่:</strong> ในเมือง 34.2% : นอกเมือง 65.8% (ครอบคลุม 18 อำเภอ 8 สหวิทยาเขต)<br>
+          4. <strong>คาดการณ์ปี 2570:</strong> 43,899 คน (แนวโน้มลดลง -667 คน หรือ -1.50%)<br>
+          5. <strong>งบประมาณอุดหนุนรายหัว:</strong> ประมาณการรวม 179.63 ล้านบาท/ปี (เฉลี่ย 4,031 บาท/คน)
+        `;
+      }
+
+      // Topic: Zero Dropout / หลุด
+      if (lower.includes('หลุด') || lower.includes('dropout') || lower.includes('เสี่ยง')) {
+        return `
+          🚨 <strong>โรงเรียนที่ต้องเฝ้าระวังการลดลงของนักเรียนสูงสุดระหว่างภาคเรียน (2569):</strong><br>
+          1. <strong>รร.เตรียมอุดมศึกษา ภาคตะวันออกเฉียงเหนือ:</strong> ลดลง -42 คน (คงอยู่ 98.49%)<br>
+          2. <strong>รร.ธาตุนารายณ์วิทยา:</strong> ลดลง -39 คน (คงอยู่ 98.81%)<br>
+          3. <strong>รร.มัธยมวานรนิวาส:</strong> ลดลง -31 คน (คงอยู่ 98.60%)<br>
+          4. <strong>รร.สกลราชวิทยานุกูล:</strong> ลดลง -22 คน (คงอยู่ 98.88%)<br>
+          🎯 <strong>แนวทางปฏิบัติ:</strong> มอบกลุ่มส่งเสริมการจัดการศึกษาและระบบดูแลช่วยเหลือนักเรียน ลงพื้นที่ติดตามสาเหตุ (ย้ายถิ่นฐาน, ปัญหาส่วนตัว) เพื่อนำเด็กกลับเข้าสู่ระบบการศึกษา
+        `;
+      }
+
+      // Topic: สุขภาวะ / AAA
+      if (lower.includes('สุขภาวะ') || lower.includes('aaa') || lower.includes('อันดับ')) {
+        return `
+          🏆 <strong>5 อันดับสถานศึกษาที่มีดัชนีสุขภาวะสูงสุด (เกรด AAA จาก 100 คะแนนเต็ม):</strong><br>
+          1. <strong>รร.บ้านม่วงพิทยาคม:</strong> 94.4 คะแนน (เสถียรภาพสูงมาก, ห้องเรียนสมดุล)<br>
+          2. <strong>รร.พังโคนวิทยาคม:</strong> 93.3 คะแนน (อัตราคงอยู่ดีเด่น, สหวิทยาเขตดำรงธรรม)<br>
+          3. <strong>รร.คำตากล้าราชประชาสงเคราะห์:</strong> 93.3 คะแนน (สหวิทยาเขตเบญจพัฒน์)<br>
+          4. <strong>รร.พรรณาวุฒาจารย์:</strong> 93.0 คะแนน (การบริหารจัดการชั้นเรียนยอดเยี่ยม)<br>
+          5. <strong>รร.อากาศอำนวยศึกษา:</strong> 93.0 คะแนน (รักษาเสถียรภาพนักเรียนต่อเนื่อง)<br>
+          * รวมทั้งเขตมีโรงเรียนผ่านเกณฑ์ AAA ทั้งสิ้น 8 โรงเรียน
+        `;
+      }
+
+      // Topic: ขนาดเล็ก / เปราะบาง
+      if (lower.includes('ขนาดเล็ก') || lower.includes('เปราะบาง') || lower.includes('ขนาดกลาง')) {
+        return `
+          🏫 <strong>สถานการณ์ขนาดโรงเรียนตามเกณฑ์ สพฐ. ล่าสุด (พฤษภาคม 2569):</strong><br>
+          • <strong>ขนาดเล็ก (≤ 119 คน):</strong> 0 โรงเรียนในเทอม 2/69 (เนื่องจาก รร.ลำปลาหางวิทยา มี 120 คน ขยับขึ้นขนาดกลางพอดี)<br>
+          • <strong>ขนาดกลาง (120 - 719 คน):</strong> 26 โรงเรียน (9,320 คน)<br>
+          • <strong>ขนาดใหญ่ (720 - 1,679 คน):</strong> 10 โรงเรียน (11,964 คน)<br>
+          • <strong>ขนาดใหญ่พิเศษ (≥ 1,680 คน):</strong> 9 โรงเรียน (23,282 คน)<br>
+          ⚠️ <strong>กลุ่มเฝ้าระวังต่ำกว่า 150 คน:</strong> รร.ลำปลาหางวิทยา (120), รร.เทพสวัสดิ์วิทยา (124), รร.ท่าสงครามวิทยา (146) ควรขับเคลื่อนโมเดล <strong>โรงเรียนคุณภาพคู่พัฒนา (Mentorship Partner)</strong>
+        `;
+      }
+
+      // Topic: ไทม์ไลน์ 5 รอบ
+      if (lower.includes('ไทม์ไลน์') || lower.includes('5 รอบ') || lower.includes('แนวโน้ม')) {
+        return `
+          📈 <strong>สรุปสถิติการเคลื่อนไหวของนักเรียน 5 รอบเวลาต่อเนื่อง:</strong><br>
+          • <strong>2568 เทอม 1:</strong> 45,403 คน (1,382 ห้อง)<br>
+          • <strong>2568 เทอม 2:</strong> 45,047 คน (-356 คน ระหว่างเทอม)<br>
+          • <strong>2568 สิ้นปี:</strong> 44,808 คน (-239 คน ปลายปี)<br>
+          • <strong>2569 เทอม 1:</strong> 44,818 คน (+10 คน รับ ม.1/ม.4 ชดเชยได้)<br>
+          • <strong>2569 เทอม 2:</strong> 44,566 คน (-252 คน ระหว่างเทอม)<br>
+          📊 ภาพรวม 2 ปีลดลงสุทธิ -837 คน (-1.84%) แต่วิกฤตการหลุดระหว่างเทอมลดความรุนแรงลงอย่างมีนัยสำคัญ
+        `;
+      }
+
+      // Topic: งบประมาณ
+      if (lower.includes('งบประมาณ') || lower.includes('รายหัว') || lower.includes('เงิน')) {
+        return `
+          💰 <strong>ประมาณการงบประมาณเงินอุดหนุนรายหัว (สพฐ.):</strong><br>
+          • <strong>ระดับมัธยมศึกษาตอนต้น (24,002 คน x 3,800 บาท):</strong> 91.21 ล้านบาท<br>
+          • <strong>ระดับมัธยมศึกษาตอนปลาย (20,564 คน x 4,300 บาท):</strong> 88.43 ล้านบาท<br>
+          • <strong>ยอดรวมทั้งเขต:</strong> <strong>179.63 ล้านบาท</strong> (เฉลี่ย 4,031 บาท/คน)<br>
+          💸 <strong>ผลกระทบจากการลดลงระหว่างเทอม (-252 คน):</strong> เสียโอกาสทางงบประมาณราว 1.02 ล้านบาท
+        `;
+      }
+
+      // General fallback
+      return `
+        ขอเรียนข้อมูลสรุปสำหรับท่านผู้บริหารครับ: ปัจจุบัน สพม.สกลนคร มีนักเรียนรวม <strong>44,566 คน</strong> (45 โรงเรียน 1,392 ห้องเรียน) โดยมีอัตราคงอยู่ 99.44% และงบประมาณอุดหนุนรายหัว 179.63 ล้านบาท<br><br>
+        หากท่านต้องการเจาะลึกเรื่องใดเป็นพิเศษ สามารถพิมพ์ถามชื่อโรงเรียน เช่น <em>"วิเคราะห์ รร.สกลราชฯ"</em> หรือพิมพ์ประเด็น เช่น <em>"งบประมาณ"</em>, <em>"สุขภาวะ"</em>, หรือ <em>"โรงเรียนขนาดกลาง"</em> ได้ตลอดเวลาครับ!
+      `;
     }
   }
 
