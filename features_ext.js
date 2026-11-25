@@ -462,13 +462,15 @@
     const btnCopySpeechBtn = document.getElementById('btnCopySpeechBtn');
     const btnPrintSpeechBtn = document.getElementById('btnPrintSpeechBtn');
 
+    // Always clear any stored tokens on page load
+    try {
+      sessionStorage.removeItem('dmc_executive_auth_token');
+      localStorage.removeItem('dmc_executive_auth_token');
+    } catch(e) {}
+
+    // ALWAYS prompt for passcode every single time! Never cache!
     function checkAuthAndOpen() {
-      const isAuth = sessionStorage.getItem('dmc_executive_auth_token') === EXECUTIVE_PASSCODE;
-      if (isAuth) {
-        openSpeechModal();
-      } else {
-        openAuthModal();
-      }
+      openAuthModal();
     }
 
     function openAuthModal() {
@@ -484,12 +486,16 @@
 
     function closeAuthModal() {
       if (authModal) authModal.style.display = 'none';
+      if (pinInput) pinInput.value = '';
+      if (pinErrorMsg) pinErrorMsg.style.display = 'none';
     }
 
     function handlePinSubmit() {
       const enteredPin = pinInput ? pinInput.value.trim() : '';
       if (enteredPin === EXECUTIVE_PASSCODE) {
-        sessionStorage.setItem('dmc_executive_auth_token', EXECUTIVE_PASSCODE);
+        // Clear PIN input immediately upon success (no token stored anywhere)
+        if (pinInput) pinInput.value = '';
+        if (pinErrorMsg) pinErrorMsg.style.display = 'none';
         closeAuthModal();
         openSpeechModal();
       } else {
@@ -513,6 +519,12 @@
 
     function closeSpeechModal() {
       if (speechModal) speechModal.style.display = 'none';
+      // Ensure state is completely cleared so next access requires PIN 6547
+      if (pinInput) pinInput.value = '';
+      try {
+        sessionStorage.removeItem('dmc_executive_auth_token');
+        localStorage.removeItem('dmc_executive_auth_token');
+      } catch(e) {}
     }
 
     if (btnOpenSpeech) btnOpenSpeech.addEventListener('click', checkAuthAndOpen);
