@@ -3314,6 +3314,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const sizeStaffTotals = { S: 0, M: 0, L: 0, XL: 0 };
     const sizeRoomTotals = { S: 0, M: 0, L: 0, XL: 0 };
+    const sizeGrantTotals = { S: 0, M: 0, L: 0, XL: 0 };
 
     const records = DASHBOARD_DATA.map((s) => {
       const displayName = getSchoolDisplayName(s);
@@ -3353,17 +3354,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (sizeStaffTotals[size] !== undefined) {
         sizeStaffTotals[size] += entitledStaff;
         sizeRoomTotals[size] += roomsTotal;
+        sizeGrantTotals[size] += grantTotal;
       }
 
-      let status = 'อัตรากำลังพอดีตามเกณฑ์';
-      let statusBadge = '<span class="trend-badge positive" style="font-size: 11px;">🟢 สมดุลตามเกณฑ์</span>';
-      if (ratio > 25.0) {
-        status = 'ภาระงานสูง ครูสอนเกินเกณฑ์มาตรฐาน';
-        statusBadge = '<span class="trend-badge negative" style="font-size: 11px; background: rgba(197, 34, 31, 0.12); color: var(--color-error);">🔴 ภาระงานสูง</span>';
-      } else if (ratio < 15.0) {
-        status = 'สัดส่วน นร./ครู ต่ำกว่าเกณฑ์มาตรฐาน';
-        statusBadge = '<span class="trend-badge warning" style="font-size: 11px; background: rgba(194, 142, 56, 0.15); color: var(--color-gold);">🟡 เฝ้าระวังส่วนเกิน</span>';
-      }
+      let status = 'ปกติ';
+      let statusBadge = '<span class="trend-badge positive" style="font-size: 11px;">🟢 ปกติ</span>';
 
       return {
         id: s.id,
@@ -3396,7 +3391,8 @@ document.addEventListener('DOMContentLoaded', () => {
       totalRoomsAll,
       avgRatio: totalEntitledStaff > 0 ? totalStudentsAll / totalEntitledStaff : 0,
       sizeStaffTotals,
-      sizeRoomTotals
+      sizeRoomTotals,
+      sizeGrantTotals
     };
   }
 
@@ -3412,13 +3408,13 @@ document.addEventListener('DOMContentLoaded', () => {
       grantSubEl.textContent = `ม.ต้น ${(data.totalGrantMTon / 1e6).toFixed(2)}M บ. | ม.ปลาย ${(data.totalGrantMPlai / 1e6).toFixed(2)}M บ.`;
     }
 
-    const staffEl = document.getElementById('resourceKpiStaffTotal');
-    const staffSubEl = document.getElementById('resourceKpiStaffSub');
-    if (staffEl) {
-      staffEl.textContent = `${data.totalEntitledStaff.toLocaleString()} อัตรา`;
+    const roomsEl = document.getElementById('resourceKpiRoomsTotal') || document.getElementById('resourceKpiStaffTotal');
+    const roomsSubEl = document.getElementById('resourceKpiRoomsSub') || document.getElementById('resourceKpiStaffSub');
+    if (roomsEl) {
+      roomsEl.textContent = `${data.totalRoomsAll.toLocaleString()} ห้อง`;
     }
-    if (staffSubEl) {
-      staffSubEl.textContent = `คำนวณจาก ${data.totalRoomsAll.toLocaleString()} ห้องเรียน (${data.records.length} โรงเรียน)`;
+    if (roomsSubEl) {
+      roomsSubEl.textContent = `ม.ต้น 750 ห้อง | ม.ปลาย 642 ห้อง (เฉลี่ย ${(data.totalRoomsAll / data.records.length).toFixed(1)} ห้อง/แห่ง)`;
     }
 
     renderResourceTable(data);
@@ -3438,7 +3434,7 @@ document.addEventListener('DOMContentLoaded', () => {
       );
     }
 
-    filtered.sort((a, b) => b.stdTotal - a.stdTotal);
+    filtered.sort((a, b) => b.grantTotal - a.grantTotal);
 
     tbody.innerHTML = '';
     if (filtered.length === 0) {
@@ -3447,6 +3443,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     filtered.forEach((r, idx) => {
+      const avgPerStudent = r.stdTotal > 0 ? Math.round(r.grantTotal / r.stdTotal) : 0;
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td style="text-align: center; color: var(--text-muted); font-size: 11.5px;">${idx + 1}</td>
@@ -3460,16 +3457,18 @@ document.addEventListener('DOMContentLoaded', () => {
         </td>
         <td style="text-align: right; font-weight: 600;">${r.stdTotal.toLocaleString()}</td>
         <td style="text-align: center; color: var(--text-muted);">${r.roomsTotal}</td>
-        <td style="text-align: center; font-weight: 700; color: var(--color-primary); font-size: 13px;">
-          ${r.entitledStaff} อัตรา
+        <td style="text-align: right; color: var(--text-main); font-weight: 500;">
+          ${r.grantMTon.toLocaleString()} บ.
         </td>
-        <td style="text-align: center; font-weight: 600; color: ${r.ratio > 25 ? 'var(--color-error)' : 'var(--text-main)'};">
-          ${r.ratio.toFixed(1)} : 1
+        <td style="text-align: right; color: var(--text-main); font-weight: 500;">
+          ${r.grantMPlai.toLocaleString()} บ.
         </td>
         <td style="text-align: right; font-weight: 700; color: var(--color-gold);">
           ${r.grantTotal.toLocaleString()} บ.
         </td>
-        <td style="text-align: left;">${r.statusBadge}</td>
+        <td style="text-align: right; color: var(--text-muted); font-size: 11.5px;">
+          ${avgPerStudent.toLocaleString()} บ.
+        </td>
       `;
 
       const link = tr.querySelector('.table-school-link');
@@ -3495,15 +3494,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const labels1 = ['ขนาดเล็ก (S)', 'ขนาดกลาง (M)', 'ขนาดใหญ่ (L)', 'ขนาดใหญ่พิเศษ (XL)'];
       const keys = ['S', 'M', 'L', 'XL'];
-      const staffValues = keys.map(k => data.sizeStaffTotals[k] || 0);
+      const grantValues = keys.map(k => Number(((data.sizeGrantTotals[k] || 0) / 1e6).toFixed(2)));
 
       resourceChartStaffInstance = new Chart(ctx1, {
         type: 'bar',
         data: {
           labels: labels1,
           datasets: [{
-            label: 'กรอบอัตรากำลังครูพึงมี (อัตรา)',
-            data: staffValues,
+            label: 'เงินอุดหนุนรายหัวรวม (ล้านบาท)',
+            data: grantValues,
             backgroundColor: '#10233F',
             borderRadius: 4,
             barPercentage: 0.7
@@ -3516,7 +3515,7 @@ document.addEventListener('DOMContentLoaded', () => {
             legend: { display: false },
             tooltip: {
               callbacks: {
-                label: (c) => ` กรอบอัตรากำลัง: ${c.parsed.y.toLocaleString()} อัตรา`
+                label: (c) => ` เงินอุดหนุน: ${Number(c.parsed.y).toLocaleString()} ล้านบาท`
               }
             }
           },
@@ -3580,15 +3579,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const data = getResourceData();
     const rows = [
-      ['รายงานการวิเคราะห์อัตรากำลังครูและประมาณการเงินอุดหนุนรายหัว - สพม.สกลนคร'],
+      ['รายงานการประมาณการเงินอุดหนุนรายหัวและโครงสร้างสถานศึกษา - สพม.สกลนคร'],
       ['วันที่จัดทำรายงาน:', new Date().toLocaleDateString('th-TH')],
-      ['สรุปภาพรวมทั้งเขต:', `กรอบครูพึงมีรวม ${data.totalEntitledStaff.toLocaleString()} อัตรา, สัดส่วน นร./ครู ${data.avgRatio.toFixed(1)}:1, งบอุดหนุนรวม ${(data.totalGrantDistrict / 1e6).toFixed(2)} ล้านบาท`],
+      ['สรุปภาพรวมทั้งเขต:', `งบอุดหนุนรวม ${(data.totalGrantDistrict / 1e6).toFixed(2)} ล้านบาท (ม.ต้น ${(data.totalGrantMTon / 1e6).toFixed(2)} ล้านบาท / ม.ปลาย ${(data.totalGrantMPlai / 1e6).toFixed(2)} ล้านบาท), นักเรียนรวม ${data.totalStudentsAll.toLocaleString()} คน, ห้องเรียนรวม ${data.totalRoomsAll.toLocaleString()} ห้อง`],
       [],
-      ['ลำดับ', 'รหัสโรงเรียน', 'ชื่อโรงเรียน', 'ขนาด', 'นักเรียนรวม (คน)', 'ห้องเรียน', 'กรอบครูพึงมี (อัตรา)', 'สัดส่วน นร./ครู', 'เงินอุดหนุน ม.ต้น (บาท)', 'เงินอุดหนุน ม.ปลาย (บาท)', 'เงินอุดหนุนรวม (บาท)', 'สถานะทรัพยากร']
+      ['ลำดับ', 'รหัสโรงเรียน', 'ชื่อโรงเรียน', 'ขนาด', 'นักเรียนรวม (คน)', 'ห้องเรียน', 'เงินอุดหนุน ม.ต้น (บาท)', 'เงินอุดหนุน ม.ปลาย (บาท)', 'เงินอุดหนุนรวม (บาท)', 'เฉลี่ยต่อนักเรียน (บาท)']
     ];
 
-    const sorted = [...data.records].sort((a, b) => b.stdTotal - a.stdTotal);
+    const sorted = [...data.records].sort((a, b) => b.grantTotal - a.grantTotal);
     sorted.forEach((r, idx) => {
+      const avg = r.stdTotal > 0 ? Math.round(r.grantTotal / r.stdTotal) : 0;
       rows.push([
         idx + 1,
         r.id,
@@ -3596,19 +3596,17 @@ document.addEventListener('DOMContentLoaded', () => {
         r.size,
         r.stdTotal,
         r.roomsTotal,
-        r.entitledStaff,
-        Number(r.ratio.toFixed(1)),
         r.grantMTon,
         r.grantMPlai,
         r.grantTotal,
-        r.status
+        avg
       ]);
     });
 
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(rows);
-    XLSX.utils.book_append_sheet(wb, ws, 'Staffing_Budget');
-    XLSX.writeFile(wb, `Staffing_and_Budget_Report.xlsx`);
+    XLSX.utils.book_append_sheet(wb, ws, 'Capitation_Grant');
+    XLSX.writeFile(wb, `Capitation_Grant_Report.xlsx`);
   }
 
   // Multi-Dimensional Insights & Size Analysis
@@ -3778,13 +3776,13 @@ document.addEventListener('DOMContentLoaded', () => {
       [2, 'อัตราคงอยู่ (Zero Dropout)', 99.44, '%', 'ลดลงระหว่างภาคเรียน -252 คน (-0.56%) ดีขึ้นกว่าปี 2568 ที่ลดลง -356 คน'],
       [3, 'การกระจายตัวเชิงพื้นที่', 34.16, '% (ในเมือง)', 'อำเภอเมือง 15,224 คน (34.2%) : 17 อำเภอรอบนอก 29,342 คน (65.8%)'],
       [4, 'คาดการณ์ประชากรปี 2570', 43899, 'คน', 'แบบจำลอง Demographic Cohort Progression ชี้แนวโน้มลดลง -667 คน (-1.50%)'],
-      [5, 'งบประมาณอุดหนุนรายหัว', 179632800, 'บาท', 'กรอบอัตรากำลังข้าราชการครูพึงมี (ก.ค.ศ. ว23/2563) รวม 2,348 ตำแหน่ง (สัดส่วน 19.0:1)'],
+      [5, 'งบประมาณอุดหนุนรวม', 179632800, 'บาท', 'ประมาณการเงินอุดหนุนรายหัว สพฐ. รวม 179.63 ล้านบาทต่อปี (ม.ต้น 91.21 ล้านบาท / ม.ปลาย 88.43 ล้านบาท) เฉลี่ย 4,031 บาท/คน'],
       [],
       ['=== ข้อสั่งการและทิศทางเชิงกลยุทธ์สำหรับผู้บริหาร สพม.สกลนคร (Actionable Directives) ==='],
       ['ข้อที่', 'มิตินโยบาย', 'แนวทางปฏิบัติและข้อสั่งการสำหรับสถานศึกษา'],
       [1, 'มาตรการ Zero Dropout เชิงรุก', 'มอบหมายกลุ่มส่งเสริมการจัดการศึกษาและระบบดูแลช่วยเหลือนักเรียน ลงพื้นที่ติดตามช่วยเหลือนักเรียนใน 3 โรงเรียนที่สถิติลดลงสูงสุดระหว่างภาคเรียน ได้แก่ รร.เตรียมอุดมศึกษา ภาคตะวันออกเฉียงเหนือ (-42 คน), รร.ธาตุนารายณ์วิทยา (-39 คน) และ รร.มัธยมวานรนิวาส (-31 คน)'],
       [2, 'การวางแผนรับนักเรียน ม.1 / ม.4 ปี 2570', 'กำหนดเป้าหมายรับนักเรียน ม.1 แรกเข้าที่ 7,120 คน (225 ห้อง) และ ม.4 แรกเข้าที่ 7,370 คน (235 ห้อง) ปรับขนาดห้องเรียนให้ได้มาตรฐาน 32-35 คน/ห้อง เพื่อป้องกันห้องเรียนแออัดและห้องเรียนต่ำกว่าเกณฑ์'],
-      [3, 'การเกลี่ยอัตรากำลังครูตามเกณฑ์ ก.ค.ศ.', 'บริหารจัดการอัตรากำลังข้าราชการครู 2,348 ตำแหน่ง โดยพิจารณาเกลี่ยอัตรากำลังจากโรงเรียนที่มีสัดส่วน นร./ครู ต่ำกว่า 15:1 ไปสนับสนุนโรงเรียนที่มีสัดส่วนเกิน 25:1 (เช่น รร.ธาตุนารายณ์วิทยา และ รร.สกลราชวิทยานุกูล)'],
+      [3, 'การสนับสนุนการบริหารจัดการศึกษา', 'มอบหมายกลุ่มบริหารงานบุคคลและกลุ่มนโยบายและแผน นำข้อมูลสถิตินักเรียนและห้องเรียนไปใช้เป็นฐานข้อมูลในการวางแผนอัตรากำลังและจัดสรรงบประมาณสนับสนุนการจัดการเรียนการสอนอย่างทั่วถึงและเป็นธรรม'],
       [4, 'การเสริมสร้างเครือข่ายโรงเรียนขนาดเล็ก', 'ยกระดับโรงเรียนขนาดเล็กและกลุ่มเฝ้าระวัง (≤ 120 คน เช่น รร.ลำปลาหางวิทยา และ รร.เทพสวัสดิ์วิทยา) โดยนำโมเดลการใช้ทรัพยากรร่วมกัน (Resource Sharing) ภายในกลุ่มสหวิทยาเขตดำรงธรรม และโรงเรียนพี่เลี้ยงใกล้เคียง']
     ];
     const wsSummary = XLSX.utils.aoa_to_sheet(summaryRows);
@@ -3907,18 +3905,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const wsFc = XLSX.utils.aoa_to_sheet(fcRows);
     XLSX.utils.book_append_sheet(wb, wsFc, 'Forecast_2570');
 
-    // Sheet 5: Staffing and Budget
+    // Sheet 5: Capitation Grant and Resources
     const resData = getResourceData();
     const resRows = [
-      ['รายงานการประมาณการกรอบอัตรากำลังครู (ก.ค.ศ. ว23/2563) และเงินอุดหนุนรายหัว - สพม.สกลนคร'],
+      ['รายงานการประมาณการเงินอุดหนุนรายหัวและโครงสร้างสถานศึกษา - สพม.สกลนคร'],
       [`วันที่ส่งออก: ${new Date().toLocaleDateString('th-TH')}`],
-      ['สรุปภาพรวมเขต:', `เงินอุดหนุนรวม ${resData.totalGrantDistrict.toLocaleString()} บาท (ม.ต้น ${resData.totalGrantMTon.toLocaleString()} บาท / ม.ปลาย ${resData.totalGrantMPlai.toLocaleString()} บาท), กรอบครูรวม ${resData.totalEntitledStaff.toLocaleString()} อัตรา, สัดส่วน นร.:ครู เฉลี่ย ${resData.studentToTeacherRatio}:1`],
+      ['สรุปภาพรวมเขต:', `เงินอุดหนุนรวม ${resData.totalGrantDistrict.toLocaleString()} บาท (ม.ต้น ${resData.totalGrantMTon.toLocaleString()} บาท / ม.ปลาย ${resData.totalGrantMPlai.toLocaleString()} บาท), นักเรียนรวม ${resData.totalStudentsAll.toLocaleString()} คน, ห้องเรียนรวม ${resData.totalRoomsAll.toLocaleString()} ห้อง`],
       [],
-      ['ลำดับ', 'รหัสโรงเรียน', 'ชื่อโรงเรียน', 'อำเภอ', 'ขนาด', 'ม.ต้น (คน)', 'ม.ปลาย (คน)', 'นักเรียนรวม (คน)', 'ห้องเรียน', 'เงินอุดหนุน ม.ต้น (บาท)', 'เงินอุดหนุน ม.ปลาย (บาท)', 'เงินอุดหนุนรวมต่อปี (บาท)', 'กรอบ ผอ.', 'กรอบ รอง ผอ.', 'กรอบครูผู้สอน', 'รวมกรอบครูพึงมี (อัตรา)', 'อัตราส่วน นร.:ครู', 'สถานะอัตรากำลัง']
+      ['ลำดับ', 'รหัสโรงเรียน', 'ชื่อโรงเรียน', 'อำเภอ', 'ขนาด', 'ม.ต้น (คน)', 'ม.ปลาย (คน)', 'นักเรียนรวม (คน)', 'ห้องเรียน', 'เงินอุดหนุน ม.ต้น (บาท)', 'เงินอุดหนุน ม.ปลาย (บาท)', 'เงินอุดหนุนรวมต่อปี (บาท)', 'เฉลี่ยต่อนักเรียน (บาท)']
     ];
-    const sortedRes = [...resData.records].sort((a, b) => b.students - a.students);
+    const sortedRes = [...resData.records].sort((a, b) => b.grantTotal - a.grantTotal);
     sortedRes.forEach((r, idx) => {
       const orig = DASHBOARD_DATA.find(s => s.id === r.id);
+      const avg = r.stdTotal > 0 ? Math.round(r.grantTotal / r.stdTotal) : 0;
       resRows.push([
         idx + 1,
         r.id,
@@ -3927,21 +3926,16 @@ document.addEventListener('DOMContentLoaded', () => {
         r.size,
         r.stdMTon,
         r.stdMPlai,
-        r.students,
-        r.rooms,
+        r.stdTotal,
+        r.roomsTotal,
         r.grantMTon,
         r.grantMPlai,
         r.grantTotal,
-        r.director,
-        r.deputy,
-        r.teacherQuota,
-        r.entitledStaff,
-        Number(r.ratio.toFixed(1)),
-        r.status
+        avg
       ]);
     });
     const wsRes = XLSX.utils.aoa_to_sheet(resRows);
-    XLSX.utils.book_append_sheet(wb, wsRes, 'Staffing_and_Budget');
+    XLSX.utils.book_append_sheet(wb, wsRes, 'Capitation_Grant');
 
     // Sheet 6: Master 45 Schools Longitudinal Data
     const masterRows = [

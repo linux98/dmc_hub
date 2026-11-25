@@ -143,14 +143,14 @@
             </a>
           </li>
           <li class="nav-item" id="menuResources">
-            <a href="#" title="อัตรากำลัง & งบประมาณ">
+            <a href="#" title="งบประมาณเงินอุดหนุนรายหัว">
               <span class="nav-icon">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
                   <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
                 </svg>
               </span>
-              <span>อัตรากำลัง & งบ</span>
+              <span>งบประมาณรายหัว</span>
             </a>
           </li>
           <li class="nav-item" id="menuInsights">
@@ -1061,14 +1061,14 @@
                   <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
                 </svg>
               </span>
-              <h3 style="margin: 0;">ระบบคำนวณอัตรากำลังครูและประมาณการงบประมาณรายหัว (Teacher Staffing & Capitation Grant Estimator)</h3>
+              <h3 style="margin: 0;">ระบบประมาณการเงินอุดหนุนรายหัวและทรัพยากรสถานศึกษา (Capitation Grant & Resource Estimator)</h3>
             </div>
-            <p style="margin-top: 4px;">การประมาณการกรอบอัตรากำลังข้าราชการครูตามเกณฑ์ ก.ค.ศ. (ว23/2563) และการจัดสรรเงินอุดหนุนรายหัว สพฐ. ประจำปี</p>
+            <p style="margin-top: 4px;">การประมาณการจัดสรรเงินอุดหนุนรายหัว สพฐ. ประจำปี และโครงสร้างขนาดสถานศึกษา สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาสกลนคร</p>
           </div>
           <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-left: auto;">
             <button id="exportResourceExcelBtn" class="primary-btn" style="background: var(--color-primary); border-color: var(--color-primary); color: #ffffff; font-size: 12.5px; padding: 7px 14px; cursor: pointer; display: inline-flex; align-items: center;">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              ส่งออกรายงานทรัพยากร (Excel)
+              ส่งออกรายงานงบประมาณ (Excel)
             </button>
           </div>
         </div>
@@ -1085,21 +1085,21 @@
           </div>
 
           <div class="kpi-card" style="border-left: 4px solid var(--color-gold); flex-direction: column; align-items: flex-start; gap: 6px; width: 100%;">
-            <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 500;">กรอบอัตรากำลังครูและผู้บริหารพึงมี</span>
+            <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 500;">โครงสร้างห้องเรียนรวมทั้งเขต</span>
             <div style="display: flex; align-items: baseline; gap: 8px;">
-              <span id="resourceKpiStaffTotal" style="font-size: 24px; font-weight: 700; color: var(--color-gold);">2,348 อัตรา</span>
-              <span class="trend-badge stable" style="font-size: 11px;">เกณฑ์ ก.ค.ศ.</span>
+              <span id="resourceKpiRoomsTotal" style="font-size: 24px; font-weight: 700; color: var(--color-gold);">1,392 ห้อง</span>
+              <span class="trend-badge stable" style="font-size: 11px;">45 โรงเรียน</span>
             </div>
-            <span style="font-size: 11px; color: var(--text-muted);" id="resourceKpiStaffSub">คำนวณจาก 1,392 ห้องเรียนจริง (45 โรงเรียน)</span>
+            <span style="font-size: 11px; color: var(--text-muted);" id="resourceKpiRoomsSub">ม.ต้น 750 ห้อง | ม.ปลาย 642 ห้อง (เฉลี่ย 31.0 ห้อง/แห่ง)</span>
           </div>
 
           <div class="kpi-card" style="border-left: 4px solid var(--color-success); flex-direction: column; align-items: flex-start; gap: 6px; width: 100%;">
-            <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 500;">สัดส่วนนักเรียนต่อครูเฉลี่ยทั้งเขต</span>
+            <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 500;">ความหนาแน่นเฉลี่ยต่อห้องเรียน</span>
             <div style="display: flex; align-items: baseline; gap: 8px;">
-              <span style="font-size: 24px; font-weight: 700; color: var(--color-success);">19.0 : 1</span>
+              <span style="font-size: 24px; font-weight: 700; color: var(--color-success);">32.0 คน/ห้อง</span>
               <span class="trend-badge positive" style="font-size: 11px;">เกณฑ์มาตรฐาน</span>
             </div>
-            <span style="font-size: 11px; color: var(--text-muted);">มาตรฐาน สพฐ. 18 - 20 คนต่อครู 1 คน</span>
+            <span style="font-size: 11px; color: var(--text-muted);">มาตรฐาน สพฐ. 30 - 35 คนต่อห้องเรียน</span>
           </div>
 
           <div class="kpi-card" style="border-left: 4px solid var(--color-error); flex-direction: column; align-items: flex-start; gap: 6px; width: 100%;">
@@ -1115,8 +1115,7 @@
         <!-- Mode Switcher Tabs for Resource View -->
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 5px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
           <div class="cluster-tabs-container" style="margin: 0;">
-            <button class="cluster-tab-btn active resource-view-btn" data-view="staffing">เกณฑ์อัตรากำลังครู (ก.ค.ศ.)</button>
-            <button class="cluster-tab-btn resource-view-btn" data-view="budget">ประมาณการเงินอุดหนุนรายหัว (สพฐ.)</button>
+            <button class="cluster-tab-btn active resource-view-btn" data-view="budget">ประมาณการเงินอุดหนุนรายหัว (สพฐ.)</button>
           </div>
           <div style="display: flex; align-items: center; gap: 10px;">
             <input type="text" id="resourceSearchInput" class="control-select" style="padding: 6px 12px; font-size: 12px; min-width: 170px;" placeholder="ค้นหาโรงเรียน...">
@@ -1128,7 +1127,7 @@
           <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; background: var(--bg-card); display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between;">
               <h4 id="resourceChartTitle1" style="font-size: 13px; font-weight: 700; color: var(--text-main); margin: 0;">
-                🏫 กรอบอัตรากำลังครูพึงมี จำแนกตามขนาดโรงเรียน (S / M / L / XL)
+                🏫 การจัดสรรเงินอุดหนุนรายหัว จำแนกตามขนาดโรงเรียน (S / M / L / XL)
               </h4>
             </div>
             <div style="height: 240px; position: relative;">
@@ -1158,10 +1157,10 @@
                 <th style="text-align: center;">ขนาด</th>
                 <th style="text-align: right;">นักเรียนรวม (คน)</th>
                 <th style="text-align: center;">ห้องเรียน</th>
-                <th style="text-align: center; color: var(--color-primary); font-weight: 700;">กรอบครูพึงมี (อัตรา)</th>
-                <th style="text-align: center;">นร./ครู</th>
+                <th style="text-align: right; color: var(--color-primary); font-weight: 700;">เงินอุดหนุน ม.ต้น (บาท)</th>
+                <th style="text-align: right; color: var(--color-primary); font-weight: 700;">เงินอุดหนุน ม.ปลาย (บาท)</th>
                 <th style="text-align: right; color: var(--color-gold); font-weight: 700;">เงินอุดหนุนรวม (บาท)</th>
-                <th style="text-align: left;">สถานะทรัพยากร</th>
+                <th style="text-align: right;">เฉลี่ยต่อคน (บาท)</th>
               </tr>
             </thead>
             <tbody id="resourceTableBody">
@@ -1232,7 +1231,7 @@
           <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; background: #ffffff; display: flex; flex-direction: column; gap: 4px; border-top: 3px solid var(--color-primary);">
             <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">5. งบประมาณอุดหนุนรวม</span>
             <span style="font-size: 20px; font-weight: 700; color: var(--color-primary);">179.63 ล้านบาท</span>
-            <span style="font-size: 10.5px; color: var(--text-muted);">กรอบครูพึงมี 2,348 อัตรา</span>
+            <span style="font-size: 10.5px; color: var(--text-muted);">ม.ต้น 91.21M | ม.ปลาย 88.43M</span>
           </div>
         </div>
 
@@ -1253,8 +1252,8 @@
             </div>
 
             <div style="background: #ffffff; border-radius: 6px; padding: 12px; border-left: 3px solid var(--color-primary); box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
-              <div style="font-weight: 700; color: var(--color-primary); margin-bottom: 4px;">3. การเกลี่ยอัตรากำลังครูตามเกณฑ์ ก.ค.ศ.</div>
-              <div style="color: var(--text-muted); line-height: 1.5;">บริหารจัดการอัตรากำลังข้าราชการครู 2,348 ตำแหน่ง โดยพิจารณาเกลี่ยอัตรากำลังจากโรงเรียนที่มีสัดส่วน นร./ครู ต่ำกว่า 15:1 ไปสนับสนุนโรงเรียนที่มีสัดส่วนเกิน 25:1 (เช่น ธาตุนารายณ์วิทยา และ สกลราชวิทยานุกูล)</div>
+              <div style="font-weight: 700; color: var(--color-primary); margin-bottom: 4px;">3. การสนับสนุนการบริหารจัดการศึกษา</div>
+              <div style="color: var(--text-muted); line-height: 1.5;">มอบหมายกลุ่มบริหารงานบุคคลและกลุ่มนโยบายและแผน นำข้อมูลสถิตินักเรียนและห้องเรียนไปใช้เป็นฐานข้อมูลในการวางแผนอัตรากำลังและจัดสรรงบประมาณสนับสนุนการจัดการเรียนการสอนอย่างทั่วถึงและเป็นธรรม</div>
             </div>
 
             <div style="background: #ffffff; border-radius: 6px; padding: 12px; border-left: 3px solid var(--color-success); box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
