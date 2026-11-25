@@ -2387,10 +2387,47 @@
           <div class="copilot-avatar">🤖</div>
           <div>
             <h4 style="margin: 0; font-size: 14.5px; color: #ffffff;">AI Executive Policy Copilot</h4>
-            <span style="font-size: 11px; color: #93c5fd;">ผู้ช่วยอัจฉริยะ ผอ.สพม.สกลนคร • DMC 5-Wave Engine</span>
+            <span style="font-size: 11px; color: #93c5fd;">ผู้ช่วยอัจฉริยะ ผอ.สพม.สกลนคร • Gemini AI & DMC Engine</span>
           </div>
         </div>
-        <button id="btnCloseCopilot" class="copilot-close-btn">&times;</button>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <button id="btnToggleCopilotSettings" class="copilot-header-btn" title="ตั้งค่าเชื่อมต่อ Gemini AI เพื่อให้ตอบได้ทุกเรื่อง">⚙️</button>
+          <button id="btnCloseCopilot" class="copilot-close-btn">&times;</button>
+        </div>
+      </div>
+
+      <!-- Engine Status & Switch Banner -->
+      <div class="copilot-status-bar" id="copilotStatusBar">
+        <div class="copilot-status-indicator" id="copilotStatusIndicator">
+          <span class="status-dot offline" id="copilotStatusDot"></span>
+          <span class="status-text" id="copilotStatusText">โหมด: <strong>Smart Offline Engine</strong> (วิเคราะห์ฐาน DMC 45 ร.ร.)</span>
+        </div>
+        <button id="btnOpenApiKeySettings" class="btn-setup-gemini">⚡ เชื่อมต่อ Gemini AI</button>
+      </div>
+
+      <!-- Collapsible Gemini API Key Settings Panel -->
+      <div class="copilot-settings-panel" id="copilotSettingsPanel" style="display: none;">
+        <div class="settings-panel-header">
+          <div style="font-weight: 700; color: #1e3a8a; font-size: 12.5px;">🔑 เชื่อมต่อ Google Gemini AI (เพื่อให้ตอบได้ทุกอย่าง)</div>
+          <button id="btnCloseSettingsPanel" class="settings-close-btn">&times;</button>
+        </div>
+        <div style="font-size: 11.5px; color: #64748b; margin-bottom: 8px;">
+          เชื่อมต่อ Gemini 1.5 Flash เพื่อให้ Copilot ตอบได้ทุกคำถามในโลก พร้อมวิเคราะห์ฐานข้อมูล DMC ทั้ง 45 ร.ร.
+        </div>
+        <div class="api-key-input-group">
+          <input type="password" id="copilotApiKeyInput" class="copilot-key-input" placeholder="วาง Google Gemini API Key ที่นี่ (AIzaSy...)" autocomplete="off">
+          <button type="button" id="btnToggleKeyVisibility" class="btn-toggle-vis" title="แสดง/ซ่อนคีย์">👁️</button>
+        </div>
+        <div class="settings-btn-row">
+          <button id="btnSaveApiKey" class="btn-save-key">💾 บันทึกคีย์</button>
+          <button id="btnClearApiKey" class="btn-clear-key">🗑️ ลบคีย์</button>
+        </div>
+        <div class="settings-help-row">
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="link-get-key">
+            👉 ยังไม่มีคีย์? คลิกที่นี่เพื่อขอรับฟรีจาก Google AI Studio (ฟรีและไม่มีค่าใช้จ่าย)
+          </a>
+          <span class="security-note">🔒 ปลอดภัย 100%: คีย์จะถูกบันทึกเฉพาะในเบราว์เซอร์ของท่านเท่านั้น ไม่มีการส่งไปเซิร์ฟเวอร์อื่น</span>
+        </div>
       </div>
 
       <!-- Quick Suggestion Chips -->

@@ -1529,7 +1529,7 @@
   }
 
   /* ==========================================================================
-     MODULE 12: AI EXECUTIVE POLICY COPILOT
+     MODULE 12: AI EXECUTIVE POLICY COPILOT (DUAL-ENGINE: GEMINI AI + DMC ENGINE)
      ========================================================================== */
   function initAiCopilotModule() {
     const btnOpen = document.getElementById('btnOpenCopilot');
@@ -1540,7 +1540,132 @@
     const msgBox = document.getElementById('copilotMessages');
     const chips = document.querySelectorAll('#copilotChipsBar .copilot-chip');
 
+    // Gemini Settings Elements
+    const btnToggleSettings = document.getElementById('btnToggleCopilotSettings');
+    const btnOpenSettings = document.getElementById('btnOpenApiKeySettings');
+    const settingsPanel = document.getElementById('copilotSettingsPanel');
+    const btnCloseSettings = document.getElementById('btnCloseSettingsPanel');
+    const keyInput = document.getElementById('copilotApiKeyInput');
+    const btnToggleVis = document.getElementById('btnToggleKeyVisibility');
+    const btnSaveKey = document.getElementById('btnSaveApiKey');
+    const btnClearKey = document.getElementById('btnClearApiKey');
+    const statusDot = document.getElementById('copilotStatusDot');
+    const statusText = document.getElementById('copilotStatusText');
+
     if (!btnOpen || !modal || !form || !input || !msgBox) return;
+
+    let chatHistory = [];
+    const STORAGE_KEY = 'dmc_gemini_api_key';
+
+    // Check saved API key on init
+    function getSavedApiKey() {
+      try {
+        return localStorage.getItem(STORAGE_KEY) || '';
+      } catch (e) {
+        return '';
+      }
+    }
+
+    function updateEngineStatusUI() {
+      const key = getSavedApiKey();
+      if (key && key.trim().length > 10) {
+        if (statusDot) {
+          statusDot.className = 'status-dot online';
+        }
+        if (statusText) {
+          statusText.innerHTML = 'โหมด: 🟢 <strong>Google Gemini AI</strong> (ตอบได้ทุกเรื่อง & เจาะลึกฐาน DMC)';
+        }
+        if (btnOpenSettings) {
+          btnOpenSettings.textContent = '⚙️ ตั้งค่าคีย์';
+          btnOpenSettings.className = 'btn-setup-gemini active-mode';
+        }
+        if (keyInput) {
+          keyInput.value = key;
+        }
+      } else {
+        if (statusDot) {
+          statusDot.className = 'status-dot offline';
+        }
+        if (statusText) {
+          statusText.innerHTML = 'โหมด: ⚪ <strong>Smart Offline Engine</strong> (วิเคราะห์ฐาน DMC 45 ร.ร.)';
+        }
+        if (btnOpenSettings) {
+          btnOpenSettings.textContent = '⚡ เชื่อมต่อ Gemini AI';
+          btnOpenSettings.className = 'btn-setup-gemini';
+        }
+        if (keyInput) {
+          keyInput.value = '';
+        }
+      }
+    }
+
+    updateEngineStatusUI();
+
+    // Toggle Settings Panel
+    function toggleSettings(show) {
+      if (!settingsPanel) return;
+      const willShow = typeof show === 'boolean' ? show : (settingsPanel.style.display === 'none');
+      settingsPanel.style.display = willShow ? 'block' : 'none';
+      if (willShow && keyInput) {
+        keyInput.value = getSavedApiKey();
+        keyInput.focus();
+      }
+    }
+
+    if (btnToggleSettings) btnToggleSettings.addEventListener('click', () => toggleSettings());
+    if (btnOpenSettings) btnOpenSettings.addEventListener('click', () => toggleSettings());
+    if (btnCloseSettings) btnCloseSettings.addEventListener('click', () => toggleSettings(false));
+
+    // Toggle key visibility
+    if (btnToggleVis && keyInput) {
+      btnToggleVis.addEventListener('click', () => {
+        keyInput.type = keyInput.type === 'password' ? 'text' : 'password';
+      });
+    }
+
+    // Save API key
+    if (btnSaveKey && keyInput) {
+      btnSaveKey.addEventListener('click', () => {
+        const val = keyInput.value.trim();
+        if (!val) {
+          alert('กรุณากรอก Google Gemini API Key');
+          return;
+        }
+        try {
+          localStorage.setItem(STORAGE_KEY, val);
+          updateEngineStatusUI();
+          toggleSettings(false);
+          addMessage('bot', `
+            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 10px; border-radius: 8px; color: #166534; font-size: 12.5px;">
+              ✅ <strong>เชื่อมต่อ Google Gemini AI เรียบร้อยแล้ว!</strong><br>
+              ตอนนี้ AI Executive Copilot พร้อมตอบคำถามได้ทุกอย่าง ทุกหัวข้อ ไม่ว่าจะเป็นการวิเคราะห์ข้อมูล DMC, การกำหนดนโยบายการศึกษา, ร่างสปีช หรือคำถามทั่วไปในโลก เชิญพิมพ์สอบถามได้เลยครับ! 🚀
+            </div>
+          `);
+        } catch (e) {
+          alert('ไม่สามารถบันทึกคีย์ลงใน LocalStorage ได้: ' + e.message);
+        }
+      });
+    }
+
+    // Clear API key
+    if (btnClearKey) {
+      btnClearKey.addEventListener('click', () => {
+        try {
+          localStorage.removeItem(STORAGE_KEY);
+          if (keyInput) keyInput.value = '';
+          updateEngineStatusUI();
+          toggleSettings(false);
+          addMessage('bot', `
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; color: #475569; font-size: 12.5px;">
+              ℹ️ <strong>กลับสู่โหมด Smart Offline Engine</strong><br>
+              ระบบจะตอบคำถามวิเคราะห์สถิติ 45 โรงเรียน และยุทธศาสตร์ 5 เสาหลักตามฐานข้อมูลในระบบตามปกติครับ
+            </div>
+          `);
+        } catch (e) {
+          console.error(e);
+        }
+      });
+    }
 
     btnOpen.addEventListener('click', () => {
       modal.style.display = 'flex';
@@ -1578,16 +1703,166 @@
       msgDiv.innerHTML = `<div class="msg-bubble">${text}</div>`;
       msgBox.appendChild(msgDiv);
       msgBox.scrollTop = msgBox.scrollHeight;
+      return msgDiv;
     }
 
-    function handleUserQuery(query) {
+    function showTypingIndicator(label) {
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'copilot-msg bot typing-msg';
+      typingDiv.id = 'copilotTypingIndicator';
+      typingDiv.innerHTML = `
+        <div class="msg-bubble" style="color: #64748b; font-size: 12px; display: flex; align-items: center; gap: 8px;">
+          <div class="typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>
+          <span>${label || 'กำลังคิดและสังเคราะห์คำตอบ...'}</span>
+        </div>
+      `;
+      msgBox.appendChild(typingDiv);
+      msgBox.scrollTop = msgBox.scrollHeight;
+      return typingDiv;
+    }
+
+    function removeTypingIndicator() {
+      const el = document.getElementById('copilotTypingIndicator');
+      if (el) el.remove();
+    }
+
+    function formatMarkdown(text) {
+      if (!text) return '';
+      let out = text;
+      // Headings
+      out = out.replace(/^### (.*?)$/gm, '<h4 style="margin: 8px 0 4px; color: #1e3a8a; font-size: 13.5px;">$1</h4>');
+      out = out.replace(/^## (.*?)$/gm, '<h3 style="margin: 10px 0 6px; color: #1e3a8a; font-size: 14.5px;">$1</h3>');
+      // Bold & Italic
+      out = out.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      out = out.replace(/\*(.*?)\*/g, '<em>$1</em>');
+      // Lists
+      out = out.replace(/^\s*[\*\-]\s+(.*?)$/gm, '• $1<br>');
+      out = out.replace(/^\s*(\d+)\.\s+(.*?)$/gm, '<strong>$1.</strong> $2<br>');
+      // Line breaks
+      out = out.replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>');
+      return out;
+    }
+
+    function buildDmcGroundingContext() {
+      if (typeof DASHBOARD_DATA === 'undefined') return '';
+      let summary = `ข้อมูลสารสนเทศทางการศึกษา สพม.สกลนคร (สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาสกลนคร):\n`;
+      summary += `- ดูแล 45 โรงเรียนมัธยมศึกษา ใน 18 อำเภอ แบ่งเป็น 8 สหวิทยาเขต\n`;
+      summary += `- ไทม์ไลน์ 5 รอบเวลา (ปี 2568-2569): 2568/1 (45,403 คน), 2568/2 (45,047 คน), 2568/สิ้นปี (44,808 คน), 2569/1 (44,818 คน), 2569/2 (44,566 คน รวม 1,392 ห้อง)\n`;
+      summary += `- สถิติล่าสุด (2/2569): ม.ต้น 24,002 คน, ม.ปลาย 20,564 คน, อัตราคงอยู่ 99.44% (-252 คน ระหว่างเทอม)\n`;
+      summary += `- งบประมาณเงินอุดหนุนรายหัว สพฐ. 179.63 ล้านบาท (ม.ต้น 3,800 บ./คน = 91.21 ลบ., ม.ปลาย 4,300 บ./คน = 88.43 ลบ.)\n`;
+      summary += `- เกณฑ์ขนาดสถานศึกษา สพฐ. ล่าสุด (พ.ค. 2569): เล็ก (<=119 คน มี 0 รร.), กลาง (120-719 คน มี 26 รร.), ใหญ่ (720-1,679 คน มี 10 รร.), ใหญ่พิเศษ (>=1,680 คน มี 9 รร.)\n`;
+      summary += `- 3 โรงเรียนเปราะบางต่ำกว่า 150 คน: ลำปลาหางวิทยา (120 คน), เทพสวัสดิ์วิทยา (124 คน), ท่าสงครามวิทยา (146 คน)\n`;
+      summary += `- โรงเรียนสุขภาวะยอดเยี่ยมเกรด AAA 5 อันดับแรก: บ้านม่วงพิทยาคม (94.4), พังโคนวิทยาคม (93.3), คำตากล้าราชประชาสงเคราะห์ (93.3), พรรณาวุฒาจารย์ (93.0), อากาศอำนวยศึกษา (93.0)\n\n`;
+      summary += `ตารางสรุป 45 โรงเรียน (เทอมล่าสุด 2/2569):\n`;
+      
+      DASHBOARD_DATA.forEach((s, idx) => {
+        const total = s.y69_2?.total?.total || 0;
+        const rooms = s.y69_2?.total?.rooms || 0;
+        const diff = total - (s.y69_1?.total?.total || 0);
+        summary += `${idx+1}. ${s.name} | อ.${s.amphoe} | ${s.cluster} | นักเรียน ${total} คน | ${rooms} ห้อง | เทอมล่าสุด ${diff >= 0 ? '+' : ''}${diff} คน\n`;
+      });
+      return summary;
+    }
+
+    async function callGeminiApi(userPrompt, apiKey) {
+      const grounding = buildDmcGroundingContext();
+      const systemInstruction = `คุณคือ 'AI Executive Policy Copilot' ผู้ช่วยอัจฉริยะและที่ปรึกษาเชิงยุทธศาสตร์ระดับสูงของ ผู้อำนวยการสำนักงานเขตพื้นที่การศึกษามัธยมศึกษาสกลนคร (ผอ.สพม.สกลนคร)
+บุคลิกภาพ: สุภาพ มืออาชีพ ลึกซึ้ง มีวิสัยทัศน์ในการบริหารจัดการศึกษา อ้างอิงตัวเลขสถิติอย่างแม่นยำ และจัดรูปแบบคำตอบด้วย Markdown (หัวข้อย่อย, ตัวหนา, bullet points, อิโมจิ) ให้อ่านง่าย สบายตา
+ขอบเขต: คุณสามารถตอบคำถามได้ทุกอย่าง ทุกหัวข้อ ไม่จำกัด! ไม่ว่าจะเป็นการวิเคราะห์ข้อมูล DMC, การกำหนดนโยบายการศึกษา, ระเบียบ สพฐ./ก.ค.ศ./ศธ., ร่างสปีชเปิดงานประชุม/หนังสือราชการ, หรือคำถามทั่วไป สาระความรู้ เทคโนโลยี การบริหารจัดการ ฯลฯ
+
+ฐานข้อมูลทางการ DMC ของ สพม.สกลนคร (45 โรงเรียน 5 รอบเวลา 2568-2569):
+${grounding}`;
+
+      // Take last 8 turns of history
+      const contents = chatHistory.slice(-8).map(h => ({
+        role: h.role,
+        parts: [{ text: h.text }]
+      }));
+      contents.push({
+        role: 'user',
+        parts: [{ text: userPrompt }]
+      });
+
+      const payload = {
+        contents: contents,
+        systemInstruction: {
+          parts: [{ text: systemInstruction }]
+        },
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 2048
+        }
+      };
+
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson?.error?.message || `HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!reply) throw new Error('ไม่พบคำตอบจาก Gemini API');
+
+      chatHistory.push({ role: 'user', text: userPrompt });
+      chatHistory.push({ role: 'model', text: reply });
+
+      return reply;
+    }
+
+    async function handleUserQuery(query) {
       addMessage('user', query);
 
-      // Typing simulation
-      setTimeout(() => {
-        const response = generateExecutiveAnswer(query);
-        addMessage('bot', response);
-      }, 350);
+      const apiKey = getSavedApiKey();
+
+      if (apiKey && apiKey.trim().length > 10) {
+        showTypingIndicator('Gemini AI กำลังคิดและประมวลผลคำตอบ...');
+        try {
+          const geminiReply = await callGeminiApi(query, apiKey.trim());
+          removeTypingIndicator();
+          addMessage('bot', formatMarkdown(geminiReply));
+        } catch (err) {
+          removeTypingIndicator();
+          console.warn('Gemini API Error, falling back to local engine:', err);
+          const fallbackAns = generateExecutiveAnswer(query);
+          addMessage('bot', `
+            <div style="font-size: 11.5px; color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca; padding: 6px 10px; border-radius: 6px; margin-bottom: 8px;">
+              ⚠️ <strong>การเชื่อมต่อ Gemini AI ขัดข้อง:</strong> ${err.message}<br>
+              <em>ระบบเปลี่ยนมาตอบด้วย Smart Local Engine อัตโนมัติ:</em>
+            </div>
+            ${fallbackAns}
+          `);
+        }
+      } else {
+        // Local engine mode
+        showTypingIndicator('กำลังวิเคราะห์ฐานข้อมูล DMC...');
+        setTimeout(() => {
+          removeTypingIndicator();
+          const response = generateExecutiveAnswer(query);
+          const tip = `
+            ${response}
+            <div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed #cbd5e1; font-size: 11px; color: #64748b;">
+              💡 <em>ต้องการให้ Copilot ตอบคำถามได้ทุกอย่างในโลก หรือช่วยร่างสปีช/หนังสือราชการ? 
+              <a href="#" class="inline-open-settings" style="color: #2563eb; text-decoration: underline; font-weight: 600;">คลิกเชื่อมต่อ Gemini AI ฟรีที่นี่</a></em>
+            </div>
+          `;
+          const msgEl = addMessage('bot', tip);
+          const link = msgEl.querySelector('.inline-open-settings');
+          if (link) {
+            link.addEventListener('click', (e) => {
+              e.preventDefault();
+              toggleSettings(true);
+            });
+          }
+        }, 350);
+      }
     }
 
     function generateExecutiveAnswer(q) {
@@ -1701,8 +1976,7 @@
       `;
     }
   }
-
-  /* ==========================================================================
+/* ==========================================================================
      MODULE 5: SIDEBAR NAVIGATION & INTEGRATION
      ========================================================================== */
   function initSidebarNavigation() {
