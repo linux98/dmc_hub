@@ -106,13 +106,13 @@ document.addEventListener('DOMContentLoaded', () => {
     return school.shortName || school.name;
   }
 
-  // Helper to determine school size based on OBEC standards (2569 total)
+  // Helper to determine school size based on OBEC standards (ประกาศ 26 พ.ค. 2569 บังคับใช้ 2569-2570)
   function getSchoolSize(school) {
     const pData = school[targetPeriod] || school[selectedPeriod] || school.y69_2 || school.y69;
-    const totalStudents = pData.total.total;
-    if (totalStudents <= 120) return 'S';
-    if (totalStudents < 500) return 'M';
-    if (totalStudents < 1500) return 'L';
+    const totalStudents = pData?.total?.total || 0;
+    if (totalStudents <= 119) return 'S';
+    if (totalStudents <= 719) return 'M';
+    if (totalStudents <= 1679) return 'L';
     return 'XL';
   }
 
@@ -1430,7 +1430,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (currentClusterFilter === 'small') {
       filteredSchoolsForTable = filteredSchoolsForTable.filter(s => {
         const pData = s[targetPeriod] || s.y69_2;
-        return pData.total.total < 120;
+        return pData.total.total <= 119;
       });
     }
 
@@ -2965,7 +2965,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (pctPred > 1.0) {
         advice = 'แนวโน้มเติบโตต่อเนื่อง เตรียมความพร้อมห้องเรียนรองรับ';
       } else if (pred_total < 120) {
-        advice = 'เข้าเกณฑ์โรงเรียนขนาดเล็ก (< 120 คน) เตรียมแผนเรียนรวม';
+        advice = 'เข้าเกณฑ์โรงเรียนขนาดเล็ก (≤ 119 คน) เตรียมแผนเรียนรวม';
       }
 
       return {
@@ -3630,10 +3630,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const sizeLabels = {
-      S: 'ขนาดเล็ก (≤ 120)',
-      M: 'ขนาดกลาง (121 - 499)',
-      L: 'ขนาดใหญ่ (500 - 1,499)',
-      XL: 'ขนาดใหญ่พิเศษ (≥ 1,500)'
+      S: 'ขนาดเล็ก (≤ 119 คน)',
+      M: 'ขนาดกลาง (120 - 719 คน)',
+      L: 'ขนาดใหญ่ (720 - 1,679 คน)',
+      XL: 'ขนาดใหญ่พิเศษ (≥ 1,680 คน)'
     };
 
     const sizeStatsTableBody = document.getElementById('sizeStatsTableBody');
@@ -3784,7 +3784,7 @@ document.addEventListener('DOMContentLoaded', () => {
       [1, 'มาตรการ Zero Dropout เชิงรุก', 'มอบหมายกลุ่มส่งเสริมการจัดการศึกษาและระบบดูแลช่วยเหลือนักเรียน ลงพื้นที่ติดตามช่วยเหลือนักเรียนใน 3 โรงเรียนที่สถิติลดลงสูงสุดระหว่างภาคเรียน ได้แก่ รร.เตรียมอุดมศึกษา ภาคตะวันออกเฉียงเหนือ (-42 คน), รร.ธาตุนารายณ์วิทยา (-39 คน) และ รร.มัธยมวานรนิวาส (-31 คน)'],
       [2, 'การวางแผนรับนักเรียน ม.1 / ม.4 ปี 2570', 'กำหนดเป้าหมายรับนักเรียน ม.1 แรกเข้าที่ 7,120 คน (225 ห้อง) และ ม.4 แรกเข้าที่ 7,370 คน (235 ห้อง) ปรับขนาดห้องเรียนให้ได้มาตรฐาน 32-35 คน/ห้อง เพื่อป้องกันห้องเรียนแออัดและห้องเรียนต่ำกว่าเกณฑ์'],
       [3, 'การสนับสนุนการบริหารจัดการศึกษา', 'มอบหมายกลุ่มบริหารงานบุคคลและกลุ่มนโยบายและแผน นำข้อมูลสถิตินักเรียนและห้องเรียนไปใช้เป็นฐานข้อมูลในการวางแผนอัตรากำลังและจัดสรรงบประมาณสนับสนุนการจัดการเรียนการสอนอย่างทั่วถึงและเป็นธรรม'],
-      [4, 'การเสริมสร้างเครือข่ายโรงเรียนขนาดเล็ก', 'ยกระดับโรงเรียนขนาดเล็กและกลุ่มเฝ้าระวัง (≤ 120 คน เช่น รร.ลำปลาหางวิทยา และ รร.เทพสวัสดิ์วิทยา) โดยนำโมเดลการใช้ทรัพยากรร่วมกัน (Resource Sharing) ภายในกลุ่มสหวิทยาเขตดำรงธรรม และโรงเรียนพี่เลี้ยงใกล้เคียง']
+      [4, 'การเสริมสร้างเครือข่ายโรงเรียนขนาดเล็ก', 'ยกระดับสถานศึกษาขนาดเล็กและกลุ่มเปราะบาง (เกณฑ์ สพฐ. ล่าสุด ≤ 119 คน และกลุ่มเฝ้าระวังต่ำกว่า 150 คน เช่น รร.ลำปลาหางวิทยา 120 คน, รร.เทพสวัสดิ์วิทยา 124 คน) โดยนำโมเดลการใช้ทรัพยากรร่วมกัน (Resource Sharing) ภายในกลุ่มสหวิทยาเขตดำรงธรรม และโรงเรียนพี่เลี้ยงใกล้เคียง']
     ];
     const wsSummary = XLSX.utils.aoa_to_sheet(summaryRows);
     XLSX.utils.book_append_sheet(wb, wsSummary, 'Executive_Summary');

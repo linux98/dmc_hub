@@ -56,9 +56,9 @@
   }
 
   function getSchoolSize(totalStudents) {
-    if (totalStudents >= 2500) return 'XL';
-    if (totalStudents >= 1500) return 'L';
-    if (totalStudents >= 500) return 'M';
+    if (totalStudents >= 1680) return 'XL';
+    if (totalStudents >= 720) return 'L';
+    if (totalStudents >= 120) return 'M';
     return 'S';
   }
 
