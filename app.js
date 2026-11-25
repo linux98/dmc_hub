@@ -1661,6 +1661,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- School Detail Drill-down Modal Functions ---
 
+  window.openSchoolDetailModal = openSchoolDetailModal;
   function openSchoolDetailModal(schoolId) {
     const school = DASHBOARD_DATA.find(s => s.id === schoolId);
     if (!school) return;

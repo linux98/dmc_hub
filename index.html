@@ -7,6 +7,14 @@
   <!-- Google Fonts for Google Sans and Sarabun (exact link provided by user) -->
   <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css?v=1.5">
+  <!-- Leaflet CSS & JS for Interactive Spatial GIS Intelligence -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- PWA Manifest & Mobile Capability -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e3a8a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -131,6 +139,18 @@
               <span>มิติเชิงพื้นที่</span>
             </a>
           </li>
+          <li class="nav-item" id="menuGisMap">
+            <a href="#" title="แผนที่ GIS อัจฉริยะ (Spatial Map)">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                  <line x1="8" y1="2" x2="8" y2="18"></line>
+                  <line x1="16" y1="6" x2="16" y2="22"></line>
+                </svg>
+              </span>
+              <span>แผนที่ GIS 45 ร.ร.</span>
+            </a>
+          </li>
           <li class="nav-item" id="menuForecast">
             <a href="#" title="พยากรณ์แนวโน้มปี 2570">
               <span class="nav-icon">
@@ -165,6 +185,47 @@
                 </svg>
               </span>
               <span>บทวิเคราะห์เชิงลึก</span>
+            </a>
+          </li>
+          <li class="nav-item" id="menuSandbox">
+            <a href="#" title="จำลองนโยบาย (What-If Sandbox)">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="4" y1="21" x2="4" y2="14"></line>
+                  <line x1="4" y1="10" x2="4" y2="3"></line>
+                  <line x1="12" y1="21" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12" y2="3"></line>
+                  <line x1="20" y1="21" x2="20" y2="16"></line>
+                  <line x1="20" y1="12" x2="20" y2="3"></line>
+                  <line x1="1" y1="14" x2="7" y2="14"></line>
+                  <line x1="9" y1="8" x2="15" y2="8"></line>
+                  <line x1="17" y1="16" x2="23" y2="16"></line>
+                </svg>
+              </span>
+              <span>จำลองนโยบาย</span>
+            </a>
+          </li>
+          <li class="nav-item" id="menuEarlyWarning">
+            <a href="#" title="เรดาร์เตือนภัยวิกฤต 4 มิติ">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                  <line x1="12" y1="9" x2="12" y2="13"></line>
+                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+              </span>
+              <span>เรดาร์เตือนภัย 4D</span>
+            </a>
+          </li>
+          <li class="nav-item" id="menuSpeechGen">
+            <a href="#" title="สคริปต์รายงาน ผอ.เขต 🔒">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              </span>
+              <span>สคริปต์รายงาน ผอ. 🔒</span>
             </a>
           </li>
           <li class="nav-item" id="menuSettings">
@@ -928,6 +989,69 @@
           </table>
         </div>
       </section>
+      <!-- 7.5 GIS Spatial Map Section (Interactive Leaflet Map & Catchment Intelligence) -->
+      <section class="table-panel" id="gisMapSection" style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="panel-header-with-actions" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #1e3a8a;">
+                🗺️ ศูนย์ภูมิสารสนเทศอัจฉริยะ ๔๕ สถานศึกษา (GIS Spatial Intelligence)
+              </h3>
+              <span class="badge" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; font-size: 11px; padding: 2px 8px; border-radius: 9999px;">
+                Interactive Catchment Radar
+              </span>
+            </div>
+            <p style="margin: 4px 0 0 0; color: #64748b; font-size: 0.875rem;">
+              วิเคราะห์พิกัดที่ตั้ง ๔๕ สถานศึกษา รัศมีการให้บริการทางการศึกษา ๕ กม. / ๑๐ กม. และการกระจายตัวตาม ๘ สหวิทยาเขต
+            </p>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button id="btnResetMapView" class="btn btn-secondary" style="font-size: 13px; padding: 6px 12px; border-radius: 8px; cursor: pointer;">
+              🔄 รีเซ็ตมุมมอง
+            </button>
+          </div>
+        </div>
+
+        <!-- Controls Ribbon -->
+        <div class="gis-controls-ribbon">
+          <div class="gis-pill-group">
+            <span style="font-size: 12px; font-weight: 700; color: #475569;">สหวิทยาเขต:</span>
+            <select id="gisClusterSelect" style="padding: 5px 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; font-family: 'Sarabun';">
+              <option value="ALL">ทั้งหมด (8 สหวิทยาเขต)</option>
+              <option value="สหวิทยาเขตสกลราช">สหวิทยาเขตสกลราช</option>
+              <option value="สหวิทยาเขตพระธาตุนารายณ์เจงเวง">สหวิทยาเขตพระธาตุนารายณ์เจงเวง</option>
+              <option value="สหวิทยาเขตเบญจพัฒน์">สหวิทยาเขตเบญจพัฒน์</option>
+              <option value="สหวิทยาเขตดำรงธรรม">สหวิทยาเขตดำรงธรรม</option>
+              <option value="สหวิทยาเขตลุ่มน้ำอูน">สหวิทยาเขตลุ่มน้ำอูน</option>
+              <option value="สหวิทยาเขตสว่างศึกษา">สหวิทยาเขตสว่างศึกษา</option>
+              <option value="สหวิทยาเขตเทพทวีพัฒน์">สหวิทยาเขตเทพทวีพัฒน์</option>
+              <option value="สหวิทยาเขตเบญจรักษ์">สหวิทยาเขตเบญจรักษ์</option>
+            </select>
+          </div>
+
+          <div class="gis-pill-group">
+            <span style="font-size: 12px; font-weight: 700; color: #475569;">ขนาดโรงเรียน:</span>
+            <button class="gis-filter-btn active" data-size="ALL">ทั้งหมด</button>
+            <button class="gis-filter-btn" data-size="XL" style="border-left: 3px solid #1e3a8a;">XL</button>
+            <button class="gis-filter-btn" data-size="L" style="border-left: 3px solid #059669;">L</button>
+            <button class="gis-filter-btn" data-size="M" style="border-left: 3px solid #d97706;">M</button>
+            <button class="gis-filter-btn" data-size="S" style="border-left: 3px solid #7c3aed;">S</button>
+          </div>
+
+          <div class="gis-pill-group">
+            <button id="btnToggleBuffer5" class="gis-filter-btn" style="border: 1px dashed #0284c7;">
+              ⭕ รัศมี 5 กม.
+            </button>
+            <button id="btnToggleBuffer10" class="gis-filter-btn" style="border: 1px dashed #6366f1;">
+              ⭕ รัศมี 10 กม.
+            </button>
+          </div>
+        </div>
+
+        <!-- Leaflet Map Container -->
+        <div id="schoolGisMap" class="gis-map-container"></div>
+      </section>
+
 
       <!-- Step 3: Predictive Analytics & Demographic Forecasting Section (Year 2570) -->
       <section class="table-panel" id="forecastSection" style="display: flex; flex-direction: column; gap: 20px;">
@@ -1189,6 +1313,99 @@
           </table>
         </div>
       </section>
+      <!-- 7.6 What-If Policy Sandbox & Scenario Simulator -->
+      <section class="table-panel" id="policySandboxSection" style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="panel-header-with-actions" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #1e3a8a;">
+                🎛️ ห้องทดลองจำลองฉากทัศน์นโยบายเชิงยุทธศาสตร์ (What-If Policy Sandbox)
+              </h3>
+              <span class="badge" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a; font-size: 11px; padding: 2px 8px; border-radius: 9999px;">
+                Executive Decision Simulator
+              </span>
+            </div>
+            <p style="margin: 4px 0 0 0; color: #64748b; font-size: 0.875rem;">
+              เครื่องมือจำลองผลกระทบเชิงทรัพยากร ห้องเรียน และงบประมาณรายหัว เพื่อสนับสนุนการตัดสินใจเชิงนโยบายของ ผอ.สพม. และกลุ่มนโยบายและแผน
+            </p>
+          </div>
+          <button id="btnResetSandbox" class="btn btn-secondary" style="font-size: 13px; padding: 6px 12px; border-radius: 8px; cursor: pointer;">
+            🔄 คืนค่ามาตรฐาน
+          </button>
+        </div>
+
+        <div class="sandbox-card">
+          <!-- 3 Sliders Grid -->
+          <div class="sandbox-sliders-grid">
+            <!-- Slider 1 -->
+            <div class="slider-control-card">
+              <label>
+                <span>เกณฑ์ขนาดห้องเรียนเป้าหมาย</span>
+                <span id="sliderValClassSize" class="slider-val-badge">32 คน/ห้อง</span>
+              </label>
+              <input type="range" id="sliderClassSize" class="custom-range-slider" min="25" max="45" value="32" step="1">
+              <div class="slider-limits">
+                <span>25 คน (ขยายห้องเรียน)</span>
+                <span>มาตรฐาน 32</span>
+                <span>45 คน (ห้องเรียนแออัด)</span>
+              </div>
+            </div>
+
+            <!-- Slider 2 -->
+            <div class="slider-control-card">
+              <label>
+                <span>อัตราปรับเป้าหมายรับ นร. เข้าใหม่</span>
+                <span id="sliderValIntakeGrowth" class="slider-val-badge">0% (คงที่)</span>
+              </label>
+              <input type="range" id="sliderIntakeGrowth" class="custom-range-slider" min="-20" max="20" value="0" step="1">
+              <div class="slider-limits">
+                <span>-20% (สังคมสูงวัยรุนแรง)</span>
+                <span>0%</span>
+                <span>+20% (เป้าหมายเชิงรุก)</span>
+              </div>
+            </div>
+
+            <!-- Slider 3 -->
+            <div class="slider-control-card">
+              <label>
+                <span>เกณฑ์สถานศึกษาขนาดเล็ก/เฝ้าระวัง</span>
+                <span id="sliderValSmallThreshold" class="slider-val-badge">&lt; 150 คน</span>
+              </label>
+              <input type="range" id="sliderSmallThreshold" class="custom-range-slider" min="80" max="250" value="150" step="10">
+              <div class="slider-limits">
+                <span>80 คน (วิกฤต)</span>
+                <span>เกณฑ์ 150</span>
+                <span>250 คน</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sandbox KPIs -->
+          <div class="sandbox-kpis-grid">
+            <div class="sandbox-kpi-card" style="border-left-color: #1e3a8a;">
+              <h5>ห้องเรียนจำลองที่ต้องจัดสรร</h5>
+              <p class="val" id="sandboxKpiRooms">1,392 ห้อง</p>
+              <span class="sub" id="sandboxKpiRoomsDiff">เทียบฐานเดิม: 0 ห้อง</span>
+            </div>
+            <div class="sandbox-kpi-card" style="border-left-color: #059669;">
+              <h5>ประมาณการงบประมาณรายหัวจำลอง</h5>
+              <p class="val" id="sandboxKpiGrant">179.63 ล้านบาท</p>
+              <span class="sub" id="sandboxKpiGrantDiff">เทียบฐานเดิม: 0.00 ล้านบาท</span>
+            </div>
+            <div class="sandbox-kpi-card" style="border-left-color: #d97706;">
+              <h5>นักเรียนรวมจำลอง (Simulation)</h5>
+              <p class="val" id="sandboxKpiStudents">44,566 คน</p>
+              <span class="sub" id="sandboxKpiStudentsDiff">ความหนาแน่นเฉลี่ย: 32.0 คน/ห้อง</span>
+            </div>
+            <div class="sandbox-kpi-card" style="border-left-color: #dc2626;">
+              <h5>สถานศึกษาเข้าเกณฑ์เฝ้าระวัง</h5>
+              <p class="val" id="sandboxKpiFocusCount">4 โรงเรียน</p>
+              <span class="sub" id="sandboxKpiFocusList" style="color: #dc2626; font-size: 11px;">ต้องดูแลเป็นพิเศษ</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
 
       <!-- Step 5: Executive Policy Brief & Decision Support Section -->
       <section class="table-panel" id="executiveBriefSection" style="display: flex; flex-direction: column; gap: 20px; border: 2px solid var(--color-gold); background: linear-gradient(180deg, rgba(250, 245, 236, 0.5) 0%, #ffffff 100%);">
@@ -1211,6 +1428,10 @@
             </div>
           </div>
           <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-left: auto;">
+          <button id="openExecutiveSpeechBtn" class="primary-btn" style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%); border-color: #92400e; color: #ffffff; font-size: 12.5px; padding: 7px 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 6px -1px rgba(217, 119, 6, 0.3);">
+            <span>🔒</span>
+            <span>สคริปต์รายงาน ผอ.เขต (VIP Briefing)</span>
+          </button>
             <button id="btnExecutivePrintPdf" class="primary-btn" style="background: var(--color-primary); border-color: var(--color-primary); color: #ffffff; font-size: 12.5px; padding: 7px 14px; cursor: pointer; display: inline-flex; align-items: center;">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
               พิมพ์บทสรุปผู้บริหาร (PDF)
@@ -1285,6 +1506,91 @@
             <div style="background: #ffffff; border-radius: 6px; padding: 12px; border-left: 3px solid var(--color-success); box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
               <div style="font-weight: 700; color: var(--color-success); margin-bottom: 4px;">4. การเสริมสร้างเครือข่ายโรงเรียนขนาดเล็ก</div>
               <div style="color: var(--text-muted); line-height: 1.5;">ยกระดับโรงเรียนขนาดเล็กและกลุ่มเฝ้าระวัง (≤ 120 คน เช่น รร.ลำปลาหางวิทยา และ รร.เทพสวัสดิ์วิทยา) โดยนำโมเดลการใช้ทรัพยากรร่วมกัน (Resource Sharing) ภายในกลุ่มสหวิทยาเขตดำรงธรรม และโรงเรียนพี่เลี้ยงใกล้เคียง</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7.7 Strategic Early Warning Radar -->
+      <section class="table-panel" id="earlyWarningSection" style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="panel-header-with-actions" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #1e3a8a;">
+                🚨 ระบบเรดาร์เตือนภัยวิกฤตสถานศึกษา ๔ มิติ (Strategic Early Warning Radar)
+              </h3>
+              <span class="badge" style="background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; font-size: 11px; padding: 2px 8px; border-radius: 9999px;">
+                Proactive Anomaly Radar
+              </span>
+            </div>
+            <p style="margin: 4px 0 0 0; color: #64748b; font-size: 0.875rem;">
+              คัดกรองสัญญาณความเสี่ยงล่วงหน้าเพื่อการช่วยเหลือเชิงรุกของคณะกรรมการเขตพื้นที่การศึกษาและกลุ่มงานที่เกี่ยวข้อง
+            </p>
+          </div>
+        </div>
+
+        <div class="radar-grid">
+          <!-- Card 1: Red -->
+          <div class="radar-card red">
+            <div class="radar-header">
+              <div class="radar-title-group">
+                <span class="radar-pulse-dot"></span>
+                <strong style="color: #b91c1c; font-size: 14px;">🔴 เฝ้าระวังอัตราคงอยู่ (Drop Risk)</strong>
+              </div>
+              <span id="radarRedCount" class="badge" style="background: #fee2e2; color: #991b1b; font-size: 11px;">0 ร.ร.</span>
+            </div>
+            <p style="font-size: 12px; color: #64748b; margin: 0 0 10px 0;">โรงเรียนที่มีนักเรียนลดลงระหว่างเทอมเกิน 10 คน หรืออัตราคงอยู่ &lt; 98.5%</p>
+            <div class="radar-list" id="radarRedList"></div>
+            <div class="radar-action-box">
+              🎯 <strong>แนวทางปฏิบัติ:</strong> มอบหมายกลุ่มส่งเสริมการจัดการศึกษาลงพื้นที่ติดตามช่วยเหลือนักเรียนรายบุคคล
+            </div>
+          </div>
+
+          <!-- Card 2: Yellow -->
+          <div class="radar-card yellow">
+            <div class="radar-header">
+              <div class="radar-title-group">
+                <span class="radar-pulse-dot"></span>
+                <strong style="color: #b45309; font-size: 14px;">🟡 ห้องเรียนแออัดสูง (Overcrowded)</strong>
+              </div>
+              <span id="radarYellowCount" class="badge" style="background: #fef3c7; color: #92400e; font-size: 11px;">0 ร.ร.</span>
+            </div>
+            <p style="font-size: 12px; color: #64748b; margin: 0 0 10px 0;">โรงเรียนที่มีความหนาแน่นเฉลี่ยเกิน 36.0 คน/ห้อง เสี่ยงกระทบคุณภาพการเรียน</p>
+            <div class="radar-list" id="radarYellowList"></div>
+            <div class="radar-action-box">
+              🎯 <strong>แนวทางปฏิบัติ:</strong> พิจารณาเกลี่ยห้องเรียนและสนับสนุนสื่อดิจิทัลเสริมการเรียนการสอน
+            </div>
+          </div>
+
+          <!-- Card 3: Orange -->
+          <div class="radar-card orange">
+            <div class="radar-header">
+              <div class="radar-title-group">
+                <span class="radar-pulse-dot"></span>
+                <strong style="color: #c2410c; font-size: 14px;">🟠 สถานศึกษาขนาดเล็ก/เปราะบาง</strong>
+              </div>
+              <span id="radarOrangeCount" class="badge" style="background: #ffedd5; color: #9a3412; font-size: 11px;">0 ร.ร.</span>
+            </div>
+            <p style="font-size: 12px; color: #64748b; margin: 0 0 10px 0;">โรงเรียนที่มีนักเรียนรวมต่ำกว่า 150 คน เสี่ยงต่อการจัดสรรทรัพยากร</p>
+            <div class="radar-list" id="radarOrangeList"></div>
+            <div class="radar-action-box">
+              🎯 <strong>แนวทางปฏิบัติ:</strong> ดำเนินมาตรการโรงเรียนคุณภาพคู่พัฒนา (School Clustering Synergy)
+            </div>
+          </div>
+
+          <!-- Card 4: Blue -->
+          <div class="radar-card blue">
+            <div class="radar-header">
+              <div class="radar-title-group">
+                <span class="radar-pulse-dot"></span>
+                <strong style="color: #1d4ed8; font-size: 14px;">🔵 ช่องว่างการศึกษาต่อ (Transition Gap)</strong>
+              </div>
+              <span id="radarBlueCount" class="badge" style="background: #dbeafe; color: #1e40af; font-size: 11px;">0 ร.ร.</span>
+            </div>
+            <p style="font-size: 12px; color: #64748b; margin: 0 0 10px 0;">โรงเรียนที่มีสัดส่วน ม.ปลาย เทียบ ม.ต้น ต่ำกว่า 60% มีช่องว่างศึกษาต่อ</p>
+            <div class="radar-list" id="radarBlueList"></div>
+            <div class="radar-action-box">
+              🎯 <strong>แนวทางปฏิบัติ:</strong> ประสานกลุ่มนิเทศฯ และวิทยาลัยอาชีวะจัดกิจกรรมแนะแนวการศึกษาต่อเชิงรุก
             </div>
           </div>
         </div>
@@ -1550,8 +1856,98 @@
   </div>
 
   <!-- Javascript Inclusions -->
+
+  <!-- Modal 1: Security Gate for VIP Executive Speech (PIN = 6547) -->
+  <div id="executiveSpeechAuthModal" class="security-gate-overlay" style="display: none;">
+    <div class="security-gate-card" id="securityGateCard">
+      <div class="security-icon-circle">
+        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+      </div>
+      <h3 style="margin: 0 0 6px 0; font-size: 18px; color: #0f172a; font-weight: 700;">
+        ระบบความปลอดภัยสารสนเทศผู้บริหาร
+      </h3>
+      <p style="margin: 0 0 16px 0; font-size: 13px; color: #64748b; line-height: 1.5;">
+        สงวนสิทธิ์เฉพาะผู้อำนวยการสำนักงานเขตพื้นที่การศึกษา และผู้ได้รับมอบหมาย กรุณากรอกรหัสความปลอดภัย 4 หลัก เพื่อเข้าถึงระบบสร้างสคริปต์รายงาน
+      </p>
+      
+      <div style="margin: 12px 0;">
+        <input type="password" id="executivePinInput" class="security-pin-input" maxlength="4" placeholder="••••" autocomplete="off">
+      </div>
+      
+      <div id="pinErrorMsg" style="color: #dc2626; font-size: 13px; font-weight: 600; min-height: 20px; margin-bottom: 12px; display: none;">
+        รหัสผ่านไม่ถูกต้อง กรุณาติดต่อผู้ดูแลระบบ DLICT
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: center;">
+        <button id="btnCancelPin" class="btn btn-secondary" style="padding: 8px 18px; font-size: 14px; border-radius: 8px; cursor: pointer;">
+          ยกเลิก
+        </button>
+        <button id="btnSubmitPin" class="btn btn-primary" style="padding: 8px 22px; font-size: 14px; border-radius: 8px; background: #d97706; border-color: #b45309; cursor: pointer;">
+          🔓 ปลดล็อกเข้าใช้งาน
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Executive Speech Synthesizer Modal -->
+  <div id="executiveSpeechModal" class="security-gate-overlay" style="display: none;">
+    <div class="speech-modal-card">
+      <!-- Modal Header -->
+      <div style="padding: 16px 20px; background: #1e3a8a; color: #ffffff; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 20px;">🎙️</span>
+          <div>
+            <h3 style="margin: 0; font-size: 16px; font-weight: 700;">ระบบสร้างสคริปต์รายงานและบทแถลงข่าวสำหรับ ผอ.เขต (Executive Speech Synthesizer)</h3>
+            <p style="margin: 0; font-size: 12px; color: #cbd5e1;">สังเคราะห์สารสนเทศสถิติ DMC ภาคเรียนที่ ๒/๒๕๖๙ เป็นสุนทรพจน์ทางการ</p>
+          </div>
+        </div>
+        <button id="btnCloseSpeechModal" style="background: transparent; border: none; color: #ffffff; font-size: 24px; cursor: pointer;">&times;</button>
+      </div>
+
+      <!-- Context Tabs -->
+      <div class="speech-tabs">
+        <button class="speech-tab-btn active" data-context="board">🏛️ ๑. แถลงที่ประชุม กศจ. / อ.ก.ค.ศ.</button>
+        <button class="speech-tab-btn" data-context="inspection">📋 ๒. รายงานตรวจราชการ สพฐ. (เรียนดี มีความสุข)</button>
+        <button class="speech-tab-btn" data-context="seminar">🎤 ๓. เปิดการประชุมผู้บริหาร ๔๕ โรงเรียน</button>
+      </div>
+
+      <!-- Speech Content Container -->
+      <div class="speech-content-box" id="speechContentDisplay"></div>
+
+      <!-- Modal Footer -->
+      <div style="padding: 12px 20px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <span style="font-size: 12px; color: #64748b;">
+          🔒 ยืนยันสิทธิ์ด้วยรหัสความปลอดภัย • ข้อมูลผ่านการสังเคราะห์แบบเรียลไทม์
+        </span>
+        <div style="display: flex; gap: 8px;">
+          <button id="btnPrintSpeechBtn" class="btn btn-secondary" style="font-size: 13px; padding: 6px 14px; border-radius: 6px; cursor: pointer;">
+            🖨️ พิมพ์สคริปต์
+          </button>
+          <button id="btnCopySpeechBtn" class="btn btn-primary" style="font-size: 13px; padding: 6px 18px; border-radius: 6px; background: #059669; border-color: #047857; cursor: pointer;">
+            📋 คัดลอกสคริปต์ไปใช้งาน
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="data.js?v=2.0"></script>
+  <script src="gis_data.js"></script>
   <script src="xlsx.full.min.js"></script>
   <script src="app.js?v=2.0"></script>
+  <script src="features_ext.js?v=1.0"></script>
+  <!-- Service Worker Registration for PWA Offline Field Support -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('DMC Hub ServiceWorker registered:', reg.scope))
+          .catch(err => console.log('ServiceWorker registration failed:', err));
+      });
+    }
+  </script>
 </body>
 </html>

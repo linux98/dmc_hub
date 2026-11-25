@@ -1,0 +1,21 @@
+{
+  "name": "DMC Hub | ศูนย์สารสนเทศและวิเคราะห์สถิตินักเรียน สพม.สกลนคร",
+  "short_name": "DMC Hub",
+  "description": "ศูนย์สารสนเทศและระบบวิเคราะห์เปรียบเทียบสถิตินักเรียน สพม.สกลนคร",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#1e3a8a",
+  "icons": [
+    {
+      "src": "banner_dmc_hub_400x150.png",
+      "sizes": "400x150",
+      "type": "image/png"
+    },
+    {
+      "src": "garuda.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
