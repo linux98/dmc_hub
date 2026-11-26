@@ -276,6 +276,20 @@
               <span>สคริปต์รายงาน ผอ. 🔒</span>
             </a>
           </li>
+          <li class="nav-item" id="menuAiCopilot">
+            <a href="#" title="AI Executive Policy Copilot 🔒 (Passcode: 6547)">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"></path>
+                  <rect x="4" y="8" width="16" height="12" rx="2"></rect>
+                  <circle cx="9" cy="13" r="1"></circle>
+                  <circle cx="15" cy="13" r="1"></circle>
+                  <path d="M9 17h6"></path>
+                </svg>
+              </span>
+              <span>AI Copilot ผอ. 🔒</span>
+            </a>
+          </li>
           <li class="nav-item" id="menuSettings">
             <a href="#" title="ตั้งค่าระบบ">
               <span class="nav-icon">
@@ -2531,11 +2545,46 @@
   </div>
 
   <!-- Floating Copilot Button -->
-  <button id="btnOpenCopilot" class="floating-copilot-btn" title="AI Executive Policy Copilot (ผู้ช่วยนโยบาย ผอ.เขต)">
+  <button id="btnOpenCopilot" class="floating-copilot-btn" title="AI Executive Policy Copilot (ผู้ช่วยนโยบาย ผอ.เขต 🔒 ต้องใส่รหัส 6547)">
     <span class="copilot-icon">🤖</span>
-    <span class="copilot-btn-text">AI Copilot ผอ.เขต</span>
+    <span class="copilot-btn-text">AI Copilot ผอ.เขต 🔒</span>
     <span class="copilot-pulse"></span>
   </button>
+
+  <!-- Security Gate Modal for AI Executive Policy Copilot (PIN = 6547) -->
+  <div id="copilotAuthModal" class="security-gate-overlay" style="display: none; z-index: 10005;">
+    <div class="security-gate-card" id="copilotSecurityGateCard">
+      <div class="security-icon-circle" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #1e40af;">
+        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+      </div>
+      <h3 style="margin: 0 0 6px 0; font-size: 18px; color: #0f172a; font-weight: 700;">
+        ระบบความปลอดภัย AI Executive Copilot
+      </h3>
+      <p style="margin: 0 0 16px 0; font-size: 13px; color: #64748b; line-height: 1.5;">
+        สงวนสิทธิ์เฉพาะผู้อำนวยการสำนักงานเขตพื้นที่การศึกษา และผู้บริหาร กรุณากรอกรหัสความปลอดภัย 4 หลัก เพื่อเข้าใช้งานผู้ช่วยอัจฉริยะ AI Copilot
+      </p>
+      
+      <div style="margin: 12px 0;">
+        <input type="password" id="copilotPinInput" class="security-pin-input" maxlength="4" placeholder="••••" autocomplete="off">
+      </div>
+      
+      <div id="copilotPinErrorMsg" style="color: #dc2626; font-size: 13px; font-weight: 600; min-height: 20px; margin-bottom: 12px; display: none;">
+        รหัสผ่านไม่ถูกต้อง กรุณาติดต่อผู้ดูแลระบบ DLICT
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: center;">
+        <button id="btnCancelCopilotPin" class="btn btn-secondary" style="padding: 8px 18px; font-size: 14px; border-radius: 8px; cursor: pointer;">
+          ยกเลิก
+        </button>
+        <button id="btnSubmitCopilotPin" class="btn btn-primary" style="padding: 8px 22px; font-size: 14px; border-radius: 8px; background: #1e40af; border-color: #1e3a8a; color: #ffffff; cursor: pointer;">
+          🔓 ปลดล็อกเข้าใช้งาน AI
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- AI Executive Copilot Drawer Modal -->
   <div id="copilotModal" class="copilot-drawer-overlay" style="display: none;">
@@ -2549,6 +2598,7 @@
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 6px;">
+          <button id="btnLockCopilot" class="copilot-header-btn" title="ล็อกเซสชัน AI (Passcode: 6547)">🔒</button>
           <button id="btnToggleCopilotSettings" class="copilot-header-btn" title="ตั้งค่าเชื่อมต่อ Gemini AI เพื่อให้ตอบได้ทุกเรื่อง">⚙️</button>
           <button id="btnCloseCopilot" class="copilot-close-btn">&times;</button>
         </div>

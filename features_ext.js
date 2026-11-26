@@ -1313,6 +1313,8 @@
       { title: 'ติดตามรุ่นนักเรียน (Cohort Tracking)', desc: 'การเลื่อนชั้น ม.1 สู่ ม.6 ข้ามปี', tag: 'โมดูล', targetId: 'cohortSection' },
       { title: 'ดัชนีสุขภาวะ 45 ร.ร. (Health Index)', desc: 'เรดาร์ชาร์ต 100 คะแนนเต็ม 5 มิติ', tag: 'โมดูล', targetId: 'healthIndexSection' },
       { title: 'สคริปต์รายงาน ผอ.เขต 🔒', desc: 'เครื่องมือสร้างสุนทรพจน์ทางการ กศจ./สพฐ.', tag: 'เครื่องมือ', targetId: 'openExecutiveSpeechBtn', isButton: true },
+      { title: 'AI Executive Policy Copilot 🔒', desc: 'ผู้ช่วยอัจฉริยะ ผอ.เขต (ต้องใส่รหัส 6547)', tag: 'เครื่องมือ', targetId: 'btnOpenCopilot', isButton: true },
+      { title: 'เส้นทางตรวจเยี่ยมโรงเรียน (Route Planner)', desc: 'ระบบวางแผนเส้นทางตรวจราชการและคำนวณเวลา', tag: 'เครื่องมือ', targetId: 'btnToggleRoutePlanner', isButton: true },
       { title: 'เอกสารสรุปหน้าเดียว A4 (One-Pager)', desc: 'พรีวิวและพิมพ์สรุปนโยบายหน้าเดียว A4', tag: 'เอกสาร', targetId: 'btnOpenOnePager', isButton: true }
     ];
 
@@ -1607,6 +1609,16 @@
     const msgBox = document.getElementById('copilotMessages');
     const chips = document.querySelectorAll('#copilotChipsBar .copilot-chip');
 
+    // Security Gate Elements (Passcode 6547)
+    const COPILOT_PASSCODE = '6547';
+    const authModal = document.getElementById('copilotAuthModal');
+    const authCard = document.getElementById('copilotSecurityGateCard');
+    const pinInput = document.getElementById('copilotPinInput');
+    const btnSubmitPin = document.getElementById('btnSubmitCopilotPin');
+    const btnCancelPin = document.getElementById('btnCancelCopilotPin');
+    const pinErrorMsg = document.getElementById('copilotPinErrorMsg');
+    const btnLockCopilot = document.getElementById('btnLockCopilot');
+
     // Gemini Settings Elements
     const btnToggleSettings = document.getElementById('btnToggleCopilotSettings');
     const btnOpenSettings = document.getElementById('btnOpenApiKeySettings');
@@ -1620,6 +1632,48 @@
     const statusText = document.getElementById('copilotStatusText');
 
     if (!btnOpen || !modal || !form || !input || !msgBox) return;
+
+    function openCopilotAuthModal() {
+      if (!authModal) return;
+      authModal.style.display = 'flex';
+      if (pinInput) {
+        pinInput.value = '';
+        setTimeout(() => pinInput.focus(), 120);
+      }
+      if (pinErrorMsg) pinErrorMsg.style.display = 'none';
+      if (authCard) authCard.classList.remove('shake');
+    }
+
+    function closeCopilotAuthModal() {
+      if (authModal) authModal.style.display = 'none';
+      if (pinInput) pinInput.value = '';
+      if (pinErrorMsg) pinErrorMsg.style.display = 'none';
+    }
+
+    function unlockAndOpenCopilot() {
+      closeCopilotAuthModal();
+      modal.style.display = 'flex';
+      setTimeout(() => input.focus(), 150);
+    }
+
+    function handleCopilotPinSubmit() {
+      const enteredPin = pinInput ? pinInput.value.trim() : '';
+      if (enteredPin === COPILOT_PASSCODE) {
+        if (pinInput) pinInput.value = '';
+        if (pinErrorMsg) pinErrorMsg.style.display = 'none';
+        unlockAndOpenCopilot();
+      } else {
+        if (pinErrorMsg) pinErrorMsg.style.display = 'block';
+        if (authCard) {
+          authCard.classList.add('shake');
+          setTimeout(() => authCard.classList.remove('shake'), 400);
+        }
+        if (pinInput) {
+          pinInput.value = '';
+          pinInput.focus();
+        }
+      }
+    }
 
     let chatHistory = [];
     const STORAGE_KEY = 'dmc_gemini_api_key';
@@ -1734,10 +1788,47 @@
       });
     }
 
+    // Open Copilot protected by Passcode 6547
+    const menuAiCopilot = document.getElementById('menuAiCopilot');
+    if (menuAiCopilot) {
+      menuAiCopilot.addEventListener('click', (e) => {
+        e.preventDefault();
+        openCopilotAuthModal();
+      });
+    }
+
     btnOpen.addEventListener('click', () => {
-      modal.style.display = 'flex';
-      setTimeout(() => input.focus(), 150);
+      openCopilotAuthModal();
     });
+
+    if (btnSubmitPin) {
+      btnSubmitPin.addEventListener('click', handleCopilotPinSubmit);
+    }
+
+    if (btnCancelPin) {
+      btnCancelPin.addEventListener('click', closeCopilotAuthModal);
+    }
+
+    if (pinInput) {
+      pinInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleCopilotPinSubmit();
+        }
+      });
+    }
+
+    if (authModal) {
+      authModal.addEventListener('click', (e) => {
+        if (e.target === authModal) closeCopilotAuthModal();
+      });
+    }
+
+    if (btnLockCopilot) {
+      btnLockCopilot.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+    }
 
     btnClose.addEventListener('click', () => {
       modal.style.display = 'none';
