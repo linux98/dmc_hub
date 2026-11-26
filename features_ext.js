@@ -43,11 +43,11 @@
     const mapContainer = document.getElementById('schoolGisMap');
     if (!mapContainer || typeof L === 'undefined') return;
 
-    // Center on Sakon Nakhon province
-    const SAKON_CENTER = [17.1544, 104.1486];
+    // Provincial geographic center of Sakon Nakhon [17.3000, 103.8800]
+    const SAKON_CENTER = [17.3000, 103.8800];
     gisMap = L.map('schoolGisMap', {
       center: SAKON_CENTER,
-      zoom: 10,
+      zoom: 9,
       zoomControl: true,
       scrollWheelZoom: true
     });
@@ -64,6 +64,44 @@
     window.schoolMarkers = schoolMarkers;
     window.getSchoolMarkers = () => schoolMarkers;
     setupGisEvents();
+
+    // ------------------------------------------------------------------------
+    // Automatic Resizing & Invalidation (Eliminates Grey Area on wide screens)
+    // ------------------------------------------------------------------------
+    const forceMapResize = () => {
+      if (gisMap) {
+        gisMap.invalidateSize();
+      }
+    };
+
+    // 1. Initial delayed passes for DOM layout, web fonts and flex settlement
+    setTimeout(forceMapResize, 150);
+    setTimeout(forceMapResize, 400);
+    setTimeout(forceMapResize, 1000);
+
+    // 2. Continuous ResizeObserver: monitors any change to map container dimensions
+    if (window.ResizeObserver && mapContainer) {
+      const resizeObserver = new ResizeObserver(() => {
+        forceMapResize();
+      });
+      resizeObserver.observe(mapContainer);
+    }
+
+    // 3. IntersectionObserver: instantly invalidates size when scrolled into viewport
+    if (window.IntersectionObserver) {
+      const intersectObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            forceMapResize();
+          }
+        });
+      }, { threshold: 0.05 });
+      intersectObserver.observe(mapContainer);
+    }
+
+    // 4. Global window resize & custom orientation/sidebar events
+    window.addEventListener('resize', forceMapResize);
+    window.addEventListener('orientationchange', () => setTimeout(forceMapResize, 300));
   }
 
   function getSchoolSize(totalStudents) {
@@ -260,7 +298,10 @@
           btnBuf10.style.color = '#334155';
         }
         renderGisMarkers();
-        gisMap.setView([17.1544, 104.1486], 10);
+        if (gisMap) {
+          gisMap.invalidateSize();
+          gisMap.setView([17.3000, 103.8800], 9);
+        }
       });
     }
   }
