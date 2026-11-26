@@ -1677,6 +1677,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const geoInfo = [school.cluster, school.amphoe ? `อ.${school.amphoe}` : '', school.districtName || 'สพม.สกลนคร'].filter(Boolean).join(' • ');
     document.getElementById('modalSchoolDistrict').textContent = geoInfo;
+
+    // Populate Official Metadata Bar
+    const officialBar = document.getElementById('modalOfficialInfoBar');
+    if (officialBar) {
+      let badges = [];
+      if (school.moeCode) {
+        badges.push(`<span style="background: rgba(30, 58, 138, 0.08); color: #1e3a8a; padding: 2px 8px; border-radius: 4px; font-weight: 600;">MOE: ${school.moeCode}</span>`);
+      }
+      if (school.id) {
+        badges.push(`<span style="background: rgba(30, 58, 138, 0.08); color: #1e3a8a; padding: 2px 8px; border-radius: 4px; font-weight: 600;">SMIS: ${school.id}</span>`);
+      }
+      if (school.address || school.tambon) {
+        const fullAddr = `${school.address || ''} ม.${school.moo || '0'} ต.${school.tambon || ''} อ.${school.amphoe} จ.สกลนคร ${school.zipcode || ''}`.trim();
+        badges.push(`<span style="color: #475569;">📍 ${fullAddr}</span>`);
+      }
+      if (school.distanceKm) {
+        badges.push(`<span style="background: #f1f5f9; color: #334155; padding: 2px 8px; border-radius: 4px;">🚗 ห่างจาก สพท. <strong>${school.distanceKm} กม.</strong></span>`);
+      }
+      if (school.project) {
+        badges.push(`<span style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a; padding: 2px 8px; border-radius: 4px; font-weight: 600;">🏅 ${school.project}</span>`);
+      }
+      if (school.tel) {
+        badges.push(`<a href="tel:${school.tel}" style="background: #e0e7ff; color: #1e3a8a; padding: 2px 8px; border-radius: 4px; text-decoration: none; font-weight: 600;">📞 โทร: ${school.tel}</a>`);
+      }
+      if (school.website) {
+        badges.push(`<a href="${school.website}" target="_blank" rel="noopener" style="background: #d1fae5; color: #065f46; padding: 2px 8px; border-radius: 4px; text-decoration: none; font-weight: 600;">🌐 เว็บไซต์โรงเรียน</a>`);
+      }
+      officialBar.innerHTML = badges.join('');
+    }
     
     // Set KPI summary cards
     if (document.getElementById('modalKpiStd68')) {

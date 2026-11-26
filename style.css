@@ -3844,3 +3844,26 @@ body.dark-theme .copilot-msg.bot .msg-bubble h3,
 body.dark-theme .copilot-msg.bot .msg-bubble h4 {
   color: #93c5fd;
 }
+
+/* ==========================================================================
+   OFFICIAL SCHOOL METADATA BAR & CONTACT PILLS
+   ========================================================================== */
+.school-modal-official-bar {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: 'Sarabun', sans-serif;
+  line-height: 1.5;
+}
+
+body.dark-theme .school-modal-official-bar {
+  background: #0f172a;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+.school-popup-tag {
+  display: inline-block;
+  line-height: 1.3;
+}

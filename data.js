@@ -1,4 +1,3 @@
-// Auto-generated data file for DMC Dashboard (5 Periods with Two-Tier Naming Architecture)
 const DASHBOARD_DATA = [
   {
     "id": "47012001",
@@ -367,7 +366,16 @@ const DASHBOARD_DATA = [
         "total": 3802,
         "rooms": 102
       }
-    }
+    },
+    "moeCode": "1047540626",
+    "address": "74/26 ใสสว่าง",
+    "moo": "0",
+    "tambon": "ธาตุเชิงชุม",
+    "zipcode": "47000",
+    "tel": "042713566",
+    "distanceKm": 1.0,
+    "project": "",
+    "website": "http://www.sakolraj.ac.th/"
   },
   {
     "id": "47012002",
@@ -736,7 +744,16 @@ const DASHBOARD_DATA = [
         "total": 472,
         "rooms": 17
       }
-    }
+    },
+    "moeCode": "1047540627",
+    "address": "1175 นิตโย",
+    "moo": "13",
+    "tambon": "ขมิ้น",
+    "zipcode": "47220",
+    "tel": "0-4275-9107",
+    "distanceKm": 21.0,
+    "project": "",
+    "website": "http://www.dongmafai.ac.th/mainpage"
   },
   {
     "id": "47012003",
@@ -1105,7 +1122,16 @@ const DASHBOARD_DATA = [
         "total": 1940,
         "rooms": 66
       }
-    }
+    },
+    "moeCode": "1047540628",
+    "address": "271 ไอ.ที.ยู",
+    "moo": "2",
+    "tambon": "ธาตุเชิงชุม",
+    "zipcode": "47000",
+    "tel": "042728195",
+    "distanceKm": 3.0,
+    "project": "โครงการ 1 อำเภอ 1 โรงเรียนคุณภาพ",
+    "website": "https://www.sps.ac.th/"
   },
   {
     "id": "47012004",
@@ -1474,7 +1500,16 @@ const DASHBOARD_DATA = [
         "total": 3234,
         "rooms": 87
       }
-    }
+    },
+    "moeCode": "1047540629",
+    "address": "606 นิตโย",
+    "moo": "11",
+    "tambon": "ธาตุเชิงชุม",
+    "zipcode": "47000",
+    "tel": "042970128",
+    "distanceKm": 6.0,
+    "project": "",
+    "website": "http://testtnw.tnw.in.th/"
   },
   {
     "id": "47012005",
@@ -1843,7 +1878,16 @@ const DASHBOARD_DATA = [
         "total": 579,
         "rooms": 17
       }
-    }
+    },
+    "moeCode": "1047540630",
+    "address": "55 นิตโย",
+    "moo": "4",
+    "tambon": "ท่าแร่",
+    "zipcode": "47230",
+    "tel": "042704938",
+    "distanceKm": 25.0,
+    "project": "",
+    "website": "http://www.trsc.ac.th/"
   },
   {
     "id": "47012007",
@@ -2212,7 +2256,16 @@ const DASHBOARD_DATA = [
         "total": 212,
         "rooms": 10
       }
-    }
+    },
+    "moeCode": "1047540632",
+    "address": "356 -",
+    "moo": "3",
+    "tambon": "พังขว้าง",
+    "zipcode": "47000",
+    "tel": "042090210",
+    "distanceKm": 15.0,
+    "project": "โครงการพระราชดำริ",
+    "website": "http://www.cpsn.ac.th/"
   },
   {
     "id": "47012008",
@@ -2581,7 +2634,16 @@ const DASHBOARD_DATA = [
         "total": 1539,
         "rooms": 48
       }
-    }
+    },
+    "moeCode": "1047540633",
+    "address": "653 นิตโย",
+    "moo": "1",
+    "tambon": "กุสุมาลย์",
+    "zipcode": "47210",
+    "tel": "042769056",
+    "distanceKm": 40.0,
+    "project": "โครงการพระราชดำริ,โครงการ 1 อำเภอ 1 โรงเรียนคุณภาพ",
+    "website": "http://www.ksm.ac.th/"
   },
   {
     "id": "47012009",
@@ -2950,7 +3012,16 @@ const DASHBOARD_DATA = [
         "total": 686,
         "rooms": 20
       }
-    }
+    },
+    "moeCode": "1047540634",
+    "address": "14 -",
+    "moo": "11",
+    "tambon": "อุ่มจาน",
+    "zipcode": "47230",
+    "tel": "042162422",
+    "distanceKm": 35.0,
+    "project": "โครงการพระราชดำริ",
+    "website": ""
   },
   {
     "id": "47012010",
@@ -3319,7 +3390,16 @@ const DASHBOARD_DATA = [
         "total": 803,
         "rooms": 25
       }
-    }
+    },
+    "moeCode": "1047540671",
+    "address": "5 -",
+    "moo": "6",
+    "tambon": "เต่างอย",
+    "zipcode": "47260",
+    "tel": "042-761022",
+    "distanceKm": 20.0,
+    "project": "โครงการ 1 อำเภอ 1 โรงเรียนคุณภาพ",
+    "website": ""
   },
   {
     "id": "47012011",
@@ -3688,7 +3768,16 @@ const DASHBOARD_DATA = [
         "total": 1517,
         "rooms": 48
       }
-    }
+    },
+    "moeCode": "1047540672",
+    "address": "190 -",
+    "moo": "14",
+    "tambon": "ตองโขบ",
+    "zipcode": "47280",
+    "tel": "042766063",
+    "distanceKm": 25.0,
+    "project": "โครงการพระราชดำริ,โครงการ 1 อำเภอ 1 โรงเรียนคุณภาพ",
+    "website": ""
   },
   {
     "id": "47012012",
@@ -4057,7 +4146,16 @@ const DASHBOARD_DATA = [
         "total": 183,
         "rooms": 8
       }
-    }
+    },
+    "moeCode": "1047540673",
+    "address": "239 -",
+    "moo": "1",
+    "tambon": "ด่านม่วงคำ",
+    "zipcode": "47280",
+    "tel": "-",
+    "distanceKm": 35.0,
+    "project": "",
+    "website": ""
   },
   {
     "id": "47012013",
@@ -4426,7 +4524,16 @@ const DASHBOARD_DATA = [
         "total": 340,
         "rooms": 13
       }
-    }
+    },
+    "moeCode": "1047540675",
+    "address": "79 อ้อมแก้ว-ห้องโจด",
+    "moo": "7",
+    "tambon": "บ้านโพน",
+    "zipcode": "47230",
+    "tel": "042170446",
+    "distanceKm": 40.0,
+    "project": "โครงการ 1 อำเภอ 1 โรงเรียนคุณภาพ",
+    "website": ""
   },
   {
     "id": "47012014",
@@ -4795,7 +4902,16 @@ const DASHBOARD_DATA = [
         "total": 558,
         "rooms": 19
       }
-    }
+    },
+    "moeCode": "1047540676",
+    "address": "- สกลนคร-กาฬสินธุ์",
+    "moo": "6",
+    "tambon": "โคกภู",
+    "zipcode": "47310",
+    "tel": "0930861479",
+    "distanceKm": 33.0,
+    "project": "โครงการ 1 อำเภอ 1 โรงเรียนคุณภาพ",
+    "website": ""
   },
   {
     "id": "47012015",
@@ -5164,7 +5280,16 @@ const DASHBOARD_DATA = [
         "total": 624,
         "rooms": 19
       }
-    }
+    },
+    "moeCode": "1047540677",
+    "address": "164 -",
+    "moo": "12",
+    "tambon": "สร้างค้อ",
+    "zipcode": "47310",
+    "tel": "042704700",
+    "distanceKm": 54.0,
+    "project": "โครงการพระราชดำริ",
+    "website": ""
   },
   {
     "id": "47022001",
@@ -5533,7 +5658,16 @@ const DASHBOARD_DATA = [
         "total": 1881,
         "rooms": 53
       }
-    }
+    },
+    "moeCode": "1047540644",
+    "address": "344 พังโคน-วานร",
+    "moo": "8",
+    "tambon": "ไฮหย่อง",
+    "zipcode": "47160",
+    "tel": "042771218",
+    "distanceKm": 55.0,
+    "project": "โครงการ 1 อำเภอ 1 โรงเรียนคุณภาพ",
+    "website": ""
   },
   {
     "id": "47022002",
@@ -5902,7 +6036,16 @@ const DASHBOARD_DATA = [
         "total": 1387,
         "rooms": 41
       }
-    }
+    },
+    "moeCode": "1047540635",
+    "address": "279 -",
+    "moo": "1",
+    "tambon": "กุดบาก",
+    "zipcode": "47180",
+    "tel": "042784026",
+    "distanceKm": 45.0,
+    "project": "โครงการ 1 อำเภอ 1 โรงเรียนคุณภาพ",
+    "website": ""
   },
   {
     "id": "47022003",
@@ -6271,7 +6414,16 @@ const DASHBOARD_DATA = [
         "total": 1353,
         "rooms": 39
       }
-    }
+    },
+    "moeCode": "1047540637",
+    "address": "430 พรรณานิคม-อากาศอำนวย",
+    "moo": "2",
+    "tambon": "พรรณา",
+    "zipcode": "47130",
+    "tel": "042779117",
+    "distanceKm": 40.0,
+    "project": "โครงการ 1 อำเภอ 1 โรงเรียนคุณภาพ",
+    "website": "https://www.pwj.ac.th/"
   },
   {
     "id": "47022004",
@@ -6640,7 +6792,16 @@ const DASHBOARD_DATA = [
         "total": 296,
         "rooms": 10
       }
-    }
+    },
+    "moeCode": "1047540638",
+    "address": "194 สกล-อากาศ",
+    "moo": "3",
+    "tambon": "สว่าง",
+    "zipcode": "47130",
+    "tel": "042973009",
+    "distanceKm": 35.0,
+    "project": "",
+    "website": "http://www.bbr.ac.th/"
   },
   {
     "id": "47022005",
@@ -7009,7 +7170,16 @@ const DASHBOARD_DATA = [
         "total": 120,
         "rooms": 6
       }
-    }
+    },
+    "moeCode": "1047540645",
+    "address": "240 -",
+    "moo": "11",
+    "tambon": "ต้นผึ้ง",
+    "zipcode": "47160",
+    "tel": "042704368",
+    "distanceKm": 70.0,
+    "project": "",
+    "website": ""
   },
   {
     "id": "47022007",
@@ -7378,7 +7548,16 @@ const DASHBOARD_DATA = [
         "total": 124,
         "rooms": 6
       }
-    }
+    },
+    "moeCode": "1047540639",
+    "address": "179 -",
+    "moo": "13",
+    "tambon": "ไร่",
+    "zipcode": "47130",
+    "tel": "0635419232",
+    "distanceKm": 46.0,
+    "project": "",
+    "website": "https://thepsawat.thai.ac/home/"
   },
   {
     "id": "47022008",
@@ -7747,7 +7926,16 @@ const DASHBOARD_DATA = [
         "total": 208,
         "rooms": 6
       }
-    }
+    },
+    "moeCode": "1047540640",
+    "address": "บ้านหนองผือ -",
+    "moo": "8",
+    "tambon": "นาใน",
+    "zipcode": "47130",
+    "tel": "042703215",
+    "distanceKm": 52.0,
+    "project": "",
+    "website": "http://phurithat.ac.th/"
   },
   {
     "id": "47022009",
@@ -8116,7 +8304,16 @@ const DASHBOARD_DATA = [
         "total": 258,
         "rooms": 9
       }
-    }
+    },
+    "moeCode": "1047540641",
+    "address": "124 -",
+    "moo": "8",
+    "tambon": "บะฮี",
+    "zipcode": "47130",
+    "tel": "",
+    "distanceKm": 55.0,
+    "project": "",
+    "website": "https://bwk.thai.ac/home/"
   },
   {
     "id": "47022010",
@@ -8485,7 +8682,16 @@ const DASHBOARD_DATA = [
         "total": 163,
         "rooms": 6
       }
-    }
+    },
+    "moeCode": "1047540642",
+    "address": "0 0",
+    "moo": "1",
+    "tambon": "ช้างมิ่ง",
+    "zipcode": "47130",
+    "tel": "042166262",
+    "distanceKm": 45.0,
+    "project": "",
+    "website": "http://www.cmp.ac.th/"
   },
   {
     "id": "47022012",
@@ -8854,7 +9060,16 @@ const DASHBOARD_DATA = [
         "total": 1394,
         "rooms": 47
       }
-    }
+    },
+    "moeCode": "1047540646",
+    "address": "90 พังโคน - วาริชภูมิ",
+    "moo": "9",
+    "tambon": "ปลาโหล",
+    "zipcode": "47150",
+    "tel": "042781190",
+    "distanceKm": 61.0,
+    "project": "โครงการ 1 อำเภอ 1 โรงเรียนคุณภาพ",
+    "website": ""
   },
   {
     "id": "47022013",
@@ -9223,7 +9438,16 @@ const DASHBOARD_DATA = [
         "total": 849,
         "rooms": 24
       }
-    }
+    },
+    "moeCode": "1047540647",
+    "address": "244 -",
+    "moo": "6",
+    "tambon": "คำบ่อ",
+    "zipcode": "47150",
+    "tel": "042774113",
+    "distanceKm": 90.0,
+    "project": "",
+    "website": ""
   },
   {
     "id": "47022014",
@@ -9592,7 +9816,16 @@ const DASHBOARD_DATA = [
         "total": 175,
         "rooms": 7
       }
-    }
+    },
+    "moeCode": "1047540648",
+    "address": "- วาริช-สามหมอ",
+    "moo": "11",
+    "tambon": "วาริชภูมิ",
+    "zipcode": "47150",
+    "tel": "042090448",
+    "distanceKm": 75.0,
+    "project": "",
+    "website": ""
   },
   {
     "id": "47022015",
@@ -9961,7 +10194,16 @@ const DASHBOARD_DATA = [
         "total": 522,
         "rooms": 18
       }
-    }
+    },
+    "moeCode": "1047540649",
+    "address": "77 วาริชภูมิ-กุดบาก",
+    "moo": "5",
+    "tambon": "หนองปลิง",
+    "zipcode": "47270",
+    "tel": "042789247",
+    "distanceKm": 57.0,
+    "project": "โครงการ 1 อำเภอ 1 โรงเรียนคุณภาพ",
+    "website": ""
   },
   {
     "id": "47022016",
@@ -10330,7 +10572,16 @@ const DASHBOARD_DATA = [
         "total": 2694,
         "rooms": 80
       }
-    }
+    },
+    "moeCode": "1047540664",
+    "address": "121 นิตโย",
+    "moo": "12",
+    "tambon": "สว่างแดนดิน",
+    "zipcode": "47110",
+    "tel": "042-721181",
+    "distanceKm": 80.0,
+    "project": "",
+    "website": ""
   },
   {
     "id": "47022017",
@@ -10699,7 +10950,16 @@ const DASHBOARD_DATA = [
         "total": 479,
         "rooms": 21
       }
-    }
+    },
+    "moeCode": "1047540665",
+    "address": "9206 นิตโย",
+    "moo": "6",
+    "tambon": "แวง",
+    "zipcode": "47240",
+    "tel": "042729090",
+    "distanceKm": 73.0,
+    "project": "",
+    "website": ""
   },
   {
     "id": "47022018",
@@ -11068,7 +11328,16 @@ const DASHBOARD_DATA = [
         "total": 603,
         "rooms": 21
       }
-    }
+    },
+    "moeCode": "1047540666",
+    "address": "137 นิตโย",
+    "moo": "1",
+    "tambon": "หนองหลวง",
+    "zipcode": "47110",
+    "tel": "042704615",
+    "distanceKm": 99.0,
+    "project": "",
+    "website": ""
   },
   {
     "id": "47022019",
@@ -11437,7 +11706,16 @@ const DASHBOARD_DATA = [
         "total": 464,
         "rooms": 18
       }
-    }
+    },
+    "moeCode": "1047540667",
+    "address": "326 -",
+    "moo": "1",
+    "tambon": "โคกสี",
+    "zipcode": "47110",
+    "tel": "042776050",
+    "distanceKm": 100.0,
+    "project": "",
+    "website": ""
   },
   {
     "id": "47022020",
@@ -11806,7 +12084,16 @@ const DASHBOARD_DATA = [
         "total": 177,
         "rooms": 9
       }
-    }
+    },
+    "moeCode": "1047540668",
+    "address": "162 -",
+    "moo": "2",
+    "tambon": "บงเหนือ",
+    "zipcode": "47110",
+    "tel": "0981041361",
+    "distanceKm": 111.0,
+    "project": "",
+    "website": ""
   },
   {
     "id": "47022021",
@@ -12175,7 +12462,16 @@ const DASHBOARD_DATA = [
         "total": 2587,
         "rooms": 81
       }
-    }
+    },
+    "moeCode": "1047540669",
+    "address": "934 นิตโย",
+    "moo": "12",
+    "tambon": "สว่างแดนดิน",
+    "zipcode": "47110",
+    "tel": "042721030",
+    "distanceKm": 80.0,
+    "project": "โครงการ 1 อำเภอ 1 โรงเรียนคุณภาพ",
+    "website": ""
   },
   {
     "id": "47022022",
@@ -12544,7 +12840,16 @@ const DASHBOARD_DATA = [
         "total": 802,
         "rooms": 26
       }
-    }
+    },
+    "moeCode": "1047540670",
+    "address": "88 -",
+    "moo": "9",
+    "tambon": "ส่องดาว",
+    "zipcode": "47190",
+    "tel": "042786023",
+    "distanceKm": 100.0,
+    "project": "โครงการ 1 อำเภอ 1 โรงเรียนคุณภาพ",
+    "website": ""
   },
   {
     "id": "47032001",
@@ -12913,7 +13218,16 @@ const DASHBOARD_DATA = [
         "total": 3057,
         "rooms": 88
       }
-    }
+    },
+    "moeCode": "1047540650",
+    "address": "400 เดื่อเจริญ",
+    "moo": "4",
+    "tambon": "วานรนิวาส",
+    "zipcode": "47120",
+    "tel": "042791644",
+    "distanceKm": 84.0,
+    "project": "โครงการ 1 อำเภอ 1 โรงเรียนคุณภาพ",
+    "website": ""
   },
   {
     "id": "47032002",
@@ -13282,7 +13596,16 @@ const DASHBOARD_DATA = [
         "total": 1195,
         "rooms": 40
       }
-    }
+    },
+    "moeCode": "1047540656",
+    "address": "162 คำตากล้า - ท่าก้อน",
+    "moo": "2",
+    "tambon": "คำตากล้า",
+    "zipcode": "47250",
+    "tel": "042796084",
+    "distanceKm": 109.0,
+    "project": "โครงการ 1 อำเภอ 1 โรงเรียนคุณภาพ",
+    "website": ""
   },
   {
     "id": "47032003",
@@ -13651,7 +13974,16 @@ const DASHBOARD_DATA = [
         "total": 461,
         "rooms": 16
       }
-    }
+    },
+    "moeCode": "1047540651",
+    "address": "96 กุดเรือคำ-หนองแวงใต้",
+    "moo": "9",
+    "tambon": "กุดเรือคำ",
+    "zipcode": "47120",
+    "tel": "042764042",
+    "distanceKm": 106.0,
+    "project": "",
+    "website": ""
   },
   {
     "id": "47032004",
@@ -14020,7 +14352,16 @@ const DASHBOARD_DATA = [
         "total": 410,
         "rooms": 15
       }
-    }
+    },
+    "moeCode": "1047540657",
+    "address": "183 -",
+    "moo": "1",
+    "tambon": "แพด",
+    "zipcode": "47250",
+    "tel": "042796009",
+    "distanceKm": 120.0,
+    "project": "",
+    "website": ""
   },
   {
     "id": "47032007",
@@ -14389,7 +14730,16 @@ const DASHBOARD_DATA = [
         "total": 212,
         "rooms": 8
       }
-    }
+    },
+    "moeCode": "1047540654",
+    "address": "216 พังโคน-บึงกาฬ",
+    "moo": "1",
+    "tambon": "หนองแวงใต้",
+    "zipcode": "47120",
+    "tel": "042707201",
+    "distanceKm": 96.0,
+    "project": "",
+    "website": ""
   },
   {
     "id": "47032009",
@@ -14758,7 +15108,16 @@ const DASHBOARD_DATA = [
         "total": 2000,
         "rooms": 58
       }
-    }
+    },
+    "moeCode": "1047540658",
+    "address": "172 -",
+    "moo": "2",
+    "tambon": "ม่วง",
+    "zipcode": "47140",
+    "tel": "042794116",
+    "distanceKm": 125.0,
+    "project": "โครงการพระราชดำริ,โครงการ 1 อำเภอ 1 โรงเรียนคุณภาพ",
+    "website": ""
   },
   {
     "id": "47032010",
@@ -14766,7 +15125,7 @@ const DASHBOARD_DATA = [
     "shortName": "พระเทพญาณวิศิษฏ์โพธิ์ชัยทองวิทย์",
     "districtId": "00470001",
     "districtName": "สพม.สกลนคร",
-    "amphoe": "วานรนิวาส",
+    "amphoe": "บ้านม่วง",
     "cluster": "สหวิทยาเขตเทพทวีพัฒน์",
     "y68": {
       "grades": {
@@ -15127,7 +15486,16 @@ const DASHBOARD_DATA = [
         "total": 163,
         "rooms": 9
       }
-    }
+    },
+    "moeCode": "1047540659",
+    "address": "163 -",
+    "moo": "3",
+    "tambon": "หนองกวั่ง",
+    "zipcode": "47140",
+    "tel": "042702201",
+    "distanceKm": 130.0,
+    "project": "โครงการพระราชดำริ",
+    "website": ""
   },
   {
     "id": "47032012",
@@ -15496,7 +15864,16 @@ const DASHBOARD_DATA = [
         "total": 2087,
         "rooms": 62
       }
-    }
+    },
+    "moeCode": "1047540661",
+    "address": "165 -",
+    "moo": "17",
+    "tambon": "อากาศ",
+    "zipcode": "47170",
+    "tel": "042799121",
+    "distanceKm": 57.0,
+    "project": "โครงการ 1 อำเภอ 1 โรงเรียนคุณภาพ",
+    "website": ""
   },
   {
     "id": "47032013",
@@ -15865,7 +16242,16 @@ const DASHBOARD_DATA = [
         "total": 1125,
         "rooms": 34
       }
-    }
+    },
+    "moeCode": "1047540662",
+    "address": "50 -",
+    "moo": "8",
+    "tambon": "โพนงาม",
+    "zipcode": "47170",
+    "tel": "042168095",
+    "distanceKm": 75.0,
+    "project": "",
+    "website": ""
   },
   {
     "id": "47032014",
@@ -16234,7 +16620,16 @@ const DASHBOARD_DATA = [
         "total": 146,
         "rooms": 8
       }
-    }
+    },
+    "moeCode": "1047540663",
+    "address": "135 -",
+    "moo": "1",
+    "tambon": "ท่าก้อน",
+    "zipcode": "47170",
+    "tel": "042168776",
+    "distanceKm": 90.0,
+    "project": "",
+    "website": ""
   },
   {
     "id": "47032015",
@@ -16603,6 +16998,15 @@ const DASHBOARD_DATA = [
         "total": 685,
         "rooms": 27
       }
-    }
+    },
+    "moeCode": "1047540674",
+    "address": "402 สว่าง-นาบัว",
+    "moo": "2",
+    "tambon": "เจริญศิลป์",
+    "zipcode": "47290",
+    "tel": "042709142",
+    "distanceKm": 100.0,
+    "project": "โครงการ 1 อำเภอ 1 โรงเรียนคุณภาพ",
+    "website": ""
   }
 ];

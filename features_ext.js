@@ -126,12 +126,31 @@
       });
 
       // Rich Popup
+      const projBadge = school.project ? `
+        <span class="school-popup-tag" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 4px; font-weight: 600; font-size: 10.5px;">
+          🏅 ${school.project}
+        </span>
+      ` : '';
+
+      const contactRow = `
+        <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #e2e8f0; font-size: 11.5px; color: #475569; display: flex; flex-direction: column; gap: 3px;">
+          <div>📍 ต.${school.tambon || ''} อ.${school.amphoe} ${school.distanceKm ? `(ห่าง สพท. <strong>${school.distanceKm} กม.</strong>)` : ''}</div>
+          <div style="display: flex; gap: 6px; align-items: center; margin-top: 3px; flex-wrap: wrap;">
+            ${school.tel ? `<a href="tel:${school.tel}" style="color: #1e3a8a; background: #e0e7ff; padding: 2px 6px; border-radius: 4px; text-decoration: none; font-weight: 600; font-size: 11px;">📞 ${school.tel}</a>` : ''}
+            ${school.website ? `<a href="${school.website}" target="_blank" rel="noopener" style="color: #047857; background: #d1fae5; padding: 2px 6px; border-radius: 4px; text-decoration: none; font-weight: 600; font-size: 11px;">🌐 เว็บไซต์ รร.</a>` : ''}
+          </div>
+        </div>
+      `;
+
       const popupHTML = `
         <div class="school-popup-card">
           <h4>${school.name}</h4>
-          <span class="school-popup-badge" style="background:${markerColor}15; color:${markerColor}; border:1px solid ${markerColor}40;">
-            ขนาด ${size} • ${school.cluster}
-          </span>
+          <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px; align-items: center;">
+            <span class="school-popup-badge" style="background:${markerColor}15; color:${markerColor}; border:1px solid ${markerColor}40;">
+              ขนาด ${size} • ${school.cluster}
+            </span>
+            ${projBadge}
+          </div>
           <div class="school-popup-grid">
             <div><strong>นักเรียนรวม:</strong> ${total69_2.toLocaleString()} คน</div>
             <div><strong>ห้องเรียน:</strong> ${rooms69_2} ห้อง (${density}/ห้อง)</div>
@@ -139,7 +158,8 @@
             <div><strong>ม.ปลาย:</strong> ${mPlai.toLocaleString()} คน</div>
             <div style="grid-column: span 2;"><strong>งบประมาณรายหัวจำลอง:</strong> ${(grant / 1e6).toFixed(2)} ล้านบาท</div>
           </div>
-          <button class="school-popup-btn" onclick="window.openSchoolDetailModal && window.openSchoolDetailModal('${school.id}')">
+          ${contactRow}
+          <button class="school-popup-btn" style="margin-top: 8px;" onclick="window.openSchoolDetailModal && window.openSchoolDetailModal('${school.id}')">
             🔍 เปิดแฟ้มประวัติ 360° (Dossier)
           </button>
         </div>
@@ -1276,9 +1296,10 @@
     // Add 45 Schools
     if (typeof DASHBOARD_DATA !== 'undefined') {
       DASHBOARD_DATA.forEach(s => {
+        const extra = [s.tel ? `โทร ${s.tel}` : '', s.tambon ? `ต.${s.tambon}` : '', s.project].filter(Boolean).join(' • ');
         searchIndex.push({
           title: s.name,
-          desc: `${s.cluster || ''} • นักเรียน ${s.y69_2?.total?.total || 0} คน`,
+          desc: `${s.cluster || ''} • นักเรียน ${s.y69_2?.total?.total || 0} คน ${extra ? '• ' + extra : ''}`,
           tag: 'โรงเรียน',
           targetId: 'tableSection',
           action: () => {
@@ -1763,7 +1784,10 @@
         const total = s.y69_2?.total?.total || 0;
         const rooms = s.y69_2?.total?.rooms || 0;
         const diff = total - (s.y69_1?.total?.total || 0);
-        summary += `${idx+1}. ${s.name} | อ.${s.amphoe} | ${s.cluster} | นักเรียน ${total} คน | ${rooms} ห้อง | เทอมล่าสุด ${diff >= 0 ? '+' : ''}${diff} คน\n`;
+        const proj = s.project ? ` [โครงการ: ${s.project}]` : '';
+        const dist = s.distanceKm ? ` [ห่างเขต ${s.distanceKm} กม.]` : '';
+        const tel = s.tel ? ` [โทร ${s.tel}]` : '';
+        summary += `${idx+1}. ${s.name} | ต.${s.tambon || ''} อ.${s.amphoe} | ${s.cluster} | นักเรียน ${total} คน | ${rooms} ห้อง | เทอมล่าสุด ${diff >= 0 ? '+' : ''}${diff} คน${dist}${proj}${tel}\n`;
       });
       return summary;
     }
