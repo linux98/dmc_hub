@@ -220,6 +220,17 @@
               <span>เรดาร์เตือนภัย 4D</span>
             </a>
           </li>
+          <li class="nav-item" id="menuRoutePlanner">
+            <a href="#" title="วางแผนเส้นทางตรวจเยี่ยมสถานศึกษา (Executive Route Planner)">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+                </svg>
+              </span>
+              <span>เส้นทางตรวจเยี่ยม</span>
+            </a>
+          </li>
           <li class="nav-section-title">วิเคราะห์ 5 รอบเวลา (Big Data)</li>
           <li class="nav-item" id="menuLongitudinal">
             <a href="#" title="ไทม์ไลน์ 5 จุดเวลา">
@@ -1053,10 +1064,14 @@
               วิเคราะห์พิกัดที่ตั้ง ๔๕ สถานศึกษา รัศมีการให้บริการทางการศึกษา ๕ กม. / ๑๐ กม. และการกระจายตัวตาม ๘ สหวิทยาเขต
             </p>
           </div>
-          <div style="display: flex; gap: 8px; align-items: center;">
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <button id="btnToggleRoutePlanner" class="btn btn-secondary" style="font-size: 13px; padding: 6px 14px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; font-weight: 600;" title="เปิด/ปิดระบบวางแผนเส้นทางตรวจเยี่ยมโรงเรียนอัจฉริยะ">
+              <span>🚗</span>
+              <span>เส้นทางตรวจเยี่ยม (Route Planner)</span>
+            </button>
             <button id="btnToggleSynergyNetwork" class="btn btn-secondary" style="font-size: 13px; padding: 6px 14px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; font-weight: 600;" title="เปิด/ปิดเส้นโครงข่ายโรงเรียนพี่เลี้ยงคู่พัฒนา">
               <span>🔗</span>
-              <span>โครงข่ายโรงเรียนคู่พัฒนา (Synergy Network)</span>
+              <span>โครงข่ายคู่พัฒนา</span>
             </button>
             <button id="btnResetMapView" class="btn btn-secondary" style="font-size: 13px; padding: 6px 12px; border-radius: 8px; cursor: pointer;">
               🔄 รีเซ็ตมุมมอง
@@ -1102,6 +1117,148 @@
 
         <!-- Leaflet Map Container -->
         <div id="schoolGisMap" class="gis-map-container"></div>
+
+        <!-- Executive Inspection Route Planner Drawer / Control Suite -->
+        <div id="routePlannerPanel" class="route-planner-panel" style="display: none; background: #ffffff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 18px 20px; box-shadow: 0 10px 15px -3px rgba(30, 58, 138, 0.08); margin-top: 5px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 14px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: #eff6ff; color: #1e40af; font-size: 16px;">🚗</span>
+                <h4 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: #1e3a8a;">
+                  ระบบวางแผนเส้นทางตรวจเยี่ยมโรงเรียนอัจฉริยะ (Executive Inspection Route Planner)
+                </h4>
+                <span class="badge" style="background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; font-size: 11px; padding: 2px 8px; border-radius: 9999px;">
+                  Optimal Multi-Stop Routing
+                </span>
+              </div>
+              <p style="margin: 4px 0 0 40px; color: #64748b; font-size: 12.5px;">
+                วางแผนกำหนดการและเส้นทางตรวจราชการ คัดสรรกลุ่มโรงเรียนเป้าหมาย คำนวณระยะทางและเวลาเดินทางอัตโนมัติ
+              </p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button id="btnCloseRoutePlanner" class="btn btn-secondary" style="font-size: 12px; padding: 5px 10px; border-radius: 6px; cursor: pointer;">✕ ซ่อนแผงวางแผน</button>
+            </div>
+          </div>
+
+          <!-- Route Configuration & Filter Ribbon -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-bottom: 16px;">
+            <!-- Group Presets -->
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+              <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 8px;">
+                🎯 1. เลือกกลุ่มเป้าหมายตรวจเยี่ยม (Preset Selection):
+              </label>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                <button class="route-preset-btn active" data-preset="cluster">ตามสหวิทยาเขต</button>
+                <button class="route-preset-btn" data-preset="quality">1 อำเภอ 1 โรงเรียนคุณภาพ (18)</button>
+                <button class="route-preset-btn" data-preset="royal">โครงการพระราชดำริ (7)</button>
+                <button class="route-preset-btn" data-preset="small">กลุ่มขนาดเล็ก & เฝ้าระวัง (S)</button>
+                <button class="route-preset-btn" data-preset="custom">เลือกเองอิสระ (Custom)</button>
+              </div>
+              <div id="routeClusterSelectWrap" style="margin-top: 10px;">
+                <select id="routeClusterSelect" style="width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 12.5px; font-family: 'Sarabun';">
+                  <option value="สหวิทยาเขตสกลราช">สหวิทยาเขตสกลราช (5 ร.ร. • อ.เมือง, อ.ภูพาน)</option>
+                  <option value="สหวิทยาเขตพระธาตุนารายณ์เจงเวง">สหวิทยาเขตพระธาตุนารายณ์เจงเวง (6 ร.ร. • อ.เมือง, อ.กุสุมาลย์, อ.โพนนาแก้ว)</option>
+                  <option value="สหวิทยาเขตเบญจพัฒน์">สหวิทยาเขตเบญจพัฒน์ (5 ร.ร. • อ.เมือง, อ.เต่างอย)</option>
+                  <option value="สหวิทยาเขตดำรงธรรม">สหวิทยาเขตดำรงธรรม (6 ร.ร. • อ.พรรณานิคม, อ.พังโคน)</option>
+                  <option value="สหวิทยาเขตลุ่มน้ำอูน">สหวิทยาเขตลุ่มน้ำอูน (6 ร.ร. • อ.วาริชภูมิ, อ.นิคมน้ำอูน)</option>
+                  <option value="สหวิทยาเขตสว่างศึกษา">สหวิทยาเขตสว่างศึกษา (6 ร.ร. • อ.สว่างแดนดิน, อ.ส่องดาว)</option>
+                  <option value="สหวิทยาเขตเทพทวีพัฒน์">สหวิทยาเขตเทพทวีพัฒน์ (6 ร.ร. • อ.วานรนิวาส, อ.คำตากล้า)</option>
+                  <option value="สหวิทยาเขตเบญจรักษ์">สหวิทยาเขตเบญจรักษ์ (5 ร.ร. • อ.อากาศอำนวย, อ.บ้านม่วง)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Trip Settings -->
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+              <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 8px;">
+                ⚙️ 2. เงื่อนไขการเดินทาง (Trip Parameters):
+              </label>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                  <span style="font-size: 11.5px; color: #64748b; display: block; margin-bottom: 4px;">เวลาเริ่มออกเดินทาง:</span>
+                  <input type="time" id="routeStartTime" value="08:30" style="width: 100%; padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12.5px;">
+                </div>
+                <div>
+                  <span style="font-size: 11.5px; color: #64748b; display: block; margin-bottom: 4px;">เวลาตรวจเยี่ยม/แห่ง:</span>
+                  <select id="routeDurationPerSchool" style="width: 100%; padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12.5px; font-family: 'Sarabun';">
+                    <option value="45">45 นาที (ตรวจเยี่ยมด่วน)</option>
+                    <option value="60">60 นาที (1 ชั่วโมง)</option>
+                    <option value="90" selected>90 นาที (1.5 ชม. มาตรฐาน)</option>
+                    <option value="120">120 นาที (2 ชม. เชิงลึก)</option>
+                  </select>
+                </div>
+              </div>
+              <div style="margin-top: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #334155; cursor: pointer;">
+                  <input type="checkbox" id="routeRoundtripCheckbox" checked style="cursor: pointer;">
+                  <span>เดินทางวนกลับ สพท. (Roundtrip)</span>
+                </label>
+                <button id="btnCalculateRoute" class="btn btn-primary" style="font-size: 12.5px; padding: 6px 14px; border-radius: 6px; font-weight: 600; background: #1e40af; color: #ffffff; border: none; cursor: pointer;">
+                  ⚡ คำนวณเส้นทางเหมาะสมที่สุด
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- School Selection Chips (Visible for Custom Selection) -->
+          <div id="routeCustomSchoolSelector" style="display: none; background: #f1f5f9; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 12px; font-weight: 700; color: #334155;">ติ๊กเลือกโรงเรียนเป้าหมายที่ต้องการตรวจเยี่ยม:</span>
+              <div style="display: flex; gap: 8px;">
+                <button id="btnSelectAllRouteSchools" style="font-size: 11px; padding: 2px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: #ffffff; cursor: pointer;">เลือกทั้งหมด</button>
+                <button id="btnClearAllRouteSchools" style="font-size: 11px; padding: 2px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: #ffffff; cursor: pointer;">ล้างตัวเลือก</button>
+              </div>
+            </div>
+            <div id="routeSchoolCheckboxContainer" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 140px; overflow-y: auto; padding: 4px 0;"></div>
+          </div>
+
+          <!-- Route Results Area -->
+          <div id="routeResultsArea">
+            <!-- Route KPI Strip -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 14px;">
+              <div class="kpi-card" style="padding: 10px 14px; background: #eff6ff; border-color: #bfdbfe;">
+                <span style="font-size: 11.5px; color: #1e40af; font-weight: 600;">🚗 ระยะทางเดินทางรวม</span>
+                <span id="routeTotalDist" style="font-size: 20px; font-weight: 700; color: #1e3a8a; margin-top: 2px;">-- กม.</span>
+                <span style="font-size: 10.5px; color: #64748b;">จุดเริ่มต้น สพม.สกลนคร</span>
+              </div>
+              <div class="kpi-card" style="padding: 10px 14px; background: #f0fdf4; border-color: #bbf7d0;">
+                <span style="font-size: 11.5px; color: #166534; font-weight: 600;">⏱️ เวลาเดินทางบนถนน</span>
+                <span id="routeTotalTravelTime" style="font-size: 20px; font-weight: 700; color: #166534; margin-top: 2px;">-- นาที</span>
+                <span style="font-size: 10.5px; color: #64748b;">ความเร็วเฉลี่ย 60 กม./ชม.</span>
+              </div>
+              <div class="kpi-card" style="padding: 10px 14px; background: #fefce8; border-color: #fde047;">
+                <span style="font-size: 11.5px; color: #854d0e; font-weight: 600;">🏫 สถานศึกษาที่ตรวจเยี่ยม</span>
+                <span id="routeTotalStops" style="font-size: 20px; font-weight: 700; color: #854d0e; margin-top: 2px;">0 แห่ง</span>
+                <span style="font-size: 10.5px; color: #64748b;">จุดตรวจราชการตามลำดับ</span>
+              </div>
+              <div class="kpi-card" style="padding: 10px 14px; background: #faf5ff; border-color: #e9d5ff;">
+                <span style="font-size: 11.5px; color: #6b21a8; font-weight: 600;">🏁 เวลาสิ้นสุดภารกิจ</span>
+                <span id="routeEndTime" style="font-size: 20px; font-weight: 700; color: #6b21a8; margin-top: 2px;">--:-- น.</span>
+                <span style="font-size: 10.5px; color: #64748b;">รวมเวลาตรวจและพักกลางวัน</span>
+              </div>
+            </div>
+
+            <!-- Action Bar -->
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
+              <span style="font-size: 12.5px; font-weight: 700; color: #1e3a8a;">
+                📋 ลำดับกำหนดการและประเด็นตรวจเยี่ยม (Optimal Itinerary & Focus Points):
+              </span>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <button id="btnPrintRouteDossier" class="btn btn-secondary" style="font-size: 12px; padding: 5px 12px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; background: #f8fafc; border: 1px solid #cbd5e1; cursor: pointer;">
+                  <span>🖨️</span>
+                  <span>พิมพ์แผนปฏิบัติภารกิจ (Print Dossier)</span>
+                </button>
+                <a id="btnOpenGoogleMapsRoute" href="#" target="_blank" rel="noopener" class="btn btn-secondary" style="font-size: 12px; padding: 5px 12px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; text-decoration: none; font-weight: 600;">
+                  <span>🧭</span>
+                  <span>เปิดนำทางบน Google Maps</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Route Timeline Cards -->
+            <div id="routeTimelineContainer" class="route-timeline-container" style="display: flex; flex-direction: column; gap: 10px;"></div>
+          </div>
+        </div>
       </section>
 
 

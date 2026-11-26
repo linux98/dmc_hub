@@ -25,6 +25,7 @@
     initGisSynergyModule();
     initAiCopilotModule();
     initSidebarNavigation();
+    initInspectionRoutePlanner();
   });
 
   /* ==========================================================================
@@ -2051,6 +2052,7 @@ ${grounding}`;
   function initSidebarNavigation() {
     const navItems = [
       { id: 'menuGisMap', targetId: 'gisMapSection' },
+      { id: 'menuRoutePlanner', targetId: 'gisMapSection', action: () => window.openRoutePlannerDrawer && window.openRoutePlannerDrawer() },
       { id: 'menuSandbox', targetId: 'policySandboxSection' },
       { id: 'menuEarlyWarning', targetId: 'earlyWarningSection' },
       { id: 'menuLongitudinal', targetId: 'longitudinalSection' },
@@ -2069,6 +2071,7 @@ ${grounding}`;
           if (target) {
             target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             // In case map was hidden or resized, invalidate Leaflet size
+            if (item.action) item.action();
             if (item.targetId === 'gisMapSection' && gisMap) {
               setTimeout(() => gisMap.invalidateSize(), 300);
             }
@@ -2076,6 +2079,709 @@ ${grounding}`;
         });
       }
     });
+  }
+
+
+  /* ==========================================================================
+     MODULE: EXECUTIVE INSPECTION ROUTE PLANNER (ระบบวางแผนเส้นทางตรวจเยี่ยม)
+     ========================================================================== */
+  const SEC_SAKON_OFFICE = {
+    name: "สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาสกลนคร (สพม.สกลนคร)",
+    shortName: "สพม.สกลนคร",
+    lat: 17.1598,
+    lng: 104.1448,
+    address: "ศูนย์ราชการจังหวัดสกลนคร ถนนศูนย์ราชการ ต.ธาตุเชิงชุม อ.เมืองสกลนคร",
+    tel: "042711031"
+  };
+
+  let routePolylineLayer = null;
+  let routeMarkerLayers = [];
+  let currentOptimalRoute = null;
+
+  function calcRoadDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return (R * c) * 1.22; // 1.22 winding road multiplier for Isan highways
+  }
+
+  function minutesToTimeStr(totalMins) {
+    const h = Math.floor(totalMins / 60) % 24;
+    const m = Math.floor(totalMins % 60);
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')} น.`;
+  }
+
+  function timeStrToMinutes(timeStr) {
+    const parts = (timeStr || '08:30').split(':');
+    return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+  }
+
+  function generateSchoolInspectionFocus(school) {
+    const total = school.y69_2 ? school.y69_2.total.total : 0;
+    const prev = school.y69_1 ? school.y69_1.total.total : 0;
+    const diff = total - prev;
+    const size = getSchoolSize(total);
+    const points = [];
+
+    if (school.project && school.project.includes('1 อำเภอ 1 โรงเรียนคุณภาพ')) {
+      points.push('🏅 ติดตามความพร้อมห้องเรียนอัจฉริยะ โครงสร้างพื้นฐาน และการเป็นศูนย์กลางวิชาการระดับอำเภอ');
+    }
+    if (school.project && school.project.includes('พระราชดำริ')) {
+      points.push('👑 ตรวจเยี่ยมโครงการอันเนื่องมาจากพระราชดำริ การอนุรักษ์พันธุกรรมพืช และทักษะอาชีพนักเรียน');
+    }
+    if (size === 'S') {
+      points.push(`⚠️ โรงเรียนขนาดเล็ก (${total} คน): ตรวจสอบแนวทางการจัดการเรียนรวม/แชร์ทรัพยากรครูในสหวิทยาเขต`);
+    } else if (size === 'XL') {
+      points.push(`🏢 โรงเรียนขนาดใหญ่พิเศษ (${total.toLocaleString()} คน): ติดตามการบริหารอัตรากำลังครูและงบประมาณรายหัว`);
+    }
+    if (diff < -15) {
+      points.push(`📉 นักเรียนลดลงสุทธิ ${Math.abs(diff)} คน: ติดตามมาตรการ Zero Dropout และการป้องกันเด็กหลุดจากระบบ`);
+    } else if (diff > 15) {
+      points.push(`📈 นักเรียนเพิ่มขึ้น +${diff} คน: นิเทศการบริหารจัดการห้องเรียนและความเพียงพอของสื่อการสอน`);
+    }
+    if (points.length === 0) {
+      points.push('📌 นิเทศติดตามนโยบาย "เรียนดี มีความสุข" และตรวจเยี่ยมสภาพแวดล้อมความปลอดภัยในสถานศึกษา');
+    }
+    return points;
+  }
+
+  function solveOptimalRoute(selectedSchools, isRoundtrip) {
+    if (!selectedSchools || selectedSchools.length === 0) return null;
+
+    const coordsMap = typeof SCHOOL_COORDINATES !== 'undefined' ? SCHOOL_COORDINATES : {};
+    
+    // Attach coordinates
+    const validSchools = selectedSchools.map(s => {
+      const c = coordsMap[s.name] || coordsMap[s.shortName];
+      return { ...s, coords: c };
+    }).filter(s => !!s.coords);
+
+    if (validSchools.length === 0) return null;
+
+    // Nearest Neighbor TSP starting from SEC_SAKON_OFFICE
+    let unvisited = [...validSchools];
+    let orderedStops = [];
+    let currentPos = { lat: SEC_SAKON_OFFICE.lat, lng: SEC_SAKON_OFFICE.lng, name: SEC_SAKON_OFFICE.name };
+
+    while (unvisited.length > 0) {
+      let nearestIdx = 0;
+      let minDistance = Infinity;
+
+      for (let i = 0; i < unvisited.length; i++) {
+        const dist = calcRoadDistance(currentPos.lat, currentPos.lng, unvisited[i].coords.lat, unvisited[i].coords.lng);
+        if (dist < minDistance) {
+          minDistance = dist;
+          nearestIdx = i;
+        }
+      }
+
+      const nextSchool = unvisited.splice(nearestIdx, 1)[0];
+      const legDist = minDistance;
+      const legTravelMins = Math.max(5, Math.round(legDist / 60 * 60) + 3);
+
+      orderedStops.push({
+        school: nextSchool,
+        legDistanceKm: Math.round(legDist * 10) / 10,
+        legTravelMins: legTravelMins
+      });
+
+      currentPos = { lat: nextSchool.coords.lat, lng: nextSchool.coords.lng, name: nextSchool.name };
+    }
+
+    // Optional return leg
+    let returnLeg = null;
+    if (isRoundtrip) {
+      const retDist = calcRoadDistance(currentPos.lat, currentPos.lng, SEC_SAKON_OFFICE.lat, SEC_SAKON_OFFICE.lng);
+      returnLeg = {
+        legDistanceKm: Math.round(retDist * 10) / 10,
+        legTravelMins: Math.max(5, Math.round(retDist / 60 * 60) + 3)
+      };
+    }
+
+    return {
+      stops: orderedStops,
+      returnLeg: returnLeg,
+      isRoundtrip: isRoundtrip
+    };
+  }
+
+  function initInspectionRoutePlanner() {
+    const btnToggle = document.getElementById('btnToggleRoutePlanner');
+    const panel = document.getElementById('routePlannerPanel');
+    const btnClose = document.getElementById('btnCloseRoutePlanner');
+    if (!btnToggle || !panel) return;
+
+    let activePreset = 'cluster';
+
+    // Populate custom checkbox container with all 45 schools
+    const checkboxContainer = document.getElementById('routeSchoolCheckboxContainer');
+    if (checkboxContainer && typeof DASHBOARD_DATA !== 'undefined') {
+      checkboxContainer.innerHTML = '';
+      DASHBOARD_DATA.forEach(s => {
+        const chip = document.createElement('label');
+        chip.className = 'route-school-chip';
+        chip.innerHTML = `
+          <input type="checkbox" value="${s.name}" data-school-id="${s.id}" style="cursor: pointer;">
+          <span>${s.name} (${s.amphoe})</span>
+        `;
+        const cb = chip.querySelector('input');
+        cb.addEventListener('change', () => {
+          chip.classList.toggle('checked', cb.checked);
+        });
+        checkboxContainer.appendChild(chip);
+      });
+    }
+
+    // Toggle panel
+    function openRoutePlanner() {
+      panel.style.display = 'block';
+      btnToggle.style.background = '#1e40af';
+      btnToggle.style.color = '#ffffff';
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (gisMap) {
+        setTimeout(() => gisMap.invalidateSize(), 200);
+      }
+      if (!currentOptimalRoute) {
+        runRouteCalculation();
+      }
+    }
+
+    function closeRoutePlanner() {
+      panel.style.display = 'none';
+      btnToggle.style.background = '#eff6ff';
+      btnToggle.style.color = '#1e40af';
+      // Clear route layers from map
+      clearRouteMapLayers();
+    }
+
+    btnToggle.addEventListener('click', () => {
+      if (panel.style.display === 'none' || panel.style.display === '') {
+        openRoutePlanner();
+      } else {
+        closeRoutePlanner();
+      }
+    });
+
+    if (btnClose) {
+      btnClose.addEventListener('click', closeRoutePlanner);
+    }
+
+    window.openRoutePlannerDrawer = openRoutePlanner;
+
+    // Preset selection buttons
+    const presetBtns = document.querySelectorAll('.route-preset-btn');
+    const clusterSelectWrap = document.getElementById('routeClusterSelectWrap');
+    const customSelector = document.getElementById('routeCustomSchoolSelector');
+
+    presetBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        presetBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activePreset = btn.getAttribute('data-preset');
+
+        if (activePreset === 'cluster') {
+          if (clusterSelectWrap) clusterSelectWrap.style.display = 'block';
+          if (customSelector) customSelector.style.display = 'none';
+        } else if (activePreset === 'custom') {
+          if (clusterSelectWrap) clusterSelectWrap.style.display = 'none';
+          if (customSelector) customSelector.style.display = 'block';
+        } else {
+          if (clusterSelectWrap) clusterSelectWrap.style.display = 'none';
+          if (customSelector) customSelector.style.display = 'none';
+        }
+
+        runRouteCalculation();
+      });
+    });
+
+    const routeClusterSelect = document.getElementById('routeClusterSelect');
+    if (routeClusterSelect) {
+      routeClusterSelect.addEventListener('change', () => {
+        if (activePreset === 'cluster') runRouteCalculation();
+      });
+    }
+
+    const btnSelectAll = document.getElementById('btnSelectAllRouteSchools');
+    if (btnSelectAll && checkboxContainer) {
+      btnSelectAll.addEventListener('click', () => {
+        checkboxContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+          cb.checked = true;
+          cb.closest('.route-school-chip').classList.add('checked');
+        });
+        runRouteCalculation();
+      });
+    }
+
+    const btnClearAll = document.getElementById('btnClearAllRouteSchools');
+    if (btnClearAll && checkboxContainer) {
+      btnClearAll.addEventListener('click', () => {
+        checkboxContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+          cb.checked = false;
+          cb.closest('.route-school-chip').classList.remove('checked');
+        });
+        runRouteCalculation();
+      });
+    }
+
+    const btnCalc = document.getElementById('btnCalculateRoute');
+    if (btnCalc) {
+      btnCalc.addEventListener('click', runRouteCalculation);
+    }
+
+    function getSelectedSchoolsForRoute() {
+      if (typeof DASHBOARD_DATA === 'undefined') return [];
+      if (activePreset === 'cluster') {
+        const selectedCluster = routeClusterSelect ? routeClusterSelect.value : 'สหวิทยาเขตสกลราช';
+        return DASHBOARD_DATA.filter(s => s.cluster === selectedCluster);
+      } else if (activePreset === 'quality') {
+        return DASHBOARD_DATA.filter(s => s.project && s.project.includes('1 อำเภอ 1 โรงเรียนคุณภาพ'));
+      } else if (activePreset === 'royal') {
+        return DASHBOARD_DATA.filter(s => s.project && s.project.includes('พระราชดำริ'));
+      } else if (activePreset === 'small') {
+        return DASHBOARD_DATA.filter(s => {
+          const total = s.y69_2 ? s.y69_2.total.total : 0;
+          return total <= 119;
+        });
+      } else if (activePreset === 'custom') {
+        if (!checkboxContainer) return [];
+        const checkedNames = Array.from(checkboxContainer.querySelectorAll('input:checked')).map(cb => cb.value);
+        return DASHBOARD_DATA.filter(s => checkedNames.includes(s.name));
+      }
+      return DASHBOARD_DATA.slice(0, 5);
+    }
+
+    function clearRouteMapLayers() {
+      if (gisMap) {
+        if (routePolylineLayer) {
+          gisMap.removeLayer(routePolylineLayer);
+          routePolylineLayer = null;
+        }
+        routeMarkerLayers.forEach(m => gisMap.removeLayer(m));
+        routeMarkerLayers = [];
+      }
+    }
+
+    function runRouteCalculation() {
+      const selectedSchools = getSelectedSchoolsForRoute();
+      const isRoundtrip = document.getElementById('routeRoundtripCheckbox') ? document.getElementById('routeRoundtripCheckbox').checked : true;
+      const startTimeStr = document.getElementById('routeStartTime') ? document.getElementById('routeStartTime').value : '08:30';
+      const durationMins = document.getElementById('routeDurationPerSchool') ? parseInt(document.getElementById('routeDurationPerSchool').value, 10) : 90;
+
+      const timelineContainer = document.getElementById('routeTimelineContainer');
+      const totalDistEl = document.getElementById('routeTotalDist');
+      const totalTravelTimeEl = document.getElementById('routeTotalTravelTime');
+      const totalStopsEl = document.getElementById('routeTotalStops');
+      const endTimeEl = document.getElementById('routeEndTime');
+
+      if (!selectedSchools || selectedSchools.length === 0) {
+        if (timelineContainer) {
+          timelineContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #64748b; background: #f8fafc; border-radius: 8px;">ยังไม่มีโรงเรียนที่เลือก กรุณาติ๊กเลือกโรงเรียนเป้าหมาย</div>';
+        }
+        clearRouteMapLayers();
+        return;
+      }
+
+      const plan = solveOptimalRoute(selectedSchools, isRoundtrip);
+      if (!plan || plan.stops.length === 0) return;
+      currentOptimalRoute = plan;
+
+      // Calculate totals and timetable
+      let currentMinute = timeStrToMinutes(startTimeStr);
+      let totalDistance = 0;
+      let totalTravelMinutes = 0;
+      let hasTakenLunch = false;
+
+      const timelineItems = [];
+
+      // 1. Departure from Office
+      timelineItems.push({
+        type: 'start',
+        time: minutesToTimeStr(currentMinute),
+        title: SEC_SAKON_OFFICE.name,
+        badge: '🏛️ จุดเริ่มต้น',
+        desc: `ออกเดินทางจากสำนักงานเขตพื้นที่การศึกษา (${SEC_SAKON_OFFICE.address})`,
+        actionHtml: `<a href="tel:${SEC_SAKON_OFFICE.tel}" style="color: #1e40af; background: #e0e7ff; padding: 2px 8px; border-radius: 4px; text-decoration: none; font-size: 11px; font-weight: 600;">📞 โทร: ${SEC_SAKON_OFFICE.tel}</a>`
+      });
+
+      // 2. Each Stop
+      plan.stops.forEach((stop, idx) => {
+        totalDistance += stop.legDistanceKm;
+        totalTravelMinutes += stop.legTravelMins;
+        currentMinute += stop.legTravelMins;
+
+        const arrivalTime = minutesToTimeStr(currentMinute);
+
+        // Check for Lunch Break if crossing 12:00
+        if (!hasTakenLunch && currentMinute >= 700 && currentMinute <= 780) { // between 11:40 and 13:00
+          timelineItems.push({
+            type: 'lunch',
+            time: `${minutesToTimeStr(currentMinute)} - ${minutesToTimeStr(currentMinute + 45)}`,
+            title: '🍱 พักรับประทานอาหารกลางวัน (45 นาที)',
+            badge: 'พักกลางวัน',
+            desc: `พักรับประทานอาหารกลางวันในพื้นที่ อ.${stop.school.amphoe} ก่อนดำเนินการตรวจราชการต่อ`,
+            actionHtml: ''
+          });
+          currentMinute += 45;
+          hasTakenLunch = true;
+        }
+
+        const departureTime = minutesToTimeStr(currentMinute + durationMins);
+        const focusPoints = generateSchoolInspectionFocus(stop.school);
+        const totalStd = stop.school.y69_2 ? stop.school.y69_2.total.total : 0;
+        const rooms = stop.school.y69_2 ? stop.school.y69_2.total.rooms : 0;
+        const size = getSchoolSize(totalStd);
+
+        timelineItems.push({
+          type: 'stop',
+          stopIndex: idx + 1,
+          arrivalTime: arrivalTime,
+          departureTime: departureTime,
+          school: stop.school,
+          legDistance: stop.legDistanceKm,
+          legTravelMins: stop.legTravelMins,
+          totalStd: totalStd,
+          rooms: rooms,
+          size: size,
+          focusPoints: focusPoints
+        });
+
+        currentMinute += durationMins;
+      });
+
+      // 3. Return Leg
+      if (plan.returnLeg) {
+        totalDistance += plan.returnLeg.legDistanceKm;
+        totalTravelMinutes += plan.returnLeg.legTravelMins;
+        currentMinute += plan.returnLeg.legTravelMins;
+
+        timelineItems.push({
+          type: 'end',
+          time: minutesToTimeStr(currentMinute),
+          title: `กลับถึง ${SEC_SAKON_OFFICE.name}`,
+          badge: '🏁 สิ้นสุดภารกิจ',
+          desc: `เดินทางกลับถึง สพท. (ระยะทางช่วงสุดท้าย ${plan.returnLeg.legDistanceKm} กม. • ใช้เวลาเดินทาง ${plan.returnLeg.legTravelMins} นาที)`,
+          actionHtml: ''
+        });
+      }
+
+      // Update KPI displays
+      if (totalDistEl) totalDistEl.textContent = `${Math.round(totalDistance * 10) / 10} กม.`;
+      if (totalTravelTimeEl) totalTravelTimeEl.textContent = `${Math.floor(totalTravelMinutes / 60)} ชม. ${totalTravelMinutes % 60} นาที`;
+      if (totalStopsEl) totalStopsEl.textContent = `${plan.stops.length} แห่ง`;
+      if (endTimeEl) endTimeEl.textContent = minutesToTimeStr(currentMinute);
+
+      // Render Timeline Cards
+      if (timelineContainer) {
+        timelineContainer.innerHTML = '';
+        timelineItems.forEach(item => {
+          if (item.type === 'start') {
+            const card = document.createElement('div');
+            card.className = 'route-stop-card start-hub';
+            card.innerHTML = `
+              <div class="route-stop-number start">🏛️</div>
+              <div style="flex: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 6px;">
+                  <div>
+                    <h5 style="margin: 0; font-size: 14px; font-weight: 700; color: #1e3a8a;">${item.title}</h5>
+                    <p style="margin: 3px 0 0 0; font-size: 12px; color: #64748b;">${item.desc}</p>
+                  </div>
+                  <span style="font-size: 13px; font-weight: 700; color: #1e3a8a; background: #e0e7ff; padding: 2px 8px; border-radius: 4px;">⏰ ${item.time}</span>
+                </div>
+                <div style="margin-top: 6px;">${item.actionHtml}</div>
+              </div>
+            `;
+            timelineContainer.appendChild(card);
+          } else if (item.type === 'lunch') {
+            const card = document.createElement('div');
+            card.className = 'route-stop-card lunch-break';
+            card.innerHTML = `
+              <div class="route-stop-number lunch">🍱</div>
+              <div style="flex: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 6px;">
+                  <h5 style="margin: 0; font-size: 13.5px; font-weight: 700; color: #92400e;">${item.title}</h5>
+                  <span style="font-size: 12px; font-weight: 700; color: #92400e; background: #fef3c7; padding: 2px 8px; border-radius: 4px;">⏰ ${item.time}</span>
+                </div>
+                <p style="margin: 3px 0 0 0; font-size: 12px; color: #78350f;">${item.desc}</p>
+              </div>
+            `;
+            timelineContainer.appendChild(card);
+          } else if (item.type === 'stop') {
+            // Leg travel banner
+            const legDiv = document.createElement('div');
+            legDiv.className = 'route-leg-divider';
+            legDiv.innerHTML = `🚗 เดินทาง ${item.legDistance} กม. (~${item.legTravelMins} นาที)`;
+            timelineContainer.appendChild(legDiv);
+
+            const s = item.school;
+            const card = document.createElement('div');
+            card.className = 'route-stop-card';
+            card.innerHTML = `
+              <div class="route-stop-number">${item.stopIndex}</div>
+              <div style="flex: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px;">
+                  <div>
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                      <h5 style="margin: 0; font-size: 14.5px; font-weight: 700; color: #1e3a8a;">${s.name}</h5>
+                      <span class="school-popup-badge" style="background: rgba(30,58,138,0.08); color: #1e3a8a; border: 1px solid rgba(30,58,138,0.25); font-size: 10.5px; padding: 1px 6px; border-radius: 4px;">
+                        ขนาด ${item.size} • ${s.cluster}
+                      </span>
+                      ${s.project ? `<span style="background: #fef3c7; color: #92400e; font-size: 10px; padding: 1px 6px; border-radius: 4px; font-weight: 600;">🏅 ${s.project}</span>` : ''}
+                    </div>
+                    <div style="margin-top: 4px; font-size: 12px; color: #475569;">
+                      📍 ต.${s.tambon || ''} อ.${s.amphoe} (ห่าง สพท. ${s.distanceKm || '--'} กม.) • <strong>นักเรียน ${item.totalStd.toLocaleString()} คน</strong> (${item.rooms} ห้อง)
+                    </div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-size: 13px; font-weight: 700; color: #047857; background: #d1fae5; padding: 2px 8px; border-radius: 4px; display: inline-block;">
+                      ⏰ ถึง: ${item.arrivalTime} — ออก: ${item.departureTime}
+                    </div>
+                    <div style="font-size: 10.5px; color: #64748b; margin-top: 2px;">(เวลาตรวจเยี่ยม ${durationMins} นาที)</div>
+                  </div>
+                </div>
+
+                <!-- Focus Points List -->
+                <div style="margin-top: 10px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 6px; padding: 8px 12px;">
+                  <span style="font-size: 11px; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">
+                    🎯 ประเด็นตรวจราชการเน้นย้ำ (Key Mission Talking Points):
+                  </span>
+                  <ul style="margin: 0; padding-left: 18px; font-size: 11.5px; color: #334155; line-height: 1.5;">
+                    ${item.focusPoints.map(p => `<li>${p}</li>`).join('')}
+                  </ul>
+                </div>
+
+                <!-- Contact & Dossier Actions -->
+                <div style="display: flex; gap: 8px; margin-top: 8px; align-items: center; flex-wrap: wrap;">
+                  ${s.tel ? `<a href="tel:${s.tel}" style="background: #e0e7ff; color: #1e40af; padding: 3px 8px; border-radius: 4px; text-decoration: none; font-size: 11px; font-weight: 600;">📞 โทร: ${s.tel}</a>` : ''}
+                  ${s.website ? `<a href="${s.website}" target="_blank" rel="noopener" style="background: #d1fae5; color: #065f46; padding: 3px 8px; border-radius: 4px; text-decoration: none; font-size: 11px; font-weight: 600;">🌐 เว็บไซต์โรงเรียน</a>` : ''}
+                  <button class="btn btn-secondary" style="font-size: 11px; padding: 2px 8px; border-radius: 4px; cursor: pointer;" onclick="window.openSchoolDetailModal && window.openSchoolDetailModal('${s.id}')">
+                    🔍 เปิดแฟ้ม 360°
+                  </button>
+                </div>
+              </div>
+            `;
+            timelineContainer.appendChild(card);
+          } else if (item.type === 'end') {
+            const card = document.createElement('div');
+            card.className = 'route-stop-card start-hub';
+            card.innerHTML = `
+              <div class="route-stop-number start">🏁</div>
+              <div style="flex: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 6px;">
+                  <div>
+                    <h5 style="margin: 0; font-size: 14px; font-weight: 700; color: #1e3a8a;">${item.title}</h5>
+                    <p style="margin: 3px 0 0 0; font-size: 12px; color: #64748b;">${item.desc}</p>
+                  </div>
+                  <span style="font-size: 13px; font-weight: 700; color: #1e3a8a; background: #e0e7ff; padding: 2px 8px; border-radius: 4px;">⏰ ${item.time}</span>
+                </div>
+              </div>
+            `;
+            timelineContainer.appendChild(card);
+          }
+        });
+      }
+
+      // Draw Route on Leaflet Map
+      if (gisMap) {
+        clearRouteMapLayers();
+
+        const latlngs = [[SEC_SAKON_OFFICE.lat, SEC_SAKON_OFFICE.lng]];
+
+        // Start Office Marker
+        const officeIcon = L.divIcon({
+          className: 'custom-route-marker-wrap',
+          html: '<div class="leaflet-route-marker start" title="สพม.สกลนคร">🏛️</div>',
+          iconSize: [32, 32],
+          iconAnchor: [16, 16]
+        });
+        const officeMarker = L.marker([SEC_SAKON_OFFICE.lat, SEC_SAKON_OFFICE.lng], { icon: officeIcon })
+          .bindPopup(`<strong>${SEC_SAKON_OFFICE.name}</strong><br>จุดเริ่มต้นและศูนย์สั่งการ`);
+        officeMarker.addTo(gisMap);
+        routeMarkerLayers.push(officeMarker);
+
+        // Stops Markers
+        plan.stops.forEach((stop, idx) => {
+          const lat = stop.school.coords.lat;
+          const lng = stop.school.coords.lng;
+          latlngs.push([lat, lng]);
+
+          const stopIcon = L.divIcon({
+            className: 'custom-route-marker-wrap',
+            html: `<div class="leaflet-route-marker">${idx + 1}</div>`,
+            iconSize: [32, 32],
+            iconAnchor: [16, 16]
+          });
+          const marker = L.marker([lat, lng], { icon: stopIcon })
+            .bindPopup(`<strong>จุดที่ ${idx + 1}: ${stop.school.name}</strong><br>ห่าง สพท. ${stop.school.distanceKm || '--'} กม.<br>นักเรียน ${stop.school.y69_2 ? stop.school.y69_2.total.total : 0} คน`);
+          marker.addTo(gisMap);
+          routeMarkerLayers.push(marker);
+        });
+
+        // If Roundtrip, add Office latlng at end
+        if (plan.returnLeg) {
+          latlngs.push([SEC_SAKON_OFFICE.lat, SEC_SAKON_OFFICE.lng]);
+        }
+
+        // Draw Polyline
+        routePolylineLayer = L.polyline(latlngs, {
+          color: '#1e40af',
+          weight: 4.5,
+          opacity: 0.85,
+          dashArray: '8, 8',
+          lineCap: 'round',
+          lineJoin: 'round'
+        }).addTo(gisMap);
+
+        // Fit bounds to polyline
+        try {
+          gisMap.fitBounds(routePolylineLayer.getBounds(), { padding: [50, 50], maxZoom: 13 });
+        } catch (e) {
+          console.warn("Could not fit bounds to route:", e);
+        }
+      }
+
+      // Update Google Maps Live Navigation URL
+      const gmapsLink = document.getElementById('btnOpenGoogleMapsRoute');
+      if (gmapsLink) {
+        const waypoints = [
+          `${SEC_SAKON_OFFICE.lat},${SEC_SAKON_OFFICE.lng}`,
+          ...plan.stops.map(s => `${s.school.coords.lat},${s.school.coords.lng}`)
+        ];
+        if (plan.returnLeg) {
+          waypoints.push(`${SEC_SAKON_OFFICE.lat},${SEC_SAKON_OFFICE.lng}`);
+        }
+        gmapsLink.href = `https://www.google.com/maps/dir/${waypoints.join('/')}`;
+      }
+    }
+
+    // Print Route Dossier Action
+    const btnPrint = document.getElementById('btnPrintRouteDossier');
+    if (btnPrint) {
+      btnPrint.addEventListener('click', () => {
+        if (!currentOptimalRoute) {
+          alert('กรุณาคำนวณเส้นทางก่อนสั่งพิมพ์');
+          return;
+        }
+        printExecutiveInspectionDossier(currentOptimalRoute);
+      });
+    }
+  }
+
+  function printExecutiveInspectionDossier(plan) {
+    const startTimeStr = document.getElementById('routeStartTime') ? document.getElementById('routeStartTime').value : '08:30';
+    const durationMins = document.getElementById('routeDurationPerSchool') ? parseInt(document.getElementById('routeDurationPerSchool').value, 10) : 90;
+
+    let currentMinute = timeStrToMinutes(startTimeStr);
+    let rowsHtml = '';
+    let totalDist = 0;
+
+    plan.stops.forEach((stop, idx) => {
+      totalDist += stop.legDistanceKm;
+      currentMinute += stop.legTravelMins;
+      const arr = minutesToTimeStr(currentMinute);
+      const dep = minutesToTimeStr(currentMinute + durationMins);
+      currentMinute += durationMins;
+      const s = stop.school;
+      const totalStd = s.y69_2 ? s.y69_2.total.total : 0;
+      const rooms = s.y69_2 ? s.y69_2.total.rooms : 0;
+      const focus = generateSchoolInspectionFocus(s).map(f => `• ${f}`).join('<br>');
+
+      rowsHtml += `
+        <tr>
+          <td style="text-align: center; font-weight: bold; padding: 8px;">${idx + 1}</td>
+          <td style="padding: 8px;">
+            <strong>${s.name}</strong><br>
+            <span style="font-size: 12px; color: #475569;">ต.${s.tambon || ''} อ.${s.amphoe} (${s.cluster}) • โทร ${s.tel || '-'}</span>
+          </td>
+          <td style="text-align: center; padding: 8px;">${arr} - ${dep}</td>
+          <td style="text-align: center; padding: 8px;">${totalStd.toLocaleString()} คน (${rooms} ห้อง)</td>
+          <td style="padding: 8px; font-size: 12px; line-height: 1.4;">${focus}</td>
+        </tr>
+      `;
+    });
+
+    const printWin = window.open('', '_blank');
+    if (!printWin) {
+      alert('บราวเซอร์บล็อกหน้าต่างป็อปอัป กรุณาอนุญาตป็อปอัปเพื่อสั่งพิมพ์เอกสาร');
+      return;
+    }
+
+    const html = `
+      <!DOCTYPE html>
+      <html lang="th">
+      <head>
+        <meta charset="UTF-8">
+        <title>แผนปฏิบัติภารกิจตรวจราชการและนิเทศติดตามสถานศึกษา - สพม.สกลนคร</title>
+        <style>
+          body { font-family: 'Sarabun', 'TH Sarabun New', sans-serif; padding: 25px; color: #1e293b; line-height: 1.4; }
+          .header { text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 12px; margin-bottom: 20px; }
+          .header h2 { margin: 0; font-size: 20px; color: #1e3a8a; }
+          .header p { margin: 4px 0 0 0; font-size: 14px; color: #475569; }
+          table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
+          th, td { border: 1px solid #cbd5e1; }
+          th { background: #f1f5f9; padding: 8px; text-align: center; font-weight: bold; }
+          .kpi-summary { display: flex; justify-content: space-between; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px 18px; margin-bottom: 15px; }
+          .kpi-item { text-align: center; }
+          .kpi-label { font-size: 12px; color: #1e40af; }
+          .kpi-val { font-size: 18px; font-weight: bold; color: #1e3a8a; }
+          .signature-section { margin-top: 40px; display: flex; justify-content: flex-end; }
+          .sign-box { text-align: center; width: 250px; }
+          @media print {
+            body { padding: 0; }
+            .no-print { display: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h2>แผนปฏิบัติภารกิจตรวจราชการและนิเทศติดตามสถานศึกษา</h2>
+          <p>สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาสกลนคร (สพม.สกลนคร)</p>
+          <p style="font-size: 12.5px; margin-top: 3px;">จุดเริ่มต้น: ศูนย์ราชการจังหวัดสกลนคร • วันที่สั่งพิมพ์: ${new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+        </div>
+
+        <div class="kpi-summary">
+          <div class="kpi-item"><div class="kpi-label">จำนวนโรงเรียนเป้าหมาย</div><div class="kpi-val">${plan.stops.length} แห่ง</div></div>
+          <div class="kpi-item"><div class="kpi-label">ระยะทางรวมประมาณการ</div><div class="kpi-val">${Math.round(totalDist * 10) / 10} กม.</div></div>
+          <div class="kpi-item"><div class="kpi-label">เวลาเริ่มออกเดินทาง</div><div class="kpi-val">${startTimeStr} น.</div></div>
+          <div class="kpi-item"><div class="kpi-label">เวลาตรวจเฉลี่ย/แห่ง</div><div class="kpi-val">${durationMins} นาที</div></div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 45px;">จุดที่</th>
+              <th style="width: 240px;">สถานศึกษาเป้าหมาย</th>
+              <th style="width: 140px;">กำหนดการเวลา</th>
+              <th style="width: 130px;">ข้อมูลพื้นฐาน</th>
+              <th>ประเด็นตรวจราชการเน้นย้ำ</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+
+        <div class="signature-section">
+          <div class="sign-box">
+            <p>ลงชื่อ........................................................</p>
+            <p>(........................................................)</p>
+            <p>ผู้อำนวยการสำนักงานเขตพื้นที่การศึกษามัธยมศึกษาสกลนคร</p>
+          </div>
+        </div>
+
+        <div class="no-print" style="text-align: center; margin-top: 25px;">
+          <button onclick="window.print()" style="padding: 8px 20px; font-size: 14px; background: #1e40af; color: #fff; border: none; border-radius: 6px; cursor: pointer;">🖨️ สั่งพิมพ์เอกสารนี้</button>
+        </div>
+      </body>
+      </html>
+    `;
+
+    printWin.document.open();
+    printWin.document.write(html);
+    printWin.document.close();
   }
 
 })();
