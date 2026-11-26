@@ -95,8 +95,11 @@ document.addEventListener('DOMContentLoaded', () => {
   let forecastChartByGradeInstance = null;
 
   // State variables for Teacher Staffing & Budget (Step 4)
-  let resourceCurrentView = 'staffing'; // 'staffing' or 'budget'
+  let resourceCurrentView = 'package'; // 'package', 'free', 'cct', 'budget'
   let resourceSearchQuery = '';
+  let budgetSimCctRate = 0.30; // 30% default poverty rate
+  let budgetSimMultiplier = 0.0; // 0% default policy multiplier
+  let budgetSimCluster = 'ALL';
   let resourceChartStaffInstance = null;
   let resourceChartBudgetInstance = null;
 
@@ -888,8 +891,8 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTable();
     
     // Add call to new views
-    updateComparison();
-    updateInsightsView();
+    if (typeof updateComparison === 'function') updateComparison();
+    if (typeof updateInsightsView === 'function') updateInsightsView();
     if (typeof updateDistrictView === 'function') updateDistrictView();
     if (typeof updateForecastView === 'function') updateForecastView();
     if (typeof updateResourceView === 'function') updateResourceView();
@@ -1861,7 +1864,86 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- Pairwise School Comparison Functions ---
+    // ==========================================
+  // Pairwise School Comparison Functions (Enhanced Executive Dossier)
+  // ==========================================
+
+  function getSchoolCoords(sch) {
+    if (typeof SCHOOL_COORDINATES !== 'undefined') {
+      if (SCHOOL_COORDINATES[sch.name]) return SCHOOL_COORDINATES[sch.name];
+      const displayName = getSchoolDisplayName(sch);
+      if (SCHOOL_COORDINATES[displayName]) return SCHOOL_COORDINATES[displayName];
+      for (const [k, v] of Object.entries(SCHOOL_COORDINATES)) {
+        if (k.includes(displayName) || displayName.includes(k) || k.includes(sch.name) || sch.name.includes(k)) {
+          return v;
+        }
+      }
+    }
+    return null;
+  }
+
+  function calculateSchoolDistanceKm(c1, c2) {
+    if (!c1 || !c2 || !c1.lat || !c2.lat) return null;
+    const R = 6371; // Earth radius in km
+    const dLat = (c2.lat - c1.lat) * Math.PI / 180;
+    const dLon = (c2.lng - c1.lng) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(c1.lat * Math.PI / 180) * Math.cos(c2.lat * Math.PI / 180) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  function getSchoolHealthScore(sch) {
+    const counts = [
+      sch.y68_1?.total?.total || 0,
+      sch.y68_2?.total?.total || 0,
+      sch.y68_3?.total?.total || 0,
+      sch.y69_1?.total?.total || 0,
+      sch.y69_2?.total?.total || 0
+    ];
+    const mean = counts.reduce((a, b) => a + b, 0) / 5.0;
+    const variance = counts.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / 5.0;
+    const stdDev = Math.sqrt(variance);
+    const cv = mean > 0 ? (stdDev / mean) : 0;
+    const score_stability = Math.max(10.0, Math.min(25.0, 25.0 - (cv * 300.0)));
+
+    const s69_1 = counts[3];
+    const s69_2 = counts[4];
+    const retRate = s69_1 > 0 ? (s69_2 / s69_1 * 100.0) : 100.0;
+    let score_retention = 25.0;
+    if (retRate < 97.0) score_retention = Math.max(8.0, 15.0 - (97.0 - retRate) * 2.0);
+    else if (retRate < 99.0) score_retention = 15.0 + (retRate - 97.0) * 2.5;
+    else if (retRate < 100.0) score_retention = 20.0 + (retRate - 99.0) * 5.0;
+
+    const rooms = sch.y69_2?.total?.rooms || 0;
+    const density = rooms > 0 ? (s69_2 / rooms) : 0;
+    let score_density = 20.0;
+    if (density >= 28.0 && density <= 35.0) score_density = 20.0;
+    else if (density >= 20.0 && density < 28.0) score_density = 16.0;
+    else if (density > 35.0 && density <= 40.0) score_density = 15.0;
+    else score_density = 12.0;
+
+    const diff = s69_2 - counts[0];
+    let score_growth = 12.0;
+    if (diff > 0) score_growth = 15.0;
+    else if (diff === 0) score_growth = 13.0;
+    else if (Math.abs(diff) < 20) score_growth = 11.0;
+    else score_growth = 9.0;
+
+    const size = getSchoolSize(sch);
+    let score_facility = 13.0;
+    if (size === 'XL' || size === 'L') score_facility = 14.5;
+    else if (size === 'M') score_facility = 13.5;
+    else score_facility = 12.0;
+
+    const total = Math.min(100.0, Math.round((score_stability + score_retention + score_density + score_growth + score_facility) * 10) / 10);
+    let grade = 'A+ (ยอดเยี่ยม)';
+    if (total < 75) grade = 'C (เฝ้าระวัง)';
+    else if (total < 85) grade = 'B (มาตรฐาน)';
+    else if (total < 92) grade = 'A (ดีเด่น)';
+    return { score: total, grade };
+  }
 
   function initComparison() {
     const compareSelectorA = document.getElementById('compareSelectorA');
@@ -1906,6 +1988,29 @@ document.addEventListener('DOMContentLoaded', () => {
       updateComparison();
     });
 
+    // Wire Quick Presets Buttons
+    document.querySelectorAll('.btn-compare-preset').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idA = btn.getAttribute('data-a');
+        const idB = btn.getAttribute('data-b');
+        if (idA && idB) {
+          comparisonSchoolA = idA;
+          comparisonSchoolB = idB;
+          compareSelectorA.value = idA;
+          compareSelectorB.value = idB;
+          updateComparison();
+        }
+      });
+    });
+
+    // Wire Export Comparison Excel Button
+    const btnExportExcel = document.getElementById('btnExportCompareExcel');
+    if (btnExportExcel) {
+      btnExportExcel.addEventListener('click', () => {
+        exportComparisonToExcel();
+      });
+    }
+
     updateComparison();
   }
 
@@ -1940,21 +2045,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const nameAEl = document.getElementById('compareNameA');
     nameAEl.textContent = getSchoolDisplayName(schA);
     nameAEl.title = schA.name;
-    document.getElementById('compareSizeBadgeA').textContent = statsA.sizeText;
+    document.getElementById('compareSizeBadgeA').textContent = `ขนาด ${statsA.sizeText}`;
     document.getElementById('compareStd68A').textContent = `${statsA.std1.toLocaleString()} คน`;
     document.getElementById('compareStd69A').textContent = `${statsA.std2.toLocaleString()} คน`;
     
     const badgeA = document.getElementById('compareChangeBadgeA');
     badgeA.classList.remove('positive', 'negative', 'stable');
+    const retRateA = statsA.std1 > 0 ? (statsA.std2 / statsA.std1 * 100) : 100;
     if (statsA.diff > 0) {
       badgeA.classList.add('positive');
-      badgeA.textContent = `↗ +${statsA.diff} คน (+${statsA.change.toFixed(1)}%)`;
+      badgeA.textContent = `↗ +${statsA.diff} คน (${retRateA.toFixed(1)}%)`;
     } else if (statsA.diff < 0) {
       badgeA.classList.add('negative');
-      badgeA.textContent = `▼ ${statsA.diff} คน (${statsA.change.toFixed(1)}%)`;
+      badgeA.textContent = `▼ ${statsA.diff} คน (${retRateA.toFixed(1)}%)`;
     } else {
       badgeA.classList.add('stable');
-      badgeA.textContent = 'คงที่';
+      badgeA.textContent = `คงที่ (${retRateA.toFixed(1)}%)`;
     }
 
     document.getElementById('compareRoomsA').textContent = `${statsA.roomsActive} ห้อง`;
@@ -1964,50 +2070,236 @@ document.addEventListener('DOMContentLoaded', () => {
     const nameBEl = document.getElementById('compareNameB');
     nameBEl.textContent = getSchoolDisplayName(schB);
     nameBEl.title = schB.name;
-    document.getElementById('compareSizeBadgeB').textContent = statsB.sizeText;
+    document.getElementById('compareSizeBadgeB').textContent = `ขนาด ${statsB.sizeText}`;
     document.getElementById('compareStd68B').textContent = `${statsB.std1.toLocaleString()} คน`;
     document.getElementById('compareStd69B').textContent = `${statsB.std2.toLocaleString()} คน`;
 
     const badgeB = document.getElementById('compareChangeBadgeB');
     badgeB.classList.remove('positive', 'negative', 'stable');
+    const retRateB = statsB.std1 > 0 ? (statsB.std2 / statsB.std1 * 100) : 100;
     if (statsB.diff > 0) {
       badgeB.classList.add('positive');
-      badgeB.textContent = `↗ +${statsB.diff} คน (+${statsB.change.toFixed(1)}%)`;
+      badgeB.textContent = `↗ +${statsB.diff} คน (${retRateB.toFixed(1)}%)`;
     } else if (statsB.diff < 0) {
       badgeB.classList.add('negative');
-      badgeB.textContent = `▼ ${statsB.diff} คน (${statsB.change.toFixed(1)}%)`;
+      badgeB.textContent = `▼ ${statsB.diff} คน (${retRateB.toFixed(1)}%)`;
     } else {
       badgeB.classList.add('stable');
-      badgeB.textContent = 'คงที่';
+      badgeB.textContent = `คงที่ (${retRateB.toFixed(1)}%)`;
     }
 
     document.getElementById('compareRoomsB').textContent = `${statsB.roomsActive} ห้อง`;
     document.getElementById('compareRatioB').textContent = `${statsB.ratioActive.toFixed(1)} คน/ห้อง`;
 
+    // Update Scoreboard Header
+    const h2hA = document.getElementById('h2hHeaderA');
+    const h2hB = document.getElementById('h2hHeaderB');
+    if (h2hA) h2hA.textContent = getSchoolDisplayName(schA);
+    if (h2hB) h2hB.textContent = getSchoolDisplayName(schB);
+
+    // Compute Advanced Metrics
+    const pA = schA[targetPeriod] || schA.y69_2;
+    const pB = schB[targetPeriod] || schB.y69_2;
+    const mTonA = pA?.levels?.['มต้น']?.total || 0;
+    const mPlaiA = pA?.levels?.['มปลาย']?.total || 0;
+    const mTonB = pB?.levels?.['มต้น']?.total || 0;
+    const mPlaiB = pB?.levels?.['มปลาย']?.total || 0;
+
+    const pctTonA = statsA.std2 > 0 ? (mTonA / statsA.std2 * 100) : 0;
+    const pctPlaiA = statsA.std2 > 0 ? (mPlaiA / statsA.std2 * 100) : 0;
+    const pctTonB = statsB.std2 > 0 ? (mTonB / statsB.std2 * 100) : 0;
+    const pctPlaiB = statsB.std2 > 0 ? (mPlaiB / statsB.std2 * 100) : 0;
+
+    const grantA = mTonA * 3800 + mPlaiA * 4300;
+    const grantB = mTonB * 3800 + mPlaiB * 4300;
+    const grantPerStdA = statsA.std2 > 0 ? Math.round(grantA / statsA.std2) : 0;
+    const grantPerStdB = statsB.std2 > 0 ? Math.round(grantB / statsB.std2) : 0;
+
+    const healthA = getSchoolHealthScore(schA);
+    const healthB = getSchoolHealthScore(schB);
+
+    const coordsA = getSchoolCoords(schA);
+    const coordsB = getSchoolCoords(schB);
+    const distKm = calculateSchoolDistanceKm(coordsA, coordsB);
+
+    // Populate 8-Dimensional Scoreboard Table
+    const tbody = document.getElementById('h2hScoreboardBody');
+    if (tbody) {
+      const dimensions = [
+        {
+          name: '1. สหวิทยาเขต และที่ตั้งอำเภอ',
+          valA: `<strong>${schA.cluster || '-'}</strong><br><span style="font-size: 11px; color: #64748b;">อ.${schA.amphoe || '-'}</span>`,
+          valB: `<strong>${schB.cluster || '-'}</strong><br><span style="font-size: 11px; color: #64748b;">อ.${schB.amphoe || '-'}</span>`,
+          winner: schA.cluster === schB.cluster ? 'same' : 'diff'
+        },
+        {
+          name: '2. ขนาดสถานศึกษา & นร.รวม',
+          valA: `<strong>${statsA.std2.toLocaleString()} คน</strong><br><span class="trend-badge stable" style="font-size: 10px;">ขนาด ${statsA.sizeText}</span>`,
+          valB: `<strong>${statsB.std2.toLocaleString()} คน</strong><br><span class="trend-badge stable" style="font-size: 10px;">ขนาด ${statsB.sizeText}</span>`,
+          winner: statsA.std2 > statsB.std2 ? 'A' : (statsA.std2 < statsB.std2 ? 'B' : 'tie')
+        },
+        {
+          name: '3. ห้องเรียน & ความหนาแน่นเฉลี่ย',
+          valA: `<strong>${statsA.roomsActive} ห้อง</strong><br><span style="font-size: 11.5px; color: #2563eb;">${statsA.ratioActive.toFixed(1)} คน/ห้อง</span>`,
+          valB: `<strong>${statsB.roomsActive} ห้อง</strong><br><span style="font-size: 11.5px; color: #d97706;">${statsB.ratioActive.toFixed(1)} คน/ห้อง</span>`,
+          winner: statsA.ratioActive > statsB.ratioActive ? 'A' : (statsA.ratioActive < statsB.ratioActive ? 'B' : 'tie')
+        },
+        {
+          name: '4. อัตราคงอยู่นักเรียน (Zero Dropout)',
+          valA: `<strong>${retRateA.toFixed(2)}%</strong><br><span style="font-size: 11px; color: ${statsA.diff >= 0 ? '#16a34a' : '#dc2626'};">${statsA.diff >= 0 ? '+' : ''}${statsA.diff} คน</span>`,
+          valB: `<strong>${retRateB.toFixed(2)}%</strong><br><span style="font-size: 11px; color: ${statsB.diff >= 0 ? '#16a34a' : '#dc2626'};">${statsB.diff >= 0 ? '+' : ''}${statsB.diff} คน</span>`,
+          winner: retRateA > retRateB ? 'A' : (retRateA < retRateB ? 'B' : 'tie')
+        },
+        {
+          name: '5. สัดส่วนนักเรียน ม.ต้น ต่อ ม.ปลาย',
+          valA: `ม.ต้น <strong>${pctTonA.toFixed(0)}%</strong> (${mTonA.toLocaleString()} คน)<br>ม.ปลาย <strong>${pctPlaiA.toFixed(0)}%</strong> (${mPlaiA.toLocaleString()} คน)`,
+          valB: `ม.ต้น <strong>${pctTonB.toFixed(0)}%</strong> (${mTonB.toLocaleString()} คน)<br>ม.ปลาย <strong>${pctPlaiB.toFixed(0)}%</strong> (${mPlaiB.toLocaleString()} คน)`,
+          winner: 'neutral'
+        },
+        {
+          name: '6. เงินอุดหนุนรายหัวพื้นฐาน สพฐ./ปี',
+          valA: `<strong>${(grantA / 1e6).toFixed(2)} ล้านบาท</strong><br><span style="font-size: 11px; color: #64748b;">เฉลี่ย ${grantPerStdA.toLocaleString()} บ./คน</span>`,
+          valB: `<strong>${(grantB / 1e6).toFixed(2)} ล้านบาท</strong><br><span style="font-size: 11px; color: #64748b;">เฉลี่ย ${grantPerStdB.toLocaleString()} บ./คน</span>`,
+          winner: grantA > grantB ? 'A' : (grantA < grantB ? 'B' : 'tie')
+        },
+        {
+          name: '7. ดัชนีสุขภาวะสถานศึกษา (Health Index)',
+          valA: `<strong>${healthA.score} / 100</strong><br><span style="font-size: 11px; color: #16a34a; font-weight: 600;">เกรด ${healthA.grade}</span>`,
+          valB: `<strong>${healthB.score} / 100</strong><br><span style="font-size: 11px; color: #16a34a; font-weight: 600;">เกรด ${healthB.grade}</span>`,
+          winner: healthA.score > healthB.score ? 'A' : (healthA.score < healthB.score ? 'B' : 'tie')
+        },
+        {
+          name: '8. ระยะห่างทางภูมิศาสตร์ (GIS Haversine)',
+          valA: distKm !== null ? `ห่างกัน <strong>${distKm.toFixed(1)} กม.</strong>` : 'ไม่พบพิกัด',
+          valB: distKm !== null ? (distKm < 15 ? '🟢 เขตบริการใกล้เคียง' : (distKm < 35 ? '🟡 โซนกลาง' : '🔵 โซนห่างไกล')) : '-',
+          winner: 'neutral'
+        }
+      ];
+
+      tbody.innerHTML = dimensions.map(d => {
+        const bgA = d.winner === 'A' ? 'background: rgba(37, 99, 235, 0.05);' : '';
+        const bgB = d.winner === 'B' ? 'background: rgba(217, 119, 6, 0.05);' : '';
+        return `
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="font-weight: 600; color: #334155; padding: 12px 14px;">${d.name}</td>
+            <td style="text-align: center; padding: 12px 14px; ${bgA}">${d.valA}</td>
+            <td style="text-align: center; color: #94a3b8; font-weight: 800; font-size: 12px; padding: 12px 4px;">VS</td>
+            <td style="text-align: center; padding: 12px 14px; ${bgB}">${d.valB}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Populate Executive Policy Verdict
+    const verdictEl = document.getElementById('compareVerdictContent');
+    if (verdictEl) {
+      let synergyType = '';
+      let synergyText = '';
+
+      if (statsA.sizeText === statsB.sizeText) {
+        synergyType = `🤝 คู่สถานศึกษาขนาดเดียวกัน (${statsA.sizeText} vs ${statsB.sizeText})`;
+        synergyText = `ทั้งสองโรงเรียนมีขนาดชั้นเรียนและบริบทการจัดการศึกษาที่ใกล้เคียงกัน เหมาะสำหรับ **การสร้างเครือข่ายแลกเปลี่ยนเรียนรู้ (Peer-to-Peer Learning Community)** และร่วมทดสอบนวัตกรรมการสอนแบบคู่ขนาน`;
+      } else if ((statsA.sizeText === 'XL' && (statsB.sizeText === 'S' || statsB.sizeText === 'M')) ||
+                 (statsB.sizeText === 'XL' && (statsA.sizeText === 'S' || statsA.sizeText === 'M'))) {
+        synergyType = `🏛️ โมเดลพี่เลี้ยงคู่พัฒนา (Big Brother / Mentor Network)`;
+        synergyText = `ความแตกต่างของขนาดโรงเรียนเปิดโอกาสเชิงยุทธศาสตร์ในการจัดทำ **ข้อตกลงความร่วมมือแบบพี่เลี้ยงวิชาการ** โดยโรงเรียนขนาดใหญ่พิเศษสามารถแบ่งปันสื่อการสอนดิจิทัล และเป็นศูนย์ฝึกอบรมครูเฉพาะทางให้แก่โรงเรียนคู่พัฒนา`;
+      } else {
+        synergyType = `🌐 เครือข่ายพัฒนาคุณภาพข้ามขนาดสถานศึกษา`;
+        synergyText = `การประสานความร่วมมือระหว่างโรงเรียนทั้งสองจะช่วยสร้างสมดุลการรับนักเรียนและกระจายโอกาสทางการศึกษาในพื้นที่`;
+      }
+
+      let geoNote = '';
+      if (distKm !== null) {
+        if (distKm < 15) {
+          geoNote = `ระยะทางห่างกันเพียง **${distKm.toFixed(1)} กิโลเมตร** ถือว่าอยู่ในรัศมีบริการร่วมกัน สามารถจัดกิจกรรมทางวิชาการและแชร์ทรัพยากรห้องปฏิบัติการหรือรถรับส่งนักเรียนร่วมกันได้อย่างคุ้มค่า`;
+        } else if (distKm < 35) {
+          geoNote = `ระยะทางห่างกัน **${distKm.toFixed(1)} กิโลเมตร** อยู่ในระยะเดินทางไปมาหาสู่กันได้สะดวกภายใน 30-45 นาที`;
+        } else {
+          geoNote = `ระยะทางห่างกัน **${distKm.toFixed(1)} กิโลเมตร** แนะนำให้เชื่อมโยงความร่วมมือผ่านระบบดิจิทัลและการประชุมออนไลน์ (Virtual Network)`;
+        }
+      }
+
+      verdictEl.innerHTML = `
+        <div style="margin-bottom: 6px;">
+          <strong style="color: #1e40af;">${synergyType}:</strong> ${synergyText}
+        </div>
+        <div style="margin-bottom: 6px; color: #475569;">
+          📍 <strong>มิติด้านระยะทาง:</strong> ${geoNote}
+        </div>
+        <div style="color: #047857; font-weight: 500;">
+          🎯 <strong>ข้อเสนอแนะเชิงนโยบาย ผอ.เขต:</strong> ควรรวมงบประมาณอุดหนุนเพื่อยกระดับผลสัมฤทธิ์ทางการศึกษา และนำจุดเด่นของโรงเรียนที่มีอัตราคงอยู่สูงกว่า (${retRateA >= retRateB ? getSchoolDisplayName(schA) : getSchoolDisplayName(schB)}) มาเป็นถอดบทเรียนขยายผล (Best Practice) สู่โรงเรียนคู่เทียบ
+        </div>
+      `;
+    }
+
     // Render Side-by-Side Grade Chart
     renderComparisonChart(schA, schB);
   }
 
+  function exportComparisonToExcel() {
+    if (typeof XLSX === 'undefined') {
+      alert('โมดูล Excel กำลังโหลด กรุณาลองใหม่อีกครั้ง');
+      return;
+    }
+    const schA = DASHBOARD_DATA.find(s => s.id === comparisonSchoolA);
+    const schB = DASHBOARD_DATA.find(s => s.id === comparisonSchoolB);
+    if (!schA || !schB) return;
+
+    const statsA = getSchoolStats(schA);
+    const statsB = getSchoolStats(schB);
+    const healthA = getSchoolHealthScore(schA);
+    const healthB = getSchoolHealthScore(schB);
+    const coordsA = getSchoolCoords(schA);
+    const coordsB = getSchoolCoords(schB);
+    const distKm = calculateSchoolDistanceKm(coordsA, coordsB);
+
+    const rows = [
+      ['รายงานผลการวิเคราะห์เปรียบเทียบคู่สถานศึกษา (School Head-to-Head Dossier)'],
+      ['สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาสกลนคร'],
+      ['วันที่จัดทำ:', new Date().toLocaleDateString('th-TH')],
+      [],
+      ['มิติการประชันสถิติ (Key Dimensions)', getSchoolDisplayName(schA), getSchoolDisplayName(schB)],
+      ['สหวิทยาเขต', schA.cluster || '-', schB.cluster || '-'],
+      ['อำเภอที่ตั้ง', schA.amphoe || '-', schB.amphoe || '-'],
+      ['ขนาดสถานศึกษา', statsA.sizeText, statsB.sizeText],
+      ['จำนวนนักเรียนรวม ปี 2569 (คน)', statsA.std2, statsB.std2],
+      ['จำนวนห้องเรียน (ห้อง)', statsA.roomsActive, statsB.roomsActive],
+      ['ความหนาแน่นเฉลี่ย (คน/ห้อง)', Number(statsA.ratioActive.toFixed(1)), Number(statsB.ratioActive.toFixed(1))],
+      ['อัตราคงอยู่นักเรียน (%)', Number((statsA.std1 > 0 ? (statsA.std2 / statsA.std1 * 100) : 100).toFixed(2)), Number((statsB.std1 > 0 ? (statsB.std2 / statsB.std1 * 100) : 100).toFixed(2))],
+      ['เงินอุดหนุนรายหัวพื้นฐาน (บาท)', (statsA.std2 > 0 ? ((schA[targetPeriod]?.levels?.['มต้น']?.total||0)*3800 + (schA[targetPeriod]?.levels?.['มปลาย']?.total||0)*4300) : 0), (statsB.std2 > 0 ? ((schB[targetPeriod]?.levels?.['มต้น']?.total||0)*3800 + (schB[targetPeriod]?.levels?.['มปลาย']?.total||0)*4300) : 0)],
+      ['ดัชนีสุขภาวะสถานศึกษา (คะแนน/100)', healthA.score, healthB.score],
+      ['เกรดสุขภาวะสถานศึกษา', healthA.grade, healthB.grade],
+      ['ระยะห่างทางภูมิศาสตร์ (กม.)', distKm !== null ? Number(distKm.toFixed(1)) : 'N/A', distKm !== null ? Number(distKm.toFixed(1)) : 'N/A']
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'H2H_Comparison');
+    XLSX.writeFile(wb, `DMC_H2H_${schA.id}_vs_${schB.id}.xlsx`);
+  }
+
   function renderComparisonChart(schA, schB) {
+    const canvas = document.getElementById('comparisonBarChart');
+    if (!canvas) return;
     const grades = ['ม1', 'ม2', 'ม3', 'ม4', 'ม5', 'ม6'];
     const labels = ['ม.1', 'ม.2', 'ม.3', 'ม.4', 'ม.5', 'ม.6'];
 
     const pA = schA[targetPeriod] || schA.y69_2;
     const pB = schB[targetPeriod] || schB.y69_2;
-    const dataA = grades.map(g => pA.grades[g] ? pA.grades[g].total : 0);
-    const dataB = grades.map(g => pB.grades[g] ? pB.grades[g].total : 0);
+    const dataA = grades.map(g => pA?.grades?.[g] ? pA.grades[g].total : 0);
+    const dataB = grades.map(g => pB?.grades?.[g] ? pB.grades[g].total : 0);
 
     if (comparisonBarChart) {
       comparisonBarChart.destroy();
     }
 
-    const ctx = document.getElementById('comparisonBarChart').getContext('2d');
+    const ctx = canvas.getContext('2d');
     const isDarkTheme = document.body.classList.contains('dark-theme');
     const gridColor = isDarkTheme ? '#3c4043' : '#eef1f6'; 
     const textColor = isDarkTheme ? '#9aa0a6' : '#5f6368'; 
     
-    const colorA = currentPrimaryColor;
-    const colorB = '#b06000'; // Google orange
+    const colorA = '#2563eb'; // Blue
+    const colorB = '#d97706'; // Amber
 
     const targetLabel = getPeriodLabel(targetPeriod);
 
@@ -2077,6 +2369,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
 
   // ==========================================
   // Step 1: Zero Dropout & Student Retention Intelligence Module
@@ -3310,16 +3603,77 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ==========================================
-  // Step 4: Teacher Staffing & Capitation Grant Estimator Module
+    // ==========================================
+  // Step 4: Budget & Equity Simulator Module (15-Year Free & CCT)
   // ==========================================
+
+
   function initResourceModule() {
+    // Populate cluster filter
+    const clusterSelect = document.getElementById('budgetSimClusterFilter');
+    if (clusterSelect) {
+      clusterSelect.innerHTML = '<option value="ALL">ทุกสหวิทยาเขต (ทั้ง 8 สหวิทยาเขต)</option>';
+      const clusters = [...new Set(DASHBOARD_DATA.map(s => s.cluster).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'th'));
+      clusters.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        clusterSelect.appendChild(opt);
+      });
+      clusterSelect.addEventListener('change', (e) => {
+        budgetSimCluster = e.target.value;
+        updateResourceView();
+      });
+    }
+
+    // Slider Listeners
+    const sliderCct = document.getElementById('sliderCctRate');
+    const valCct = document.getElementById('sliderCctVal');
+    if (sliderCct) {
+      sliderCct.addEventListener('input', (e) => {
+        const val = Number(e.target.value);
+        budgetSimCctRate = val / 100.0;
+        if (valCct) valCct.textContent = `${val}%`;
+        updateResourceView();
+      });
+    }
+
+    const sliderMult = document.getElementById('sliderPolicyMultiplier');
+    const valMult = document.getElementById('sliderPolicyVal');
+    if (sliderMult) {
+      sliderMult.addEventListener('input', (e) => {
+        const val = Number(e.target.value);
+        budgetSimMultiplier = val / 100.0;
+        if (valMult) valMult.textContent = `${val > 0 ? '+' : ''}${val}%`;
+        updateResourceView();
+      });
+    }
+
+    // Reset Button
+    const btnReset = document.getElementById('btnResetBudgetSim');
+    if (btnReset) {
+      btnReset.addEventListener('click', () => {
+        budgetSimCctRate = 0.30;
+        budgetSimMultiplier = 0.0;
+        budgetSimCluster = 'ALL';
+        if (sliderCct) sliderCct.value = 30;
+        if (valCct) valCct.textContent = '30%';
+        if (sliderMult) sliderMult.value = 0;
+        if (valMult) valMult.textContent = '+0%';
+        if (clusterSelect) clusterSelect.value = 'ALL';
+        updateResourceView();
+      });
+    }
+
+    // View Switcher Tabs
     const viewBtns = document.querySelectorAll('.resource-view-btn');
     viewBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         viewBtns.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         resourceCurrentView = btn.dataset.view;
-        updateResourceView();
+        renderResourceTable();
+        renderResourceCharts();
       });
     });
 
@@ -3345,13 +3699,18 @@ document.addEventListener('DOMContentLoaded', () => {
     let totalGrantDistrict = 0;
     let totalGrantMTon = 0;
     let totalGrantMPlai = 0;
+    let totalFreeGrantDistrict = 0;
+    let totalCctGrantDistrict = 0;
+    let totalGrandPackageDistrict = 0;
+    let totalCctStudentsDistrict = 0;
     let totalEntitledStaff = 0;
     let totalStudentsAll = 0;
     let totalRoomsAll = 0;
 
-    const sizeStaffTotals = { S: 0, M: 0, L: 0, XL: 0 };
-    const sizeRoomTotals = { S: 0, M: 0, L: 0, XL: 0 };
     const sizeGrantTotals = { S: 0, M: 0, L: 0, XL: 0 };
+    const clusterGrandTotals = {};
+
+    const mult = 1.0 + budgetSimMultiplier;
 
     const records = DASHBOARD_DATA.map((s) => {
       const displayName = getSchoolDisplayName(s);
@@ -3362,59 +3721,68 @@ document.addEventListener('DOMContentLoaded', () => {
       const stdMTon = pTarget?.levels?.['มต้น']?.total || 0;
       const stdMPlai = pTarget?.levels?.['มปลาย']?.total || 0;
 
-      const pBase = s[basePeriod] || s.y69_1;
-
-      let deputy = 0;
-      if (stdTotal >= 2500) deputy = 4;
-      else if (stdTotal >= 1500) deputy = 3;
-      else if (stdTotal >= 500) deputy = 2;
-      else if (stdTotal >= 300) deputy = 1;
-
-      const teacherQuota = Math.round(roomsTotal * 1.6);
-      const entitledStaff = teacherQuota + 1 + deputy;
-      const ratio = entitledStaff > 0 ? stdTotal / entitledStaff : 0;
-
-      const grantMTon = stdMTon * 3800;
-      const grantMPlai = stdMPlai * 4300;
+      // Tier 1: Basic Capitation Grant (สพฐ.)
+      const grantMTon = Math.round(stdMTon * 3800 * mult);
+      const grantMPlai = Math.round(stdMPlai * 4300 * mult);
       const grantTotal = grantMTon + grantMPlai;
 
-      const grantBase = (pBase?.levels?.['มต้น']?.total || 0) * 3800 + (pBase?.levels?.['มปลาย']?.total || 0) * 4300;
-      const grantDelta = grantTotal - grantBase;
+      // Tier 2: 15-Year Free Education 5 Pillars (สพฐ.)
+      // MTon = 2,830 B (book 860, supply 520, uniform 500, act 950)
+      // MPlai = 3,530 B (book 1440, supply 520, uniform 550, act 1020)
+      const freeBook = Math.round((stdMTon * 860 + stdMPlai * 1440) * mult);
+      const freeSupply = Math.round((stdMTon * 520 + stdMPlai * 520) * mult);
+      const freeUniform = Math.round((stdMTon * 500 + stdMPlai * 550) * mult);
+      const freeActivity = Math.round((stdMTon * 950 + stdMPlai * 1020) * mult);
+      const freeTotal = freeBook + freeSupply + freeUniform + freeActivity;
+
+      // Tier 3: CCT Equity Fund (กสศ. & สพฐ. 3,000 B/person)
+      const cctStudents = Math.round(stdTotal * budgetSimCctRate);
+      const cctGrant = Math.round(cctStudents * 3000 * mult);
+
+      // Grand Total Package
+      const grandPackage = grantTotal + freeTotal + cctGrant;
+      const avgPerStudent = stdTotal > 0 ? Math.round(grandPackage / stdTotal) : 0;
 
       totalGrantDistrict += grantTotal;
       totalGrantMTon += grantMTon;
       totalGrantMPlai += grantMPlai;
-      totalEntitledStaff += entitledStaff;
+      totalFreeGrantDistrict += freeTotal;
+      totalCctGrantDistrict += cctGrant;
+      totalGrandPackageDistrict += grandPackage;
+      totalCctStudentsDistrict += cctStudents;
       totalStudentsAll += stdTotal;
       totalRoomsAll += roomsTotal;
 
-      if (sizeStaffTotals[size] !== undefined) {
-        sizeStaffTotals[size] += entitledStaff;
-        sizeRoomTotals[size] += roomsTotal;
-        sizeGrantTotals[size] += grantTotal;
+      if (sizeGrantTotals[size] !== undefined) {
+        sizeGrantTotals[size] += grandPackage;
       }
 
-      let status = 'ปกติ';
-      let statusBadge = '<span class="trend-badge positive" style="font-size: 11px;">🟢 ปกติ</span>';
+      const cluster = s.cluster || 'สหวิทยาเขตทั่วไป';
+      clusterGrandTotals[cluster] = (clusterGrandTotals[cluster] || 0) + grandPackage;
 
       return {
         id: s.id,
         name: displayName,
         fullName: s.name,
+        cluster: s.cluster || '-',
+        amphoe: s.amphoe || '-',
         size,
         stdTotal,
         roomsTotal,
         stdMTon,
         stdMPlai,
-        entitledStaff,
-        deputy,
-        ratio,
         grantMTon,
         grantMPlai,
         grantTotal,
-        grantDelta,
-        status,
-        statusBadge
+        freeBook,
+        freeSupply,
+        freeUniform,
+        freeActivity,
+        freeTotal,
+        cctStudents,
+        cctGrant,
+        grandPackage,
+        avgPerStudent
       };
     });
 
@@ -3423,36 +3791,43 @@ document.addEventListener('DOMContentLoaded', () => {
       totalGrantDistrict,
       totalGrantMTon,
       totalGrantMPlai,
-      totalEntitledStaff,
+      totalFreeGrantDistrict,
+      totalCctGrantDistrict,
+      totalGrandPackageDistrict,
+      totalCctStudentsDistrict,
       totalStudentsAll,
       totalRoomsAll,
-      avgRatio: totalEntitledStaff > 0 ? totalStudentsAll / totalEntitledStaff : 0,
-      sizeStaffTotals,
-      sizeRoomTotals,
-      sizeGrantTotals
+      avgPerStudentOverall: totalStudentsAll > 0 ? Math.round(totalGrandPackageDistrict / totalStudentsAll) : 0,
+      sizeGrantTotals,
+      clusterGrandTotals
     };
   }
 
   function updateResourceView() {
     const data = getResourceData();
 
-    const grantEl = document.getElementById('resourceKpiTotalGrant');
-    const grantSubEl = document.getElementById('resourceKpiTotalGrantSub');
-    if (grantEl) {
-      grantEl.textContent = `${(data.totalGrantDistrict / 1e6).toFixed(2)} ล้านบาท`;
-    }
-    if (grantSubEl) {
-      grantSubEl.textContent = `ม.ต้น ${(data.totalGrantMTon / 1e6).toFixed(2)}M บ. | ม.ปลาย ${(data.totalGrantMPlai / 1e6).toFixed(2)}M บ.`;
-    }
+    // Update 4 KPI Cards
+    const kpiGrant = document.getElementById('resourceKpiTotalGrant');
+    const kpiGrantSub = document.getElementById('resourceKpiTotalGrantSub');
+    if (kpiGrant) kpiGrant.textContent = `${(data.totalGrantDistrict / 1e6).toFixed(2)} ล้านบาท`;
+    if (kpiGrantSub) kpiGrantSub.textContent = `ม.ต้น ${(data.totalGrantMTon / 1e6).toFixed(2)}M | ม.ปลาย ${(data.totalGrantMPlai / 1e6).toFixed(2)}M`;
 
-    const roomsEl = document.getElementById('resourceKpiRoomsTotal') || document.getElementById('resourceKpiStaffTotal');
-    const roomsSubEl = document.getElementById('resourceKpiRoomsSub') || document.getElementById('resourceKpiStaffSub');
-    if (roomsEl) {
-      roomsEl.textContent = `${data.totalRoomsAll.toLocaleString()} ห้อง`;
-    }
-    if (roomsSubEl) {
-      roomsSubEl.textContent = `ม.ต้น 750 ห้อง | ม.ปลาย 642 ห้อง (เฉลี่ย ${(data.totalRoomsAll / data.records.length).toFixed(1)} ห้อง/แห่ง)`;
-    }
+    const kpiFree = document.getElementById('resourceKpiFreeTotal');
+    const kpiFreeSub = document.getElementById('resourceKpiFreeSub');
+    if (kpiFree) kpiFree.textContent = `${(data.totalFreeGrantDistrict / 1e6).toFixed(2)} ล้านบาท`;
+    if (kpiFreeSub) kpiFreeSub.textContent = `5 หมวด: หนังสือ อุปกรณ์ ชุด กิจกรรม`;
+
+    const kpiCct = document.getElementById('resourceKpiCctTotal');
+    const kpiCctSub = document.getElementById('resourceKpiCctSub');
+    if (kpiCct) kpiCct.textContent = `${(data.totalCctGrantDistrict / 1e6).toFixed(2)} ล้านบาท`;
+    if (kpiCctSub) kpiCctSub.textContent = `เป้าหมาย ${data.totalCctStudentsDistrict.toLocaleString()} คน (${(budgetSimCctRate * 100).toFixed(0)}%)`;
+
+    const kpiGrand = document.getElementById('resourceKpiGrandPackage');
+    const kpiGrandSub = document.getElementById('resourceKpiGrandPackageSub');
+    const kpiAvg = document.getElementById('resourceKpiAvgPerStudent');
+    if (kpiGrand) kpiGrand.textContent = `${(data.totalGrandPackageDistrict / 1e6).toFixed(2)} ล้านบาท`;
+    if (kpiGrandSub) kpiGrandSub.textContent = `ครอบคลุม 45 ร.ร. (${data.totalStudentsAll.toLocaleString()} คน)`;
+    if (kpiAvg) kpiAvg.textContent = `เฉลี่ย ${data.avgPerStudentOverall.toLocaleString()} บาท/คน/ปี`;
 
     renderResourceTable(data);
     renderResourceCharts(data);
@@ -3464,6 +3839,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!tbody) return;
 
     let filtered = [...data.records];
+
+    // Filter by cluster
+    if (budgetSimCluster && budgetSimCluster !== 'ALL') {
+      filtered = filtered.filter(r => r.cluster === budgetSimCluster);
+    }
+
+    // Filter by search query
     if (resourceSearchQuery) {
       filtered = filtered.filter(r => 
         r.name.toLowerCase().includes(resourceSearchQuery) || 
@@ -3471,42 +3853,100 @@ document.addEventListener('DOMContentLoaded', () => {
       );
     }
 
-    filtered.sort((a, b) => b.grantTotal - a.grantTotal);
+    // Sort based on current view
+    if (resourceCurrentView === 'package') {
+      filtered.sort((a, b) => b.grandPackage - a.grandPackage);
+    } else if (resourceCurrentView === 'free') {
+      filtered.sort((a, b) => b.freeTotal - a.freeTotal);
+    } else if (resourceCurrentView === 'cct') {
+      filtered.sort((a, b) => b.cctGrant - a.cctGrant);
+    } else {
+      filtered.sort((a, b) => b.grantTotal - a.grantTotal);
+    }
 
     tbody.innerHTML = '';
     if (filtered.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--text-muted); padding: 30px;">ไม่พบข้อมูลโรงเรียนตามที่ค้นหา</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; color: var(--text-muted); padding: 30px;">ไม่พบข้อมูลโรงเรียนตามเงื่อนไขที่เลือก</td></tr>`;
       return;
     }
 
     filtered.forEach((r, idx) => {
-      const avgPerStudent = r.stdTotal > 0 ? Math.round(r.grantTotal / r.stdTotal) : 0;
       const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td style="text-align: center; color: var(--text-muted); font-size: 11.5px;">${idx + 1}</td>
-        <td>
-          <a href="#" class="table-school-link" data-id="${r.id}" title="${r.fullName || r.name}" style="font-weight: 500;">
-            ${r.name}
-          </a>
-        </td>
-        <td style="text-align: center;">
-          <span class="trend-badge stable" style="font-size: 11px;">${r.size}</span>
-        </td>
-        <td style="text-align: right; font-weight: 600;">${r.stdTotal.toLocaleString()}</td>
-        <td style="text-align: center; color: var(--text-muted);">${r.roomsTotal}</td>
-        <td style="text-align: right; color: var(--text-main); font-weight: 500;">
-          ${r.grantMTon.toLocaleString()} บ.
-        </td>
-        <td style="text-align: right; color: var(--text-main); font-weight: 500;">
-          ${r.grantMPlai.toLocaleString()} บ.
-        </td>
-        <td style="text-align: right; font-weight: 700; color: var(--color-gold);">
-          ${r.grantTotal.toLocaleString()} บ.
-        </td>
-        <td style="text-align: right; color: var(--text-muted); font-size: 11.5px;">
-          ${avgPerStudent.toLocaleString()} บ.
-        </td>
-      `;
+
+      if (resourceCurrentView === 'package') {
+        tr.innerHTML = `
+          <td style="text-align: center; color: var(--text-muted); font-size: 11.5px;">${idx + 1}</td>
+          <td>
+            <a href="#" class="table-school-link" data-id="${r.id}" title="${r.fullName || r.name}" style="font-weight: 600; color: #1e3a8a;">
+              ${r.name}
+            </a>
+            <div style="font-size: 10.5px; color: #64748b;">${r.cluster}</div>
+          </td>
+          <td style="text-align: center;">
+            <span class="trend-badge stable" style="font-size: 11px;">ขนาด ${r.size}</span>
+          </td>
+          <td style="text-align: right; font-weight: 600;">${r.stdTotal.toLocaleString()}</td>
+          <td style="text-align: right; color: #1e40af; font-weight: 500;">${r.grantTotal.toLocaleString()} บ.</td>
+          <td style="text-align: right; color: #059669; font-weight: 500;">${r.freeTotal.toLocaleString()} บ.</td>
+          <td style="text-align: right; color: #d97706; font-weight: 500;">${r.cctGrant.toLocaleString()} บ.</td>
+          <td style="text-align: right; font-weight: 700; color: #6b21a8;">${r.grandPackage.toLocaleString()} บ.</td>
+          <td style="text-align: right; color: var(--text-muted); font-size: 11.5px;">${r.avgPerStudent.toLocaleString()} บ.</td>
+        `;
+      } else if (resourceCurrentView === 'free') {
+        tr.innerHTML = `
+          <td style="text-align: center; color: var(--text-muted); font-size: 11.5px;">${idx + 1}</td>
+          <td>
+            <a href="#" class="table-school-link" data-id="${r.id}" title="${r.fullName || r.name}" style="font-weight: 600; color: #1e3a8a;">
+              ${r.name}
+            </a>
+          </td>
+          <td style="text-align: center;">
+            <span class="trend-badge stable" style="font-size: 11px;">${r.size}</span>
+          </td>
+          <td style="text-align: right; font-weight: 600;">${r.stdTotal.toLocaleString()}</td>
+          <td style="text-align: right; color: var(--text-main);">${r.freeBook.toLocaleString()} บ.</td>
+          <td style="text-align: right; color: var(--text-main);">${r.freeSupply.toLocaleString()} บ.</td>
+          <td style="text-align: right; color: var(--text-main);">${r.freeUniform.toLocaleString()} บ.</td>
+          <td style="text-align: right; color: var(--text-main);">${r.freeActivity.toLocaleString()} บ.</td>
+          <td style="text-align: right; font-weight: 700; color: #059669;">${r.freeTotal.toLocaleString()} บ.</td>
+        `;
+      } else if (resourceCurrentView === 'cct') {
+        tr.innerHTML = `
+          <td style="text-align: center; color: var(--text-muted); font-size: 11.5px;">${idx + 1}</td>
+          <td>
+            <a href="#" class="table-school-link" data-id="${r.id}" title="${r.fullName || r.name}" style="font-weight: 600; color: #1e3a8a;">
+              ${r.name}
+            </a>
+          </td>
+          <td style="text-align: center;">
+            <span class="trend-badge stable" style="font-size: 11px;">${r.size}</span>
+          </td>
+          <td style="text-align: right; font-weight: 600;">${r.stdTotal.toLocaleString()}</td>
+          <td style="text-align: center; color: #64748b;">${(budgetSimCctRate * 100).toFixed(0)}%</td>
+          <td style="text-align: right; color: #d97706; font-weight: 600;">${r.cctStudents.toLocaleString()} คน</td>
+          <td style="text-align: right; color: var(--text-muted);">3,000 บ./คน</td>
+          <td style="text-align: right; font-weight: 700; color: #d97706;">${r.cctGrant.toLocaleString()} บ.</td>
+          <td style="text-align: right; color: var(--text-muted); font-size: 11.5px;">${r.avgPerStudent.toLocaleString()} บ.</td>
+        `;
+      } else {
+        tr.innerHTML = `
+          <td style="text-align: center; color: var(--text-muted); font-size: 11.5px;">${idx + 1}</td>
+          <td>
+            <a href="#" class="table-school-link" data-id="${r.id}" title="${r.fullName || r.name}" style="font-weight: 600; color: #1e3a8a;">
+              ${r.name}
+            </a>
+          </td>
+          <td style="text-align: center;">
+            <span class="trend-badge stable" style="font-size: 11px;">${r.size}</span>
+          </td>
+          <td style="text-align: right; font-weight: 600;">${r.stdTotal.toLocaleString()}</td>
+          <td style="text-align: center; color: var(--text-muted);">${r.roomsTotal}</td>
+          <td style="text-align: right; color: #1e40af;">${r.grantMTon.toLocaleString()} บ.</td>
+          <td style="text-align: right; color: #1e40af;">${r.grantMPlai.toLocaleString()} บ.</td>
+          <td style="text-align: right; font-weight: 700; color: #1e40af;">${r.grantTotal.toLocaleString()} บ.</td>
+          <td style="text-align: right; color: var(--text-muted); font-size: 11.5px;">${Math.round(r.grantTotal / (r.stdTotal || 1)).toLocaleString()} บ.</td>
+        `;
+      }
 
       const link = tr.querySelector('.table-school-link');
       if (link) {
@@ -3521,26 +3961,74 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderResourceCharts(data) {
+    if (!data) data = getResourceData();
     const isDark = document.body.classList.contains('dark-theme');
     const textColor = isDark ? '#9aa0a6' : '#5f6368';
     const gridColor = isDark ? '#3c4043' : '#eef1f6';
 
+    // Chart 1: Budget Composition Doughnut
     const ctx1 = document.getElementById('resourceChartStaff')?.getContext('2d');
     if (ctx1) {
       if (resourceChartStaffInstance) resourceChartStaffInstance.destroy();
 
-      const labels1 = ['ขนาดเล็ก (S)', 'ขนาดกลาง (M)', 'ขนาดใหญ่ (L)', 'ขนาดใหญ่พิเศษ (XL)'];
-      const keys = ['S', 'M', 'L', 'XL'];
-      const grantValues = keys.map(k => Number(((data.sizeGrantTotals[k] || 0) / 1e6).toFixed(2)));
-
       resourceChartStaffInstance = new Chart(ctx1, {
+        type: 'doughnut',
+        data: {
+          labels: [
+            'เงินอุดหนุนรายหัวพื้นฐาน (สพฐ.)',
+            '5 รายการเรียนฟรี 15 ปี (สพฐ.)',
+            'ทุนเสมอภาคยากจนพิเศษ (CCT กสศ.)'
+          ],
+          datasets: [{
+            data: [
+              Number((data.totalGrantDistrict / 1e6).toFixed(2)),
+              Number((data.totalFreeGrantDistrict / 1e6).toFixed(2)),
+              Number((data.totalCctGrantDistrict / 1e6).toFixed(2))
+            ],
+            backgroundColor: ['#1e40af', '#059669', '#d97706'],
+            borderWidth: 2,
+            borderColor: isDark ? '#1e1f22' : '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '60%',
+          plugins: {
+            legend: {
+              display: true,
+              position: 'bottom',
+              labels: {
+                color: isDark ? '#f1f3f4' : '#202124',
+                font: { family: 'Google Sans, Sarabun', size: 10.5 }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: (c) => ` ${c.label}: ${c.parsed.toLocaleString()} ล้านบาท (${((c.parsed / (data.totalGrandPackageDistrict / 1e6)) * 100).toFixed(1)}%)`
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Chart 2: Grand Package by Cluster Bar Chart
+    const ctx2 = document.getElementById('resourceChartBudget')?.getContext('2d');
+    if (ctx2) {
+      if (resourceChartBudgetInstance) resourceChartBudgetInstance.destroy();
+
+      const clusters = Object.keys(data.clusterGrandTotals).sort();
+      const clusterValues = clusters.map(c => Number((data.clusterGrandTotals[c] / 1e6).toFixed(2)));
+
+      resourceChartBudgetInstance = new Chart(ctx2, {
         type: 'bar',
         data: {
-          labels: labels1,
+          labels: clusters.map(c => c.replace('สหวิทยาเขต', '')),
           datasets: [{
-            label: 'เงินอุดหนุนรายหัวรวม (ล้านบาท)',
-            data: grantValues,
-            backgroundColor: '#10233F',
+            label: 'งบประมาณรวมทั้งสิ้น (ล้านบาท)',
+            data: clusterValues,
+            backgroundColor: '#6b21a8',
             borderRadius: 4,
             barPercentage: 0.7
           }]
@@ -3552,7 +4040,7 @@ document.addEventListener('DOMContentLoaded', () => {
             legend: { display: false },
             tooltip: {
               callbacks: {
-                label: (c) => ` เงินอุดหนุน: ${Number(c.parsed.y).toLocaleString()} ล้านบาท`
+                label: (c) => ` ${clusters[c.dataIndex]}: ${c.parsed.y.toLocaleString()} ล้านบาท`
               }
             }
           },
@@ -3569,44 +4057,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     }
-
-    const ctx2 = document.getElementById('resourceChartBudget')?.getContext('2d');
-    if (ctx2) {
-      if (resourceChartBudgetInstance) resourceChartBudgetInstance.destroy();
-
-      resourceChartBudgetInstance = new Chart(ctx2, {
-        type: 'doughnut',
-        data: {
-          labels: ['มัธยมศึกษาตอนต้น (ม.1 - ม.3)', 'มัธยมศึกษาตอนปลาย (ม.4 - ม.6)'],
-          datasets: [{
-            data: [data.totalGrantMTon, data.totalGrantMPlai],
-            backgroundColor: ['#C28E38', '#10233F'],
-            borderWidth: 2,
-            borderColor: isDark ? '#1e1f22' : '#ffffff'
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: '65%',
-          plugins: {
-            legend: {
-              display: true,
-              position: 'bottom',
-              labels: {
-                color: isDark ? '#f1f3f4' : '#202124',
-                font: { family: 'Google Sans, Sarabun', size: 11 }
-              }
-            },
-            tooltip: {
-              callbacks: {
-                label: (c) => ` ${c.label}: ${(c.parsed / 1e6).toFixed(2)} ล้านบาท (${((c.parsed / data.totalGrantDistrict) * 100).toFixed(1)}%)`
-              }
-            }
-          }
-        }
-      });
-    }
   }
 
   function exportResourceToExcel() {
@@ -3616,162 +4066,39 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const data = getResourceData();
     const rows = [
-      ['รายงานการประมาณการเงินอุดหนุนรายหัวและโครงสร้างสถานศึกษา - สพม.สกลนคร'],
+      ['รายงานการประมาณการจัดสรรงบประมาณ 15 ปี เรียนฟรี และเงินอุดหนุนยากจนพิเศษ (CCT) - สพม.สกลนคร'],
       ['วันที่จัดทำรายงาน:', new Date().toLocaleDateString('th-TH')],
-      ['สรุปภาพรวมทั้งเขต:', `งบอุดหนุนรวม ${(data.totalGrantDistrict / 1e6).toFixed(2)} ล้านบาท (ม.ต้น ${(data.totalGrantMTon / 1e6).toFixed(2)} ล้านบาท / ม.ปลาย ${(data.totalGrantMPlai / 1e6).toFixed(2)} ล้านบาท), นักเรียนรวม ${data.totalStudentsAll.toLocaleString()} คน, ห้องเรียนรวม ${data.totalRoomsAll.toLocaleString()} ห้อง`],
+      ['สมมติฐานการจำลอง:', `อัตราความยากจน CCT = ${(budgetSimCctRate * 100).toFixed(0)}%, ส่วนเพิ่มนโยบาย = ${(budgetSimMultiplier * 100).toFixed(0)}%, สหวิทยาเขต = ${budgetSimCluster}`],
+      ['สรุปภาพรวมทั้งเขต:', `งบรวมสุทธิ ${(data.totalGrandPackageDistrict / 1e6).toFixed(2)} ล้านบาท (รายหัว ${(data.totalGrantDistrict / 1e6).toFixed(2)}M, เรียนฟรี ${(data.totalFreeGrantDistrict / 1e6).toFixed(2)}M, ทุน CCT ${(data.totalCctGrantDistrict / 1e6).toFixed(2)}M), นร.รวม ${data.totalStudentsAll.toLocaleString()} คน`],
       [],
-      ['ลำดับ', 'รหัสโรงเรียน', 'ชื่อโรงเรียน', 'ขนาด', 'นักเรียนรวม (คน)', 'ห้องเรียน', 'เงินอุดหนุน ม.ต้น (บาท)', 'เงินอุดหนุน ม.ปลาย (บาท)', 'เงินอุดหนุนรวม (บาท)', 'เฉลี่ยต่อนักเรียน (บาท)']
+      ['ลำดับ', 'รหัส ร.ร.', 'ชื่อโรงเรียน', 'สหวิทยาเขต', 'อำเภอ', 'ขนาด', 'นร.รวม', 'ห้องเรียน', 'งบรายหัวพื้นฐาน (บาท)', 'งบเรียนฟรี 15 ปี (บาท)', 'งบทุนเสมอภาค CCT (บาท)', 'งบรวมสุทธิ (บาท)', 'เฉลี่ยต่อคน (บาท)']
     ];
 
-    const sorted = [...data.records].sort((a, b) => b.grantTotal - a.grantTotal);
+    const sorted = [...data.records].sort((a, b) => b.grandPackage - a.grandPackage);
     sorted.forEach((r, idx) => {
-      const avg = r.stdTotal > 0 ? Math.round(r.grantTotal / r.stdTotal) : 0;
       rows.push([
         idx + 1,
         r.id,
         r.fullName || r.name,
+        r.cluster,
+        r.amphoe,
         r.size,
         r.stdTotal,
         r.roomsTotal,
-        r.grantMTon,
-        r.grantMPlai,
         r.grantTotal,
-        avg
+        r.freeTotal,
+        r.cctGrant,
+        r.grandPackage,
+        r.avgPerStudent
       ]);
     });
 
-    const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(rows);
-    XLSX.utils.book_append_sheet(wb, ws, 'Capitation_Grant');
-    XLSX.writeFile(wb, `Capitation_Grant_Report.xlsx`);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Budget_Equity_Sim');
+    XLSX.writeFile(wb, `DMC_Budget_Equity_Simulation.xlsx`);
   }
 
-  // Multi-Dimensional Insights & Size Analysis
-  function updateInsightsView() {
-    const sizeStats = {
-      S: { count: 0, students: 0, rooms: 0 },
-      M: { count: 0, students: 0, rooms: 0 },
-      L: { count: 0, students: 0, rooms: 0 },
-      XL: { count: 0, students: 0, rooms: 0 }
-    };
-
-    DASHBOARD_DATA.forEach(sch => {
-      const size = getSchoolSize(sch);
-      const pData = sch[targetPeriod] || sch.y69_2;
-      if (sizeStats[size]) {
-        sizeStats[size].count += 1;
-        sizeStats[size].students += pData.total.total;
-        sizeStats[size].rooms += pData.total.rooms;
-      }
-    });
-
-    const sizeLabels = {
-      S: 'ขนาดเล็ก (≤ 119 คน)',
-      M: 'ขนาดกลาง (120 - 719 คน)',
-      L: 'ขนาดใหญ่ (720 - 1,679 คน)',
-      XL: 'ขนาดใหญ่พิเศษ (≥ 1,680 คน)'
-    };
-
-    const sizeStatsTableBody = document.getElementById('sizeStatsTableBody');
-    if (sizeStatsTableBody) {
-      sizeStatsTableBody.innerHTML = '';
-      Object.keys(sizeStats).forEach(key => {
-        const stats = sizeStats[key];
-        const avgRatio = stats.rooms > 0 ? stats.students / stats.rooms : 0;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><strong>${sizeLabels[key]}</strong></td>
-          <td style="text-align: center;">${stats.count}</td>
-          <td style="text-align: right;">${stats.students.toLocaleString()}</td>
-          <td style="text-align: center; font-weight: 700;">${avgRatio.toFixed(1)}</td>
-        `;
-        sizeStatsTableBody.appendChild(tr);
-      });
-    }
-
-    const densityStats = {
-      crowded: { count: 0, students: 0 },
-      standard: { count: 0, students: 0 },
-      roomy: { count: 0, students: 0 }
-    };
-
-    DASHBOARD_DATA.forEach(sch => {
-      const pData = sch[targetPeriod] || sch.y69_2;
-      const ratio = pData.total.rooms > 0 ? pData.total.total / pData.total.rooms : 0;
-      const students = pData.total.total;
-      
-      if (ratio > 35) {
-        densityStats.crowded.count += 1;
-        densityStats.crowded.students += students;
-      } else if (ratio >= 20) {
-        densityStats.standard.count += 1;
-        densityStats.standard.students += students;
-      } else {
-        densityStats.roomy.count += 1;
-        densityStats.roomy.students += students;
-      }
-    });
-
-    const totalStudentsOverall = DASHBOARD_DATA.reduce((sum, s) => {
-      const pData = s[targetPeriod] || s.y69_2;
-      return sum + pData.total.total;
-    }, 0);
-
-    const densityStatsTableBody = document.getElementById('densityStatsTableBody');
-    if (densityStatsTableBody) {
-      densityStatsTableBody.innerHTML = '';
-      
-      const rows = [
-        { label: 'แออัดหนาแน่นสูง (> 35 คน/ห้อง)', stats: densityStats.crowded, color: 'var(--color-error)' },
-        { label: 'ระดับเกณฑ์ดีมาตรฐาน (20-35 คน/ห้อง)', stats: densityStats.standard, color: 'var(--color-success)' },
-        { label: 'ระดับเบาบางมาก (< 20 คน/ห้อง)', stats: densityStats.roomy, color: 'var(--text-muted)' }
-      ];
-
-      rows.forEach(r => {
-        const pct = totalStudentsOverall > 0 ? (r.stats.students / totalStudentsOverall) * 100 : 0;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><span style="color: ${r.color}; font-weight: 600;">■</span> ${r.label}</td>
-          <td style="text-align: center;">${r.stats.count}</td>
-          <td style="text-align: right;">${r.stats.students.toLocaleString()}</td>
-          <td style="text-align: center; font-weight: 700;">${pct.toFixed(1)}%</td>
-        `;
-        densityStatsTableBody.appendChild(tr);
-      });
-    }
-
-    const policyInsightsContent = document.getElementById('policyInsightsContent');
-    if (policyInsightsContent) {
-      const baseLabel = getPeriodLabel(basePeriod);
-      const targetLabel = getPeriodLabel(targetPeriod);
-
-      let bullet1 = `วิเคราะห์เปรียบเทียบเชิงมิติเวลา (${baseLabel} ➔ ${targetLabel}): เพื่อการบริหารจัดการและติดตามพัฒนาการประชากรนักเรียนในสังกัด สพม.สกลนคร`;
-      
-      if (basePeriod === 'y69_1' && targetPeriod === 'y69_2') {
-        bullet1 = `วิเคราะห์การคงอยู่ระหว่างภาคเรียน (เทอม 1 ➔ เทอม 2 ปี 2569): จำนวนนักเรียนทั้งเขตลดลง **-252 คน (-0.56%)** โดยลดลงในระดับ ม.ต้น -126 คน และ ม.ปลาย -126 คน เท่ากันพอดี`;
-        bullet2 = `โรงเรียนที่สูญเสียนักเรียนระหว่างเทอมสูงสุด: **รร.เตรียมอุดมศึกษา ภาคตะวันออกเฉียงเหนือ (-42 คน)**, **รร.ธาตุนารายณ์วิทยา (-39 คน)** และ **รร.มัธยมวานรนิวาส (-31 คน)**`;
-        bullet3 = `โรงเรียนที่มีนักเรียนเพิ่มขึ้นสวนกระแสในเทอม 2: **รร.เทพสวัสดิ์วิทยา (+23 คน หรือ +22.8%)** เพิ่มจาก 101 เป็น 124 คน`;
-        bullet4 = `การบริหารห้องเรียน: ปรับลดลง -4 ห้อง (จาก 1,396 เหลือ 1,392 ห้อง) ช่วยเพิ่มประสิทธิภาพการจัดสรรงบประมาณครู`;
-      } else if (basePeriod === 'y68' && targetPeriod === 'y69_2') {
-        bullet1 = `วิเคราะห์การเปลี่ยนแปลงรอบ 1 ปี (2568 ➔ 2569 เทอม 2): นักเรียนทั้งเขตลดลงสุทธิ **-837 คน (-1.84%)** (จาก 45,403 เหลือ 44,566 คน)`;
-        bullet2 = `โรงเรียนขนาดเล็กและกลางลดลงรวดเร็วกว่าขนาดใหญ่ สะท้อนการเคลื่อนย้ายนักเรียนเข้าสู่สถานศึกษาศูนย์กลาง`;
-        bullet3 = `ห้องเรียนความหนาแน่นวิกฤต (> 37 คน/ห้อง) ยังคงกระจุกตัวที่ **รร.ธาตุนารายณ์วิทยา** และ **รร.สกลราชวิทยานุกูล**`;
-        bullet4 = `ข้อเสนอแนะ: เตรียมแผนรับมือนักเรียนแรกเข้า ม.1 ที่มีแนวโน้มลดลงต่อเนื่องตามอัตราการเกิดของประชากร`;
-      } else {
-        bullet1 = `วิเคราะห์เปรียบเทียบข้อมูลระหว่าง **${baseLabel}** และ **${targetLabel}**: สะท้อนแนวโน้มการเปลี่ยนแปลงตามนโยบาย`;
-        bullet2 = `สามารถเลือกสลับคู่เปรียบเทียบอื่นได้อิสระจากแถบควบคุมด้านบน`;
-        bullet3 = `รายงานระบบแสดงผลสถิติที่จัดกลุ่มตามขนาดโรงเรียนและความหนาแน่นห้องเรียนอย่างเป็นกลาง`;
-        bullet4 = `ส่งออกรายงานผ่านปุ่ม '+ ส่งออกรายงาน PDF' เพื่อนำเสนอต่อคณะกรรมการบริหารเขตพื้นที่ฯ ได้ทันที`;
-      }
-
-      policyInsightsContent.innerHTML = `
-        <div class="insight-bullet">${bullet1}</div>
-        <div class="insight-bullet">${bullet2}</div>
-        <div class="insight-bullet">${bullet3}</div>
-        <div class="insight-bullet">${bullet4}</div>
-      `;
-    }
-  }
 
   // ==========================================
   // Step 5: Executive Policy Brief & Decision Support Module

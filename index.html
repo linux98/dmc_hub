@@ -5,11 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DMC Hub | ศูนย์สารสนเทศและวิเคราะห์สถิตินักเรียน สพม.สกลนคร</title>
   <!-- Favicon Configuration -->
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="shortcut icon" href="favicon.ico">
   <!-- Google Fonts for Google Sans and Sarabun (exact link provided by user) -->
   <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css?v=1.5">
@@ -713,53 +714,76 @@
 
       </section>
 
-      <!-- Pairwise School Comparison Section (New feature) -->
+            <!-- Pairwise School Comparison Section (Enhanced Executive Dossier) -->
       <section class="table-panel" id="comparisonSection" style="display: flex; flex-direction: column; gap: 20px;">
         <div class="panel-header" style="flex-wrap: wrap; gap: 16px;">
           <div class="panel-title">
-            <h3>ระบบวิเคราะห์เปรียบเทียบคู่สถานศึกษาระดับเขต (Pairwise School Comparison)</h3>
-            <p>เลือกโรงเรียนเพื่อนำสถิติมาเปรียบเทียบในมิติต่างๆ แบบเคียงคู่ (Side-by-Side)</p>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; background: rgba(30, 58, 138, 0.1); color: var(--color-primary); font-size: 15px;">
+                ⚖️
+              </span>
+              <h3 style="margin: 0;">ระบบวิเคราะห์เปรียบเทียบคู่สถานศึกษาระดับเขต (School Head-to-Head Dossier Comparison)</h3>
+            </div>
+            <p style="margin-top: 4px;">เปรียบเทียบเจาะลึก 8 มิติเชิงนโยบาย ความหนาแน่น สุขภาวะ อัตราคงอยู่ และระยะห่างทางภูมิศาสตร์ (GIS Distance) เพื่อวางแผนจับคู่พัฒนา</p>
           </div>
           <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-left: auto;">
-            <select id="compareSelectorA" class="control-select" style="min-width: 220px;"></select>
-            <div style="font-weight: 700; color: var(--text-muted);">VS</div>
-            <select id="compareSelectorB" class="control-select" style="min-width: 220px;"></select>
+            <select id="compareSelectorA" class="control-select" style="min-width: 230px; font-weight: 600; color: #1e40af; border-color: #93c5fd;"></select>
+            <div style="font-weight: 800; font-size: 14px; padding: 4px 10px; background: #f1f5f9; border-radius: 6px; color: #64748b; border: 1px solid #cbd5e1;">VS</div>
+            <select id="compareSelectorB" class="control-select" style="min-width: 230px; font-weight: 600; color: #b45309; border-color: #fde68a;"></select>
+            <button id="btnExportCompareExcel" class="btn btn-secondary" style="font-size: 12.5px; padding: 7px 14px; display: inline-flex; align-items: center; gap: 6px;">
+              📥 ส่งออกผลเปรียบเทียบ
+            </button>
           </div>
         </div>
 
-        <div class="comparison-grid">
+        <!-- Quick Matchups Preset Ribbon -->
+        <div class="compare-presets-bar" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 14px; background: rgba(30, 58, 138, 0.03); border: 1px solid rgba(30, 58, 138, 0.1); border-radius: 10px;">
+          <span style="font-size: 12px; font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 5px;">
+            ⚡ แมตช์ด่วนแนะนำ (Quick Presets):
+          </span>
+          <button type="button" class="btn-compare-preset" data-a="47012001" data-b="47022021" style="padding: 5px 12px; font-size: 11.5px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; transition: all 0.2s;">🏆 ศึกขนาดใหญ่พิเศษ (สกลราชฯ vs สว่างแดนดิน)</button>
+          <button type="button" class="btn-compare-preset" data-a="47012014" data-b="47012015" style="padding: 5px 12px; font-size: 11.5px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; transition: all 0.2s;">🌲 คู่โรงเรียนภูพาน (คำเพิ่มฯ vs จันทิมาฯ)</button>
+          <button type="button" class="btn-compare-preset" data-a="47022001" data-b="47022005" style="padding: 5px 12px; font-size: 11.5px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; transition: all 0.2s;">🤝 พี่เลี้ยงคู่พัฒนา (พังโคนฯ vs ลำปลาหางฯ)</button>
+          <button type="button" class="btn-compare-preset" data-a="47012004" data-b="47012002" style="padding: 5px 12px; font-size: 11.5px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; transition: all 0.2s;">🏙️ คู่โรงเรียนเมือง (ธาตุนารายณ์ฯ vs ดงมะไฟฯ)</button>
+        </div>
+
+        <!-- Side-by-Side Cards -->
+        <div class="comparison-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
           <!-- School A Details Card -->
-          <div class="kpi-card" id="schoolCardA" style="flex-direction: column; align-items: stretch; gap: 16px; width: 100%;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-weight: 700; font-size: 16px; color: var(--color-primary);" id="compareNameA">โรงเรียนที่ 1</span>
-              <span id="compareSizeBadgeA" class="trend-badge stable" style="margin-left: auto;">ขนาด S</span>
+          <div class="kpi-card" id="schoolCardA" style="flex-direction: column; align-items: stretch; gap: 14px; width: 100%; border-top: 4px solid #2563eb; background: linear-gradient(180deg, #f8faff 0%, #ffffff 100%);">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: #dbeafe; color: #1e40af;">รร. ฝั่ง A</span>
+                <span style="font-weight: 700; font-size: 16px; color: #1e40af;" id="compareNameA">โรงเรียนที่ 1</span>
+              </div>
+              <span id="compareSizeBadgeA" class="trend-badge stable">ขนาด XL</span>
             </div>
             
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; background: rgba(0,0,0,0.015); padding: 12px; border-radius: var(--radius-md);">
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
               <div style="display: flex; flex-direction: column; gap: 2px;">
-                <span style="font-size: 11px; color: var(--text-muted);" id="compareLabelBaseA">รอบตั้งต้น</span>
-                <span style="font-weight: 700; font-size: 15px;" id="compareStd68A">0 คน</span>
+                <span style="font-size: 11px; color: var(--text-muted);" id="compareLabelBaseA">นักเรียน เทอม 1/69</span>
+                <span style="font-weight: 700; font-size: 15px; color: #0f172a;" id="compareStd68A">0 คน</span>
               </div>
               <div style="display: flex; flex-direction: column; gap: 2px;">
-                <span style="font-size: 11px; color: var(--text-muted);" id="compareLabelTargetA">รอบเปรียบเทียบ</span>
-                <span style="font-weight: 700; font-size: 15px;" id="compareStd69A">0 คน</span>
+                <span style="font-size: 11px; color: var(--text-muted);" id="compareLabelTargetA">นักเรียน เทอม 2/69</span>
+                <span style="font-weight: 700; font-size: 15px; color: #1e40af;" id="compareStd69A">0 คน</span>
               </div>
               <div style="display: flex; flex-direction: column; gap: 2px;">
-                <span style="font-size: 11px; color: var(--text-muted);">การเปลี่ยนแปลง</span>
+                <span style="font-size: 11px; color: var(--text-muted);">คงอยู่ (Zero Dropout)</span>
                 <span id="compareChangeBadgeA" class="trend-badge stable" style="align-self: flex-start; margin-top: 2px;">0.0%</span>
               </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
-              <div style="display: flex; align-items: center; gap: 10px; border: 1px solid var(--border-color); padding: 10px; border-radius: var(--radius-md);">
-                <div style="font-size: 18px; color: var(--color-primary);">🏫</div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+              <div style="display: flex; align-items: center; gap: 10px; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; background: #fff;">
+                <div style="font-size: 18px;">🏫</div>
                 <div style="display: flex; flex-direction: column;">
                   <span style="font-size: 10.5px; color: var(--text-muted);">จำนวนห้องเรียน</span>
                   <span style="font-weight: 700; font-size: 13.5px;" id="compareRoomsA">0 ห้อง</span>
                 </div>
               </div>
-              <div style="display: flex; align-items: center; gap: 10px; border: 1px solid var(--border-color); padding: 10px; border-radius: var(--radius-md);">
-                <div style="font-size: 18px; color: var(--color-primary);">👥</div>
+              <div style="display: flex; align-items: center; gap: 10px; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; background: #fff;">
+                <div style="font-size: 18px;">👥</div>
                 <div style="display: flex; flex-direction: column;">
                   <span style="font-size: 10.5px; color: var(--text-muted);">ความหนาแน่นเฉลี่ย</span>
                   <span style="font-weight: 700; font-size: 13.5px;" id="compareRatioA">0.0 คน/ห้อง</span>
@@ -769,37 +793,40 @@
           </div>
 
           <!-- School B Details Card -->
-          <div class="kpi-card" id="schoolCardB" style="flex-direction: column; align-items: stretch; gap: 16px; width: 100%;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-weight: 700; font-size: 16px; color: #b06000;" id="compareNameB">โรงเรียนที่ 2</span>
-              <span id="compareSizeBadgeB" class="trend-badge stable" style="margin-left: auto;">ขนาด S</span>
+          <div class="kpi-card" id="schoolCardB" style="flex-direction: column; align-items: stretch; gap: 14px; width: 100%; border-top: 4px solid #d97706; background: linear-gradient(180deg, #fffcf5 0%, #ffffff 100%);">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: #fef3c7; color: #b45309;">รร. ฝั่ง B</span>
+                <span style="font-weight: 700; font-size: 16px; color: #b45309;" id="compareNameB">โรงเรียนที่ 2</span>
+              </div>
+              <span id="compareSizeBadgeB" class="trend-badge stable">ขนาด XL</span>
             </div>
             
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; background: rgba(0,0,0,0.015); padding: 12px; border-radius: var(--radius-md);">
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
               <div style="display: flex; flex-direction: column; gap: 2px;">
-                <span style="font-size: 11px; color: var(--text-muted);" id="compareLabelBaseB">รอบตั้งต้น</span>
-                <span style="font-weight: 700; font-size: 15px;" id="compareStd68B">0 คน</span>
+                <span style="font-size: 11px; color: var(--text-muted);" id="compareLabelBaseB">นักเรียน เทอม 1/69</span>
+                <span style="font-weight: 700; font-size: 15px; color: #0f172a;" id="compareStd68B">0 คน</span>
               </div>
               <div style="display: flex; flex-direction: column; gap: 2px;">
-                <span style="font-size: 11px; color: var(--text-muted);" id="compareLabelTargetB">รอบเปรียบเทียบ</span>
-                <span style="font-weight: 700; font-size: 15px;" id="compareStd69B">0 คน</span>
+                <span style="font-size: 11px; color: var(--text-muted);" id="compareLabelTargetB">นักเรียน เทอม 2/69</span>
+                <span style="font-weight: 700; font-size: 15px; color: #b45309;" id="compareStd69B">0 คน</span>
               </div>
               <div style="display: flex; flex-direction: column; gap: 2px;">
-                <span style="font-size: 11px; color: var(--text-muted);">การเปลี่ยนแปลง</span>
+                <span style="font-size: 11px; color: var(--text-muted);">คงอยู่ (Zero Dropout)</span>
                 <span id="compareChangeBadgeB" class="trend-badge stable" style="align-self: flex-start; margin-top: 2px;">0.0%</span>
               </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
-              <div style="display: flex; align-items: center; gap: 10px; border: 1px solid var(--border-color); padding: 10px; border-radius: var(--radius-md);">
-                <div style="font-size: 18px; color: #b06000;">🏫</div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+              <div style="display: flex; align-items: center; gap: 10px; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; background: #fff;">
+                <div style="font-size: 18px;">🏫</div>
                 <div style="display: flex; flex-direction: column;">
                   <span style="font-size: 10.5px; color: var(--text-muted);">จำนวนห้องเรียน</span>
                   <span style="font-weight: 700; font-size: 13.5px;" id="compareRoomsB">0 ห้อง</span>
                 </div>
               </div>
-              <div style="display: flex; align-items: center; gap: 10px; border: 1px solid var(--border-color); padding: 10px; border-radius: var(--radius-md);">
-                <div style="font-size: 18px; color: #b06000;">👥</div>
+              <div style="display: flex; align-items: center; gap: 10px; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; background: #fff;">
+                <div style="font-size: 18px;">👥</div>
                 <div style="display: flex; flex-direction: column;">
                   <span style="font-size: 10.5px; color: var(--text-muted);">ความหนาแน่นเฉลี่ย</span>
                   <span style="font-weight: 700; font-size: 13.5px;" id="compareRatioB">0.0 คน/ห้อง</span>
@@ -809,12 +836,42 @@
           </div>
         </div>
 
+        <!-- 8-Dimensional Head-to-Head Scoreboard Table -->
+        <div class="responsive-table-wrapper" style="border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; background: #fff;">
+          <table class="dashboard-table" style="font-size: 13px; margin: 0;">
+            <thead>
+              <tr style="background: #f8fafc;">
+                <th style="text-align: left; width: 28%; font-weight: 700; color: #475569;">มิติการประชันสถิติ (Key Dimensions)</th>
+                <th style="text-align: center; width: 33%; color: #1e40af; font-weight: 700;" id="h2hHeaderA">โรงเรียนฝั่ง A</th>
+                <th style="text-align: center; width: 6%; color: #94a3b8; font-weight: 800;">VS</th>
+                <th style="text-align: center; width: 33%; color: #b45309; font-weight: 700;" id="h2hHeaderB">โรงเรียนฝั่ง B</th>
+              </tr>
+            </thead>
+            <tbody id="h2hScoreboardBody">
+              <!-- Rendered dynamically by updateComparison -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Executive AI Policy Verdict & GIS Distance Box -->
+        <div id="compareVerdictCard" style="background: linear-gradient(135deg, #eff6ff 0%, #fefce8 100%); border: 1px solid #bfdbfe; border-radius: var(--radius-md); padding: 16px 20px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+            <span style="font-size: 18px;">💡</span>
+            <h4 style="margin: 0; font-size: 14px; font-weight: 700; color: #1e3a8a;">
+              บทวิเคราะห์สังเคราะห์เชิงนโยบายสำหรับผู้บริหาร (Executive Policy Verdict)
+            </h4>
+          </div>
+          <div id="compareVerdictContent" style="font-size: 12.5px; line-height: 1.65; color: #334155;">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
         <!-- Grade Distribution Comparison Chart -->
-        <div style="margin-top: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px;">
+        <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; background: #fff;">
           <h4 id="comparisonBarChartTitle" style="font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
             📊 กราฟแท่งเปรียบเทียบสัดส่วนนักเรียนรายชั้นเรียน (ม.1 - ม.6)
           </h4>
-          <div class="chart-area" style="height: 240px; position: relative; width: 100%;">
+          <div class="chart-area" style="height: 250px; position: relative; width: 100%;">
             <canvas id="comparisonBarChart"></canvas>
           </div>
         </div>
@@ -1403,92 +1460,124 @@
         </div>
       </section>
 
-      <!-- Step 4: Teacher Staffing & Capitation Grant Estimator Section -->
+            <!-- Step 4: Budget & Equity Simulator (15-Year Free Education & CCT Poverty Grant) -->
       <section class="table-panel" id="resourceSection" style="display: flex; flex-direction: column; gap: 20px;">
         <div class="panel-header" style="flex-wrap: wrap; gap: 16px;">
           <div class="panel-title">
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; background: rgba(16, 35, 63, 0.1); color: var(--color-primary);">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-                </svg>
+              <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; background: rgba(217, 119, 6, 0.1); color: #d97706; font-size: 15px;">
+                💰
               </span>
-              <h3 style="margin: 0;">ระบบประมาณการเงินอุดหนุนรายหัวและทรัพยากรสถานศึกษา (Capitation Grant & Resource Estimator)</h3>
+              <h3 style="margin: 0;">ระบบประมาณการงบประมาณ 15 ปี เรียนฟรี & ทุนเสมอภาคยากจน (Budget & Equity Simulator)</h3>
             </div>
-            <p style="margin-top: 4px;">การประมาณการจัดสรรเงินอุดหนุนรายหัว สพฐ. ประจำปี และโครงสร้างขนาดสถานศึกษา สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาสกลนคร</p>
+            <p style="margin-top: 4px;">จำลองงบประมาณ 3 เสาหลัก: เงินอุดหนุนรายหัวพื้นฐาน, 5 รายการเรียนฟรี 15 ปี และทุนเสมอภาคการศึกษา (CCT) สำหรับ 45 สถานศึกษา สพม.สกลนคร</p>
           </div>
           <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-left: auto;">
-            <button id="exportResourceExcelBtn" class="primary-btn" style="background: var(--color-primary); border-color: var(--color-primary); color: #ffffff; font-size: 12.5px; padding: 7px 14px; cursor: pointer; display: inline-flex; align-items: center;">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              ส่งออกรายงานงบประมาณ (Excel)
+            <button id="exportResourceExcelBtn" class="primary-btn" style="background: var(--color-primary); border-color: var(--color-primary); color: #ffffff; font-size: 12.5px; padding: 7px 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              ส่งออกรายงานงบประมาณ & ทุนเสมอภาค (Excel)
             </button>
           </div>
         </div>
 
-        <!-- 4 Resource KPI Cards -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
-          <div class="kpi-card" style="flex-direction: column; align-items: flex-start; gap: 6px; width: 100%;">
-            <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
-              <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 500;">ประมาณการเงินอุดหนุนรายหัวรวม สพฐ.</span>
-              <span class="trend-badge warning" style="font-size: 10px; padding: 1px 6px; background: rgba(194, 142, 56, 0.15); color: var(--color-gold);">ประมาณการจำลอง</span>
+        <!-- Interactive Budget & Equity Simulator Controls Card -->
+        <div class="budget-simulator-card" style="background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%); border: 1px solid #bfdbfe; border-radius: var(--radius-md); padding: 18px 20px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 16px;">🎛️</span>
+              <span style="font-weight: 700; font-size: 13.5px; color: #1e40af;">แผงควบคุมการจำลองสถานการณ์งบประมาณ (Interactive What-If Simulation)</span>
             </div>
-            <div style="display: flex; align-items: baseline; gap: 8px;">
-              <span id="resourceKpiTotalGrant" style="font-size: 24px; font-weight: 700; color: var(--color-primary);">179.63 ล้านบาท</span>
-              <span class="trend-badge positive" style="font-size: 11px;">ประจำปี 2569</span>
-            </div>
-            <span style="font-size: 11px; color: var(--text-muted);" id="resourceKpiTotalGrantSub">ม.ต้น 91.21M บ. | ม.ปลาย 88.43M บ.</span>
+            <button id="btnResetBudgetSim" type="button" style="padding: 4px 10px; font-size: 11.5px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; color: #475569; cursor: pointer;">
+              🔄 รีเซ็ตค่ามาตรฐาน สพฐ.
+            </button>
           </div>
 
-          <div class="kpi-card" style="flex-direction: column; align-items: flex-start; gap: 6px; width: 100%;">
-            <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 500;">โครงสร้างห้องเรียนรวมทั้งเขต</span>
-            <div style="display: flex; align-items: baseline; gap: 8px;">
-              <span id="resourceKpiRoomsTotal" style="font-size: 24px; font-weight: 700; color: var(--color-gold);">1,392 ห้อง</span>
-              <span class="trend-badge stable" style="font-size: 11px;">45 โรงเรียน</span>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px;">
+            <!-- Slider 1: CCT Poverty % -->
+            <div style="background: #ffffff; padding: 14px 16px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 12px; font-weight: 600; color: #334155;">สัดส่วนนักเรียนยากจนพิเศษ (CCT Poverty Rate):</span>
+                <span id="sliderCctVal" style="font-weight: 700; font-size: 13px; color: #d97706; padding: 2px 8px; background: #fef3c7; border-radius: 4px;">30%</span>
+              </div>
+              <input type="range" id="sliderCctRate" min="10" max="60" value="30" step="5" style="width: 100%; accent-color: #d97706; cursor: pointer;">
+              <span style="font-size: 11px; color: #64748b;">* อุดหนุนทุนเสมอภาค 3,000 บาท/คน/ปี สำหรับกลุ่มเปราะบาง</span>
             </div>
-            <span style="font-size: 11px; color: var(--text-muted);" id="resourceKpiRoomsSub">ม.ต้น 750 ห้อง | ม.ปลาย 642 ห้อง (เฉลี่ย 31.0 ห้อง/แห่ง)</span>
-          </div>
 
-          <div class="kpi-card" style="flex-direction: column; align-items: flex-start; gap: 6px; width: 100%;">
-            <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 500;">ความหนาแน่นเฉลี่ยต่อห้องเรียน</span>
-            <div style="display: flex; align-items: baseline; gap: 8px;">
-              <span style="font-size: 24px; font-weight: 700; color: var(--color-success);">32.0 คน/ห้อง</span>
-              <span class="trend-badge positive" style="font-size: 11px;">เกณฑ์มาตรฐาน</span>
+            <!-- Slider 2: Policy Multiplier % -->
+            <div style="background: #ffffff; padding: 14px 16px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 12px; font-weight: 600; color: #334155;">การปรับเพิ่มเงินอุดหนุนตามนโยบาย (Policy Multiplier):</span>
+                <span id="sliderPolicyVal" style="font-weight: 700; font-size: 13px; color: #1e40af; padding: 2px 8px; background: #dbeafe; border-radius: 4px;">+0%</span>
+              </div>
+              <input type="range" id="sliderPolicyMultiplier" min="0" max="20" value="0" step="2" style="width: 100%; accent-color: #1e40af; cursor: pointer;">
+              <span style="font-size: 11px; color: #64748b;">* ทดลองกรณี ครม. ปรับเพิ่มเงินอุดหนุนการศึกษาขั้นพื้นฐาน</span>
             </div>
-            <span style="font-size: 11px; color: var(--text-muted);">มาตรฐาน สพฐ. 30 - 35 คนต่อห้องเรียน</span>
-          </div>
 
-          <div class="kpi-card" style="flex-direction: column; align-items: flex-start; gap: 6px; width: 100%;">
-            <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
-              <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 500;">ผลกระทบงบประมาณจากการหลุดระหว่างเทอม</span>
-              <span class="trend-badge negative" style="font-size: 10px; padding: 1px 6px;">ผลต่างจำลอง</span>
+            <!-- Cluster Filter Dropdown -->
+            <div style="background: #ffffff; padding: 14px 16px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 8px;">
+              <span style="font-size: 12px; font-weight: 600; color: #334155;">กรองตามสหวิทยาเขต (Cluster Filter):</span>
+              <select id="budgetSimClusterFilter" class="control-select" style="width: 100%; font-size: 12.5px; padding: 6px 10px;">
+                <option value="ALL">ทุกสหวิทยาเขต (ทั้ง 8 เขต 45 โรงเรียน)</option>
+              </select>
+              <span style="font-size: 11px; color: #64748b;">* เจาะดูงบประมาณเฉพาะพื้นที่สหวิทยาเขต</span>
             </div>
-            <div style="display: flex; align-items: baseline; gap: 8px;">
-              <span id="resourceKpiBudgetDiff" style="font-size: 24px; font-weight: 700; color: var(--color-error);">-1,023,100 บาท</span>
-              <span class="trend-badge negative" style="font-size: 11px;">-252 คน</span>
-            </div>
-            <span style="font-size: 11px; color: var(--text-muted);">เทอม 1 ➔ เทอม 2 ปี 2569</span>
           </div>
         </div>
 
-        <!-- Methodology & Disclaimer Box -->
-        <div style="background: rgba(16, 35, 63, 0.03); border: 1px solid rgba(16, 35, 63, 0.12); border-radius: var(--radius-md); padding: 12px 16px; font-size: 12px; line-height: 1.6; color: var(--text-muted);">
-          <div style="font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-            คำชี้แจงเกณฑ์การคำนวณและข้อจำกัดความรับผิดชอบของข้อมูล (Methodology & Official Disclaimer)
+        <!-- 4 Resource & Equity KPI Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+          <div class="kpi-card" style="flex-direction: column; align-items: flex-start; gap: 6px; width: 100%; border-top: 3px solid #1e40af;">
+            <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+              <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 600;">1. เงินอุดหนุนรายหัวพื้นฐาน (สพฐ.)</span>
+              <span class="trend-badge positive" style="font-size: 10px;">รายหัว</span>
+            </div>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span id="resourceKpiTotalGrant" style="font-size: 22px; font-weight: 700; color: #1e40af;">179.63 ล้านบาท</span>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted);" id="resourceKpiTotalGrantSub">ม.ต้น 3,800 บ. | ม.ปลาย 4,300 บ.</span>
           </div>
-          <div>
-            <strong>1. ข้อมูลนักเรียนและห้องเรียน:</strong> เป็นข้อมูลสถิติจริงที่ผ่านการตรวจสอบและยืนยันความถูกต้องจากระบบ Data Management Center (DMC) ของ สพฐ. ณ วันที่ 10 พฤศจิกายน 2569 (44,566 คน / 1,392 ห้องเรียน)
+
+          <div class="kpi-card" style="flex-direction: column; align-items: flex-start; gap: 6px; width: 100%; border-top: 3px solid #059669;">
+            <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+              <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 600;">2. งบ 5 รายการเรียนฟรี 15 ปี</span>
+              <span class="trend-badge positive" style="font-size: 10px; background: #d1fae5; color: #065f46;">เรียนฟรี 15 ปี</span>
+            </div>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span id="resourceKpiFreeTotal" style="font-size: 22px; font-weight: 700; color: #059669;">140.54 ล้านบาท</span>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted);" id="resourceKpiFreeSub">หนังสือ, อุปกรณ์, เครื่องแบบ, กิจกรรม</span>
           </div>
-          <div>
-            <strong>2. ประมาณการเงินอุดหนุนรายหัว:</strong> เป็นการคำนวณแบบจำลองเชิงสารสนเทศเบื้องต้น (Estimated Simulation Model) อ้างอิงตามอัตราเงินอุดหนุนค่าจัดการเรียนการสอนขั้นพื้นฐานของ สพฐ. (มัธยมศึกษาตอนต้น 3,800 บาท/คน/ปี และ มัธยมศึกษาตอนปลาย 4,300 บาท/คน/ปี) เพื่อประโยชน์ในการฉายภาพภาระงานและขนาดทรัพยากรสถานศึกษาในภาพรวมเชิงนโยบายเท่านั้น <em>มิใช่ยอดจัดสรรงบประมาณจริงสุทธิจาก สพฐ.</em> ทั้งนี้ ยอดงบประมาณที่ได้รับจัดสรรจริงจะขึ้นอยู่กับหลักเกณฑ์ รายการอุดหนุนเฉพาะ และการจัดสรรผ่านระบบ GFMIS ของกลุ่มนโยบายและแผน/กลุ่มบริหารงานการเงินและสินทรัพย์
+
+          <div class="kpi-card" style="flex-direction: column; align-items: flex-start; gap: 6px; width: 100%; border-top: 3px solid #d97706;">
+            <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+              <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 600;">3. เงินอุดหนุนปัจจัยยากจน (CCT)</span>
+              <span class="trend-badge warning" style="font-size: 10px; background: #fef3c7; color: #b45309;">ทุนเสมอภาค</span>
+            </div>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span id="resourceKpiCctTotal" style="font-size: 22px; font-weight: 700; color: #d97706;">40.11 ล้านบาท</span>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted);" id="resourceKpiCctSub">ประมาณการยากจนพิเศษ 13,370 คน</span>
+          </div>
+
+          <div class="kpi-card" style="flex-direction: column; align-items: flex-start; gap: 6px; width: 100%; border-top: 3px solid #7c3aed; background: linear-gradient(180deg, #faf5ff 0%, #fff 100%);">
+            <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+              <span style="font-size: 11.5px; color: #581c87; font-weight: 700;">ยอดรวมแพ็กเกจงบประมาณทั้งสิ้น</span>
+              <span class="trend-badge positive" style="font-size: 10px; background: #ede9fe; color: #6b21a8;">Grand Total</span>
+            </div>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span id="resourceKpiGrandPackage" style="font-size: 22px; font-weight: 800; color: #6b21a8;">360.28 ล้านบาท</span>
+            </div>
+            <span style="font-size: 11px; color: #6b21a8; font-weight: 600;" id="resourceKpiAvgPerStudent">เฉลี่ย 8,084 บาท/คน/ปี</span>
           </div>
         </div>
 
         <!-- Mode Switcher Tabs for Resource View -->
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 5px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
           <div class="cluster-tabs-container" style="margin: 0;">
-            <button class="cluster-tab-btn active resource-view-btn" data-view="budget">ประมาณการเงินอุดหนุนรายหัว (สพฐ.)</button>
+            <button class="cluster-tab-btn active resource-view-btn" data-view="package">💰 แพ็กเกจงบรวม (รายหัว + เรียนฟรี + ทุน CCT)</button>
+            <button class="cluster-tab-btn resource-view-btn" data-view="free">📚 5 รายการเรียนฟรี 15 ปี (สพฐ.)</button>
+            <button class="cluster-tab-btn resource-view-btn" data-view="cct">🤝 ทุนเสมอภาคยากจนพิเศษ (CCT กสศ.)</button>
+            <button class="cluster-tab-btn resource-view-btn" data-view="budget">🏛️ เงินอุดหนุนรายหัวพื้นฐาน (สพฐ.)</button>
           </div>
           <div style="display: flex; align-items: center; gap: 10px;">
             <input type="text" id="resourceSearchInput" class="control-select" style="padding: 6px 12px; font-size: 12px; min-width: 170px;" placeholder="ค้นหาโรงเรียน...">
@@ -1500,7 +1589,7 @@
           <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; background: var(--bg-card); display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between;">
               <h4 id="resourceChartTitle1" style="font-size: 13px; font-weight: 700; color: var(--text-main); margin: 0;">
-                🏫 การจัดสรรเงินอุดหนุนรายหัว จำแนกตามขนาดโรงเรียน (S / M / L / XL)
+                📊 โครงสร้างสัดส่วนงบประมาณ 3 กลุ่มหลัก (Budget Composition)
               </h4>
             </div>
             <div style="height: 240px; position: relative;">
@@ -1511,7 +1600,7 @@
           <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; background: var(--bg-card); display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between;">
               <h4 id="resourceChartTitle2" style="font-size: 13px; font-weight: 700; color: var(--text-main); margin: 0;">
-                💰 การจัดสรรเงินอุดหนุนรายหัว จำแนกตามระดับชั้น (ม.ต้น vs ม.ปลาย)
+                🌐 การจัดสรรงบประมาณรวม จำแนกตาม 8 สหวิทยาเขต (ล้านบาท)
               </h4>
             </div>
             <div style="height: 240px; position: relative;">
@@ -1529,10 +1618,10 @@
                 <th style="text-align: left;">ชื่อโรงเรียน</th>
                 <th style="text-align: center;">ขนาด</th>
                 <th style="text-align: right;">นักเรียนรวม (คน)</th>
-                <th style="text-align: center;">ห้องเรียน</th>
-                <th style="text-align: right; color: var(--color-primary); font-weight: 700;">เงินอุดหนุน ม.ต้น (บาท)</th>
-                <th style="text-align: right; color: var(--color-primary); font-weight: 700;">เงินอุดหนุน ม.ปลาย (บาท)</th>
-                <th style="text-align: right; color: var(--color-gold); font-weight: 700;">เงินอุดหนุนรวม (บาท)</th>
+                <th style="text-align: right; color: #1e40af; font-weight: 700;">เงินรายหัว (บาท)</th>
+                <th style="text-align: right; color: #059669; font-weight: 700;">เรียนฟรี 15 ปี (บาท)</th>
+                <th style="text-align: right; color: #d97706; font-weight: 700;">ทุนยากจน CCT (บาท)</th>
+                <th style="text-align: right; color: #6b21a8; font-weight: 800;">งบรวมสุทธิ (บาท)</th>
                 <th style="text-align: right;">เฉลี่ยต่อคน (บาท)</th>
               </tr>
             </thead>
