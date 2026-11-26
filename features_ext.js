@@ -609,6 +609,12 @@
     if (btnSubmitPin) btnSubmitPin.addEventListener('click', handlePinSubmit);
     if (btnCancelPin) btnCancelPin.addEventListener('click', closeAuthModal);
     if (pinInput) {
+      pinInput.addEventListener('input', () => {
+        const val = pinInput.value.trim();
+        if (val.length === 4) {
+          handlePinSubmit();
+        }
+      });
       pinInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') handlePinSubmit();
       });
@@ -1810,6 +1816,12 @@
     }
 
     if (pinInput) {
+      pinInput.addEventListener('input', () => {
+        const val = pinInput.value.trim();
+        if (val.length === 4) {
+          handleCopilotPinSubmit();
+        }
+      });
       pinInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
