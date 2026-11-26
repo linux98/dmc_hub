@@ -1326,7 +1326,7 @@
       { title: 'ติดตามรุ่นนักเรียน (Cohort Tracking)', desc: 'การเลื่อนชั้น ม.1 สู่ ม.6 ข้ามปี', tag: 'โมดูล', targetId: 'cohortSection' },
       { title: 'ดัชนีสุขภาวะ 45 ร.ร. (Health Index)', desc: 'เรดาร์ชาร์ต 100 คะแนนเต็ม 5 มิติ', tag: 'โมดูล', targetId: 'healthIndexSection' },
       { title: 'สคริปต์รายงาน ผอ.เขต 🔒', desc: 'เครื่องมือสร้างสุนทรพจน์ทางการ กศจ./สพฐ.', tag: 'เครื่องมือ', targetId: 'openExecutiveSpeechBtn', isButton: true },
-      { title: 'AI Executive Policy Copilot 🔒', desc: 'ผู้ช่วยอัจฉริยะ ผอ.เขต (ต้องใส่รหัส 6547)', tag: 'เครื่องมือ', targetId: 'btnOpenCopilot', isButton: true },
+      { title: 'AI Executive Policy Copilot 🔒', desc: 'ผู้ช่วยอัจฉริยะ ผอ.เขต (ต้องใส่รหัส 6547)', tag: 'เครื่องมือ', targetId: 'menuAiCopilot', isButton: true },
       { title: 'เส้นทางตรวจเยี่ยมโรงเรียน (Route Planner)', desc: 'ระบบวางแผนเส้นทางตรวจราชการและคำนวณเวลา', tag: 'เครื่องมือ', targetId: 'btnToggleRoutePlanner', isButton: true },
       { title: 'เอกสารสรุปหน้าเดียว A4 (One-Pager)', desc: 'พรีวิวและพิมพ์สรุปนโยบายหน้าเดียว A4', tag: 'เอกสาร', targetId: 'btnOpenOnePager', isButton: true }
     ];
@@ -1644,7 +1644,7 @@
     const statusDot = document.getElementById('copilotStatusDot');
     const statusText = document.getElementById('copilotStatusText');
 
-    if (!btnOpen || !modal || !form || !input || !msgBox) return;
+    if (!modal || !form || !input || !msgBox) return;
 
     function openCopilotAuthModal() {
       if (!authModal) return;
@@ -1656,6 +1656,7 @@
       if (pinErrorMsg) pinErrorMsg.style.display = 'none';
       if (authCard) authCard.classList.remove('shake');
     }
+    window.openCopilotAuthModal = openCopilotAuthModal;
 
     function closeCopilotAuthModal() {
       if (authModal) authModal.style.display = 'none';
@@ -1810,9 +1811,11 @@
       });
     }
 
-    btnOpen.addEventListener('click', () => {
-      openCopilotAuthModal();
-    });
+    if (btnOpen) {
+      btnOpen.addEventListener('click', () => {
+        openCopilotAuthModal();
+      });
+    }
 
     if (btnSubmitPin) {
       btnSubmitPin.addEventListener('click', handleCopilotPinSubmit);
