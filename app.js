@@ -714,10 +714,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const isCollapsed = appContainer.classList.contains('sidebar-collapsed');
         localStorage.setItem('dmc_sidebar_collapsed', isCollapsed ? 'true' : 'false');
         
-        // Trigger chart redraw to fit new width
+        // Trigger chart redraw to fit new width & invalidate Leaflet map
         setTimeout(() => {
           window.dispatchEvent(new Event('resize'));
-        }, 260);
+          if (window.forceMapResize) window.forceMapResize();
+          if (window.gisMap) window.gisMap.invalidateSize();
+        }, 100);
+        setTimeout(() => {
+          window.dispatchEvent(new Event('resize'));
+          if (window.forceMapResize) window.forceMapResize();
+          if (window.gisMap) window.gisMap.invalidateSize();
+        }, 300);
       } else {
         // Mobile: Toggle slide-out drawer
         if (sidebar) sidebar.classList.toggle('open');
