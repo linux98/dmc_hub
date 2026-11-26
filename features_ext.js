@@ -1859,6 +1859,60 @@
       });
     });
 
+    // Clear Chat History Button & Copy Buttons
+    const btnClearChat = document.getElementById('btnClearChatHistory');
+
+    function bindCopyButtons(container) {
+      if (!container) return;
+      container.querySelectorAll('.btn-copy-bubble').forEach(btn => {
+        if (btn.dataset.bound) return;
+        btn.dataset.bound = 'true';
+        btn.addEventListener('click', () => {
+          const card = btn.closest('.copilot-msg-card');
+          const content = card ? card.querySelector('.msg-content') : null;
+          if (content) {
+            navigator.clipboard.writeText(content.innerText).then(() => {
+              btn.textContent = '✓ คัดลอกแล้ว';
+              btn.classList.add('copied');
+              setTimeout(() => {
+                btn.textContent = '📋 คัดลอก';
+                btn.classList.remove('copied');
+              }, 2000);
+            }).catch(() => {
+              btn.textContent = '✓ คัดลอกแล้ว';
+            });
+          }
+        });
+      });
+    }
+
+    bindCopyButtons(msgBox);
+
+    if (btnClearChat) {
+      btnClearChat.addEventListener('click', () => {
+        chatHistory = [];
+        msgBox.innerHTML = `
+          <div class="copilot-msg bot">
+            <div class="copilot-msg-card">
+              <div class="copilot-msg-header">
+                <div class="copilot-msg-author">
+                  <span class="copilot-bot-sparkle">✨</span>
+                  <strong>AI Executive Copilot</strong>
+                  <span class="copilot-engine-tag">DMC Engine</span>
+                </div>
+                <button type="button" class="btn-copy-bubble" title="คัดลอกข้อความ">📋 คัดลอก</button>
+              </div>
+              <div class="msg-content">
+                สวัสดีครับท่านผู้อำนวยการและคณะทำงาน สพม.สกลนคร! 🙏 ผมคือ <strong>AI Executive Policy Copilot</strong> ผู้ช่วยสังเคราะห์ข้อมูลสารสนเทศทางการศึกษา<br><br>
+                ล้างประวัติการสนทนาเรียบร้อยแล้วครับ เชิญพิมพ์คำถามเชิงนโยบายเพื่อเริ่มการวิเคราะห์ใหม่ได้ทันทีครับ!
+              </div>
+            </div>
+          </div>
+        `;
+        bindCopyButtons(msgBox);
+      });
+    }
+
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       const text = input.value.trim();
@@ -1870,7 +1924,25 @@
     function addMessage(sender, text) {
       const msgDiv = document.createElement('div');
       msgDiv.className = `copilot-msg ${sender}`;
-      msgDiv.innerHTML = `<div class="msg-bubble">${text}</div>`;
+      if (sender === 'user') {
+        msgDiv.innerHTML = `<div class="user-bubble">${text}</div>`;
+      } else {
+        const engineLabel = getSavedApiKey() ? 'Gemini 1.5' : 'DMC Intelligence';
+        msgDiv.innerHTML = `
+          <div class="copilot-msg-card">
+            <div class="copilot-msg-header">
+              <div class="copilot-msg-author">
+                <span class="copilot-bot-sparkle">✨</span>
+                <strong>AI Executive Copilot</strong>
+                <span class="copilot-engine-tag">${engineLabel}</span>
+              </div>
+              <button type="button" class="btn-copy-bubble" title="คัดลอกข้อความ">📋 คัดลอก</button>
+            </div>
+            <div class="msg-content">${text}</div>
+          </div>
+        `;
+        bindCopyButtons(msgDiv);
+      }
       msgBox.appendChild(msgDiv);
       msgBox.scrollTop = msgBox.scrollHeight;
       return msgDiv;
@@ -1881,9 +1953,11 @@
       typingDiv.className = 'copilot-msg bot typing-msg';
       typingDiv.id = 'copilotTypingIndicator';
       typingDiv.innerHTML = `
-        <div class="msg-bubble" style="color: #64748b; font-size: 12px; display: flex; align-items: center; gap: 8px;">
-          <div class="typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>
-          <span>${label || 'กำลังคิดและสังเคราะห์คำตอบ...'}</span>
+        <div class="copilot-msg-card" style="padding: 10px 14px; background: rgba(255, 255, 255, 0.95);">
+          <div style="color: #64748b; font-size: 12px; display: flex; align-items: center; gap: 8px;">
+            <div class="typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>
+            <span>${label || 'กำลังคิดและสังเคราะห์คำตอบเชิงนโยบาย...'}</span>
+          </div>
         </div>
       `;
       msgBox.appendChild(typingDiv);
@@ -1899,15 +1973,56 @@
     function formatMarkdown(text) {
       if (!text) return '';
       let out = text;
+
+      // Tables
+      if (out.includes('|')) {
+        const lines = out.split('\n');
+        let inTable = false;
+        let tableHtml = '';
+        let newLines = [];
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (line.startsWith('|') && line.endsWith('|')) {
+            if (!inTable) {
+              inTable = true;
+              tableHtml = '<table class="copilot-markdown-table">';
+            }
+            if (line.includes('---')) {
+              continue;
+            }
+            const cells = line.split('|').slice(1, -1);
+            const isHeader = !tableHtml.includes('<tbody>') && !tableHtml.includes('<tr>');
+            if (isHeader) {
+              tableHtml += '<thead><tr>' + cells.map(c => `<th>${c.trim()}</th>`).join('') + '</tr></thead><tbody>';
+            } else {
+              tableHtml += '<tr>' + cells.map(c => `<td>${c.trim()}</td>`).join('') + '</tr>';
+            }
+          } else {
+            if (inTable) {
+              inTable = false;
+              tableHtml += '</tbody></table>';
+              newLines.push(tableHtml);
+              tableHtml = '';
+            }
+            newLines.push(lines[i]);
+          }
+        }
+        if (inTable) {
+          tableHtml += '</tbody></table>';
+          newLines.push(tableHtml);
+        }
+        out = newLines.join('\n');
+      }
+
       // Headings
-      out = out.replace(/^### (.*?)$/gm, '<h4 style="margin: 8px 0 4px; color: #1e3a8a; font-size: 13.5px;">$1</h4>');
-      out = out.replace(/^## (.*?)$/gm, '<h3 style="margin: 10px 0 6px; color: #1e3a8a; font-size: 14.5px;">$1</h3>');
+      out = out.replace(/^### (.*?)$/gm, '<h4 style="margin: 8px 0 4px; color: #1e3a8a; font-size: 13.5px; font-weight: 700;">$1</h4>');
+      out = out.replace(/^## (.*?)$/gm, '<h3 style="margin: 10px 0 6px; color: #1e3a8a; font-size: 14.5px; font-weight: 700;">$1</h3>');
       // Bold & Italic
       out = out.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
       out = out.replace(/\*(.*?)\*/g, '<em>$1</em>');
       // Lists
-      out = out.replace(/^\s*[\*\-]\s+(.*?)$/gm, '• $1<br>');
-      out = out.replace(/^\s*(\d+)\.\s+(.*?)$/gm, '<strong>$1.</strong> $2<br>');
+      out = out.replace(/^\s*[\*\-]\s+(.*?)$/gm, '<div style="margin-left: 8px; margin-bottom: 3px;">• $1</div>');
+      out = out.replace(/^\s*(\d+)\.\s+(.*?)$/gm, '<div style="margin-left: 8px; margin-bottom: 3px;"><strong>$1.</strong> $2</div>');
       // Line breaks
       out = out.replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>');
       return out;

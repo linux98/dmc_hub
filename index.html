@@ -2589,18 +2589,39 @@
   <!-- AI Executive Copilot Drawer Modal -->
   <div id="copilotModal" class="copilot-drawer-overlay" style="display: none;">
     <div class="copilot-drawer">
+      <!-- Header -->
       <div class="copilot-drawer-header">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <div class="copilot-avatar">🤖</div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="copilot-avatar">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </div>
           <div>
-            <h4 style="margin: 0; font-size: 14.5px; color: #ffffff;">AI Executive Policy Copilot</h4>
-            <span style="font-size: 11px; color: #93c5fd;">ผู้ช่วยอัจฉริยะ ผอ.สพม.สกลนคร • Gemini AI & DMC Engine</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <h4 class="copilot-title">AI Executive Policy Copilot</h4>
+              <span class="copilot-badge-live">Live</span>
+            </div>
+            <div class="copilot-subtitle">
+              <span>สพม.สกลนคร • Executive Dual-Engine Intelligence</span>
+            </div>
           </div>
         </div>
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <button id="btnLockCopilot" class="copilot-header-btn" title="ล็อกเซสชัน AI (Passcode: 6547)">🔒</button>
-          <button id="btnToggleCopilotSettings" class="copilot-header-btn" title="ตั้งค่าเชื่อมต่อ Gemini AI เพื่อให้ตอบได้ทุกเรื่อง">⚙️</button>
-          <button id="btnCloseCopilot" class="copilot-close-btn">&times;</button>
+        <div class="copilot-header-actions">
+          <button id="btnLockCopilot" class="copilot-header-btn" title="ล็อกเซสชัน AI (Passcode: 6547)">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </button>
+          <button id="btnToggleCopilotSettings" class="copilot-header-btn" title="ตั้งค่าเชื่อมต่อ Gemini AI เพื่อให้ตอบได้ทุกเรื่อง">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1 2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </button>
+          <button id="btnCloseCopilot" class="copilot-close-btn" title="ปิดหน้าต่าง">&times;</button>
         </div>
       </div>
 
@@ -2616,11 +2637,13 @@
       <!-- Collapsible Gemini API Key Settings Panel -->
       <div class="copilot-settings-panel" id="copilotSettingsPanel" style="display: none;">
         <div class="settings-panel-header">
-          <div style="font-weight: 700; color: #1e3a8a; font-size: 12.5px;">🔑 เชื่อมต่อ Google Gemini AI (เพื่อให้ตอบได้ทุกอย่าง)</div>
+          <div style="font-weight: 700; color: #1e3a8a; font-size: 13px; display: flex; align-items: center; gap: 6px;">
+            <span>🔑</span> <span>เชื่อมต่อ Google Gemini AI (ตอบได้ทุกคำถามในโลก)</span>
+          </div>
           <button id="btnCloseSettingsPanel" class="settings-close-btn">&times;</button>
         </div>
-        <div style="font-size: 11.5px; color: #64748b; margin-bottom: 8px;">
-          เชื่อมต่อ Gemini 1.5 Flash เพื่อให้ Copilot ตอบได้ทุกคำถามในโลก พร้อมวิเคราะห์ฐานข้อมูล DMC ทั้ง 45 ร.ร.
+        <div style="font-size: 12px; color: #64748b; margin-bottom: 10px; line-height: 1.5;">
+          เชื่อมต่อ <strong>Gemini 1.5 Flash</strong> เพื่อให้ Copilot ตอบได้ทุกคำถาม ทั้งการกำหนดนโยบายการศึกษา ร่างสุนทรพจน์ และวิเคราะห์ข้อมูล DMC เจาะลึก
         </div>
         <div class="api-key-input-group">
           <input type="password" id="copilotApiKeyInput" class="copilot-key-input" placeholder="วาง Google Gemini API Key ที่นี่ (AIzaSy...)" autocomplete="off">
@@ -2634,38 +2657,72 @@
           <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="link-get-key">
             👉 ยังไม่มีคีย์? คลิกที่นี่เพื่อขอรับฟรีจาก Google AI Studio (ฟรีและไม่มีค่าใช้จ่าย)
           </a>
-          <span class="security-note">🔒 ปลอดภัย 100%: คีย์จะถูกบันทึกเฉพาะในเบราว์เซอร์ของท่านเท่านั้น ไม่มีการส่งไปเซิร์ฟเวอร์อื่น</span>
+          <span class="security-note">🔒 ปลอดภัย: คีย์จะถูกบันทึกเฉพาะในเบราว์เซอร์ของท่านเท่านั้น ไม่มีการส่งไปเซิร์ฟเวอร์อื่น</span>
         </div>
       </div>
 
-      <!-- Quick Suggestion Chips -->
-      <div class="copilot-chips-bar" id="copilotChipsBar">
-        <button class="copilot-chip" data-prompt="สรุปภาพรวม 5 เสาหลักยุทธศาสตร์">📊 5 เสาหลักยุทธศาสตร์</button>
-        <button class="copilot-chip" data-prompt="โรงเรียนไหนเสี่ยงเด็กหลุดสูงสุด">🚨 รร. เสี่ยงเด็กหลุดสูงสุด</button>
-        <button class="copilot-chip" data-prompt="5 โรงเรียนสุขภาวะยอดเยี่ยม AAA">🏆 5 รร. สุขภาวะยอดเยี่ยม</button>
-        <button class="copilot-chip" data-prompt="โรงเรียนขนาดกลางและเปราะบางมีที่ไหนบ้าง">🏫 รร. ขนาดกลางและเปราะบาง</button>
-        <button class="copilot-chip" data-prompt="สรุปข้อมูล รร. สกลราชวิทยานุกูล">🏛️ วิเคราะห์ รร.สกลราชฯ</button>
-        <button class="copilot-chip" data-prompt="สรุปแนวโน้มไทม์ไลน์ 5 รอบเวลา">📈 แนวโน้มไทม์ไลน์ 5 รอบ</button>
-        <button class="copilot-chip" data-prompt="ประมาณการงบประมาณเงินอุดหนุนปีนี้">💰 ประมาณการงบรายหัว</button>
+      <!-- Quick Suggestion Chips Carousel -->
+      <div class="copilot-chips-wrapper">
+        <div class="copilot-chips-header">
+          <span>✨ คำถามแนะนำสำหรับผู้บริหาร:</span>
+        </div>
+        <div class="copilot-chips-bar" id="copilotChipsBar">
+          <button class="copilot-chip" data-prompt="สรุปภาพรวม 5 เสาหลักยุทธศาสตร์">📊 5 เสาหลักยุทธศาสตร์</button>
+          <button class="copilot-chip" data-prompt="โรงเรียนไหนเสี่ยงเด็กหลุดสูงสุด">🚨 รร. เสี่ยงเด็กหลุดสูงสุด</button>
+          <button class="copilot-chip" data-prompt="5 โรงเรียนสุขภาวะยอดเยี่ยม AAA">🏆 5 รร. สุขภาวะยอดเยี่ยม</button>
+          <button class="copilot-chip" data-prompt="โรงเรียนขนาดกลางและเปราะบางมีที่ไหนบ้าง">🏫 รร. ขนาดกลางและเปราะบาง</button>
+          <button class="copilot-chip" data-prompt="สรุปข้อมูล รร. สกลราชวิทยานุกูล">🏛️ วิเคราะห์ รร.สกลราชฯ</button>
+          <button class="copilot-chip" data-prompt="สรุปแนวโน้มไทม์ไลน์ 5 รอบเวลา">📈 แนวโน้มไทม์ไลน์ 5 รอบ</button>
+          <button class="copilot-chip" data-prompt="ประมาณการงบประมาณเงินอุดหนุนปีนี้">💰 ประมาณการงบรายหัว</button>
+        </div>
       </div>
 
       <!-- Chat Messages Container -->
       <div class="copilot-messages" id="copilotMessages">
         <div class="copilot-msg bot">
-          <div class="msg-bubble">
-            สวัสดีครับท่านผู้อำนวยการและคณะทำงาน สพม.สกลนคร! 🙏 ผมคือ <strong>AI Executive Policy Copilot</strong> ผู้ช่วยสังเคราะห์ข้อมูลสารสนเทศทางการศึกษา<br><br>
-            ท่านสามารถพิมพ์คำถามหรือคลิกเลือกหัวข้อด้านบน เพื่อให้ผมวิเคราะห์ข้อมูลจากฐาน DMC ๕ รอบเวลา (๒๕๖๘ – ๒๕๖๙) ของทั้ง ๔๕ โรงเรียนได้ทันทีครับ
+          <div class="copilot-msg-card">
+            <div class="copilot-msg-header">
+              <div class="copilot-msg-author">
+                <span class="copilot-bot-sparkle">✨</span>
+                <strong>AI Executive Copilot</strong>
+                <span class="copilot-engine-tag">DMC Engine</span>
+              </div>
+              <button type="button" class="btn-copy-bubble" title="คัดลอกข้อความ">📋 คัดลอก</button>
+            </div>
+            <div class="msg-content">
+              สวัสดีครับท่านผู้อำนวยการและคณะทำงาน สพม.สกลนคร! 🙏 ผมคือ <strong>AI Executive Policy Copilot</strong> ผู้ช่วยสังเคราะห์ข้อมูลสารสนเทศทางการศึกษา<br><br>
+              ท่านสามารถพิมพ์คำถามหรือคลิกเลือกหัวข้อทางด้านบน เพื่อให้ผมวิเคราะห์ข้อมูลจากฐาน DMC ๕ รอบเวลา (๒๕๖๘ – ๒๕๖๙) ของทั้ง ๔๕ โรงเรียนได้ทันทีครับ
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Chat Input Form -->
-      <form class="copilot-input-form" id="copilotForm">
-        <input type="text" id="copilotInput" class="copilot-input" placeholder="พิมพ์คำถามเชิงนโยบาย เช่น 'รร. ไหนนักเรียนลดสูงสุด'..." autocomplete="off">
-        <button type="submit" class="copilot-send-btn">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-        </button>
-      </form>
+      <!-- Modern Chat Input Composer -->
+      <div class="copilot-composer-container">
+        <form class="copilot-composer-card" id="copilotForm">
+          <input type="text" id="copilotInput" class="copilot-composer-input" placeholder="พิมพ์คำถามเชิงนโยบาย เช่น 'รร. ไหนนักเรียนลดสูงสุด' หรือ 'ร่างสปีช'..." autocomplete="off">
+          <div class="copilot-composer-bottom">
+            <div class="copilot-composer-tools">
+              <button type="button" id="btnClearChatHistory" class="btn-composer-tool" title="ล้างประวัติการสนทนา">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                <span>ล้างการสนทนา</span>
+              </button>
+            </div>
+            <button type="submit" class="copilot-send-btn" title="ส่งคำถาม (Enter)">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </button>
+          </div>
+        </form>
+        <div class="copilot-disclaimer">
+          🔒 ระบบสารสนเทศสำหรับผู้บริหาร สพม.สกลนคร • อ้างอิงฐานข้อมูล DMC ทางการ
+        </div>
+      </div>
     </div>
   </div>
 
